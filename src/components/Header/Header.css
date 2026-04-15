@@ -1,0 +1,70 @@
+.beauty-header {
+  background-color: #ffffff;
+  padding: 1.5rem 0;
+  width: 100%;
+  z-index: 100;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-logo-img {
+  height: 44px;
+  width: auto;
+  display: block;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links a {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.nav-links a:hover {
+  color: var(--primary-pink);
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.icon-btn {
+  color: #374151;
+  display: flex;
+  align-items: center;
+}
+
+.icon-btn:hover {
+  color: var(--primary-pink);
+}
+
+.cart-badge-btn {
+  position: relative;
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background-color: var(--primary-pink);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

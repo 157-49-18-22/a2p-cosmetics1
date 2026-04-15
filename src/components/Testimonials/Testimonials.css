@@ -1,0 +1,138 @@
+.testimonials {
+  background-color: #fffafb;
+  padding: 8rem 0;
+}
+
+.testimonials-heading {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1e293b;
+}
+
+.testimonials-subheading {
+  font-size: 1.125rem;
+  color: #64748b;
+  margin-bottom: 4rem;
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.testimonial-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+  border: 1px solid #f1f5f9;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 1.5rem;
+}
+
+.review-text {
+  font-size: 1rem;
+  color: #334155;
+  line-height: 1.6;
+  font-style: italic;
+  margin-bottom: 2rem;
+  flex-grow: 1;
+}
+
+.product-tag-bubble {
+  display: inline-block;
+  background-color: #fff1f2;
+  color: #f43f5e;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  align-self: flex-start;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid #f8fafc;
+  padding-top: 1.5rem;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-row h3 {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.verified {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #10b981;
+}
+
+.verified span {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.review-date {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+@media (max-width: 1200px) {
+  .testimonials-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+  .testimonials-heading {
+    font-size: 2.25rem;
+  }
+}
