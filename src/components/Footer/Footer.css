@@ -1,8 +1,9 @@
 .footer {
   background-color: var(--primary-pink-light);
   color: var(--text-main);
-  padding: 6rem 0 2rem;
+  padding: 6rem 0 0;
   border-top: 1px solid #f1f5f9;
+  position: relative;
 }
 
 .footer-logo-img {
@@ -12,8 +13,15 @@
   display: block;
 }
 
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+  gap: 4rem;
+  margin-bottom: 4rem;
+}
+
 .footer-brand p {
-  color: #94a3b8;
+  color: var(--text-muted);
   margin-bottom: 2rem;
   font-size: 0.950rem;
 }
@@ -42,7 +50,8 @@
   transform: translateY(-3px);
 }
 
-.footer-links h3, .footer-contact h3 {
+.footer-links h3,
+.footer-contact h3 {
   font-family: var(--font-sans);
   font-size: 1.1rem;
   font-weight: 700;
@@ -68,19 +77,61 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin-bottom: 1rem;
   font-size: 0.950rem;
 }
 
+/* Cosmetic Landscape Animation */
+.footer-landscape {
+  width: 100%;
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+  margin-top: 2rem;
+  display: flex;
+  align-items: flex-end;
+}
+
+.landscape-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: bottom;
+  animation: landscapeMove 30s linear infinite alternate;
+}
+
+.landscape-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 160px;
+  background: linear-gradient(to top, transparent, var(--primary-pink-light));
+  pointer-events: none;
+}
+
+@keyframes landscapeMove {
+  from {
+    transform: scale(1.1) translateX(-2%);
+  }
+
+  to {
+    transform: scale(1.1) translateX(2%);
+  }
+}
+
 .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 2rem;
+  border-top: 1px solid rgba(236, 72, 153, 0.1);
+  padding: 2.5rem 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.875rem;
+
+  position: relative;
+  z-index: 10;
 }
 
 .footer-legal {
@@ -89,7 +140,7 @@
 }
 
 .footer-legal a:hover {
-  color: white;
+  color: var(--primary-pink);
 }
 
 @media (max-width: 991px) {
@@ -104,10 +155,14 @@
     grid-template-columns: 1fr;
     gap: 2.5rem;
   }
-  
+
   .footer-bottom {
     flex-direction: column;
     text-align: center;
     gap: 1.5rem;
+  }
+
+  .footer-landscape {
+    height: 180px;
   }
 }

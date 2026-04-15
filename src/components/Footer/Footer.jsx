@@ -49,6 +49,12 @@ const Footer = () => {
           </div>
         </div>
 
+        {/* Cosmetic Landscape Animation */}
+        <div className="footer-landscape">
+          <img src="/cosmetic_landscape_footer_1776253078456.png" alt="Cosmetic Garden" className="landscape-img" />
+          <div className="landscape-overlay"></div>
+        </div>
+
         <div className="footer-bottom">
           <p>&copy; 2026 A2P AID 2 PINNACLE COSMETICS. All rights reserved.</p>
           <div className="footer-legal">
