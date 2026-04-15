@@ -25,7 +25,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-serif);
   font-weight: 700;
   line-height: 1.2;
@@ -60,9 +63,7 @@ button {
   padding: 0 1.5rem;
 }
 
-.section {
-  padding: var(--section-spacing) 0;
-}
+.section {}
 
 .btn {
   padding: 0.75rem 1.5rem;
