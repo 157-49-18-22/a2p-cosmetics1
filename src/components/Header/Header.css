@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 1.5rem;
-  position: relative; /* Base for absolute logo */
+  position: relative;
   min-height: 60px;
 }
 
@@ -22,12 +22,12 @@
   position: absolute;
   left: 0;
   top: 50%;
-  width: 100%; /* Spans entire header width */
+  width: 100%;
   transform: translateY(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
-  pointer-events: none; /* Let clicks pass through to nav/icons if necessary */
+  pointer-events: none;
   z-index: 10;
 }
 
@@ -36,7 +36,7 @@
   width: auto;
   display: block;
   transition: height 0.3s ease;
-  pointer-events: auto; /* Logo itself remains clickable */
+  pointer-events: auto;
 }
 
 .beauty-nav {
@@ -124,26 +124,52 @@
 
 /* Responsive Styles */
 @media (max-width: 1024px) {
+  .beauty-header {
+    padding: 0.4rem 0;
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    min-height: 50px;
+  }
+
   .beauty-nav {
-    display: none; /* Hide nav links on tablets/phones to make room for centered logo */
+    display: none;
+  }
+
+  .beauty-logo {
+    position: static;
+    transform: none;
+    width: auto;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    order: 2;
+    pointer-events: auto;
+  }
+
+  .header-logo-img {
+    height: 40px; /* Reduced to prevent overlap */
+    max-width: 130px;
+  }
+
+  .header-icons {
+    order: 1;
+    flex: 0 0 auto;
+    gap: 0;
   }
 
   .mobile-menu-toggle {
     display: flex;
     order: 3;
-    width: 44px;
-    height: 44px;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
     align-items: center;
     justify-content: center;
-  }
-
-  .header-logo-img {
-    height: 52px; /* Slightly smaller but still bigger than before */
-  }
-
-  .header-icons {
-    order: 1;
-    gap: 0;
   }
 
   .beauty-nav.active {
@@ -156,15 +182,21 @@
     padding: 2rem 0;
     max-height: 400px;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s ease;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     border-top: 1px solid #f3f4f6;
+    z-index: 1001;
   }
 
   .nav-links {
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
+  }
+
+  .nav-links a {
+    font-size: 1.1rem;
+    font-weight: 600;
   }
 }
 
@@ -174,10 +206,11 @@
   }
   
   .header-logo-img {
-    height: 44px; /* Responsive size for small phones */
+    height: 35px; /* Proportional for small phones */
+    max-width: 110px;
   }
   
   .header-icon-btn {
-    padding: 6px;
+    padding: 4px;
   }
 }
