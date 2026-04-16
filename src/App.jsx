@@ -18,8 +18,10 @@ function App() {
   return (
     <div className="app">
       <Header />
-      <main>
+      <div className="hero-header-stack">
         <Hero />
+      </div>
+      <main>
         <Categories />
         <AdSection />
         <Bestsellers />

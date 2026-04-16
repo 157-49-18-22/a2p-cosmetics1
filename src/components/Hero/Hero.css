@@ -1,10 +1,13 @@
 .beauty-hero {
-  background-color: #ffffff;
-  padding: 6rem 0;
-  min-height: 85vh;
+  background-color: transparent;
+  padding: 9rem 0 6rem 0;
+  /* Adjusted padding to better fit with transparent header */
+  min-height: 80vh;
   display: flex;
   align-items: center;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-outer-bg {
@@ -181,7 +184,7 @@
 
 @media (max-width: 992px) {
   .beauty-hero {
-    padding: 4rem 0;
+    padding: 7rem 0;
   }
 
   .hero-grid {
@@ -218,12 +221,14 @@
   }
 
   .hero-text-content h1 {
-    font-size: 1.7rem; /* Smaller h1 */
+    font-size: 1.7rem;
+    /* Smaller h1 */
     margin-bottom: 0.8rem;
   }
 
   .hero-text-content p {
-    font-size: 0.85rem; /* Smaller p */
+    font-size: 0.85rem;
+    /* Smaller p */
     line-height: 1.5;
     margin-bottom: 1.25rem;
   }
@@ -245,7 +250,8 @@
   }
 
   .btn-shop-maroon {
-    padding: 0.9rem 1.8rem; /* Scaled button */
+    padding: 0.9rem 1.8rem;
+    /* Scaled button */
     font-size: 0.85rem;
   }
 
@@ -267,7 +273,7 @@
 
 @media (max-width: 480px) {
   .beauty-hero {
-    padding: 2rem 0;
+    padding: 6rem 0;
     min-height: 0vh;
   }
 
@@ -277,11 +283,13 @@
   }
 
   .hero-text-content h1 {
-    font-size: 1.3rem; /* Even smaller for phones */
+    font-size: 1.3rem;
+    /* Even smaller for phones */
   }
 
   .hero-text-content p {
-    font-size: 0.7rem; /* Even smaller p */
+    font-size: 0.7rem;
+    /* Even smaller p */
     max-width: 100%;
     margin-bottom: 1rem;
   }

@@ -2,3 +2,25 @@
   width: 100%;
 }
 
+.hero-header-stack {
+  background: linear-gradient(135deg, #fff5f9 0%, #ffdef0 100%);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.hero-header-stack::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/backgrounds/hero-bg.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
+}
+

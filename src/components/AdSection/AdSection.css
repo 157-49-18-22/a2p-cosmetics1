@@ -3,7 +3,9 @@
    ============================================ */
 
 .ad-section {
-  background: #ffffff; /* Clean white background */
+  background: var(--primary-pink-light);
+  ;
+  /* Clean white background */
   padding: 8rem 0 0;
   position: relative;
   overflow: hidden;
@@ -17,6 +19,7 @@
   filter: blur(100px);
   opacity: 0.15;
 }
+
 .ad-glow-1 {
   width: 500px;
   height: 500px;
@@ -25,6 +28,7 @@
   right: 0;
   animation: floatGlow 8s ease-in-out infinite;
 }
+
 .ad-glow-2 {
   width: 400px;
   height: 400px;
@@ -35,8 +39,15 @@
 }
 
 @keyframes floatGlow {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-30px) scale(1.08); }
+
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+
+  50% {
+    transform: translateY(-30px) scale(1.08);
+  }
 }
 
 /* ---- Header ---- */
@@ -54,6 +65,7 @@
   background: linear-gradient(90deg, transparent, var(--primary-pink));
   opacity: 0.3;
 }
+
 .ad-header:first-child .ad-header-line {
   background: linear-gradient(90deg, var(--primary-pink), transparent);
 }
@@ -87,7 +99,8 @@
 
 .ad-deco-ring {
   position: absolute;
-  width: 440px; /* Increased from 380px */
+  width: 440px;
+  /* Increased from 380px */
   height: 440px;
   border-radius: 50%;
   border: 1px dashed rgba(236, 72, 153, 0.15);
@@ -100,7 +113,8 @@
 .ad-phone-frame {
   position: relative;
   z-index: 2;
-  width: 310px; /* Increased from 260px */
+  width: 310px;
+  /* Increased from 260px */
   background: #111;
   border-radius: 44px;
   padding: 14px;
@@ -314,46 +328,147 @@
 }
 
 @media (max-width: 1024px) {
-  .ad-section { padding: 6rem 0 0; }
-  .ad-inner { flex-direction: column; text-align: center; gap: 4rem; padding: 0 2rem; }
-  .ad-content-side { max-width: 100%; display: flex; flex-direction: column; align-items: center; }
-  .ad-headline { font-size: 3.5rem; }
-  .ad-stats-strip { margin-top: 6rem; padding: 3rem 1rem; gap: 2rem; }
-  .ad-stat { flex: 0 0 calc(50% - 2rem); }
-  .ad-stat-div { display: none; }
+  .ad-section {
+    padding: 6rem 0 0;
+  }
+
+  .ad-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 4rem;
+    padding: 0 2rem;
+  }
+
+  .ad-content-side {
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ad-headline {
+    font-size: 3.5rem;
+  }
+
+  .ad-stats-strip {
+    margin-top: 6rem;
+    padding: 3rem 1rem;
+    gap: 2rem;
+  }
+
+  .ad-stat {
+    flex: 0 0 calc(50% - 2rem);
+  }
+
+  .ad-stat-div {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
-  .ad-section { padding: 4rem 0 0; }
-  .ad-header { margin-bottom: 3rem; gap: 0.8rem; }
-  .ad-header-line { width: 40px; }
-  .ad-label { font-size: 0.65rem; letter-spacing: 2px; }
+  .ad-section {
+    padding: 4rem 0 0;
+  }
 
-  .ad-deco-ring { width: 340px; height: 340px; }
-  .ad-phone-frame { width: 260px; padding: 10px; border-radius: 36px; }
-  .ad-phone-notch { width: 60px; height: 16px; margin-bottom: 6px; }
-  
-  .ad-headline { font-size: 2.5rem; margin-bottom: 1.5rem; }
-  .ad-description { font-size: 1rem; margin-bottom: 2rem; }
-  .ad-features { justify-content: center; gap: 0.6rem; margin-bottom: 2.5rem; }
-  .ad-pill { padding: 0.5rem 1rem; font-size: 0.8rem; }
-  
-  .ad-cta-btn { padding: 1rem 2.5rem; font-size: 0.95rem; width: 100%; justify-content: center; }
-  .ad-trust { flex-direction: column; gap: 0.75rem; margin-top: 2.5rem; }
-  
-  .stat-number { font-size: 2rem; }
-  .stat-label { font-size: 0.75rem; }
+  .ad-header {
+    margin-bottom: 3rem;
+    gap: 0.8rem;
+  }
+
+  .ad-header-line {
+    width: 40px;
+  }
+
+  .ad-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+  }
+
+  .ad-deco-ring {
+    width: 340px;
+    height: 340px;
+  }
+
+  .ad-phone-frame {
+    width: 260px;
+    padding: 10px;
+    border-radius: 36px;
+  }
+
+  .ad-phone-notch {
+    width: 60px;
+    height: 16px;
+    margin-bottom: 6px;
+  }
+
+  .ad-headline {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ad-description {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .ad-features {
+    justify-content: center;
+    gap: 0.6rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .ad-pill {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .ad-cta-btn {
+    padding: 1rem 2.5rem;
+    font-size: 0.95rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ad-trust {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .ad-inner { padding: 0 1.5rem; gap: 3rem; }
-  .ad-deco-ring { width: 280px; height: 280px; }
-  .ad-phone-frame { width: 220px; border-radius: 30px; }
-  
-  .ad-headline { font-size: 2rem; }
-  .ad-description { font-size: 0.95rem; }
-  
-  .ad-stats-strip { 
+  .ad-inner {
+    padding: 0 1.5rem;
+    gap: 3rem;
+  }
+
+  .ad-deco-ring {
+    width: 280px;
+    height: 280px;
+  }
+
+  .ad-phone-frame {
+    width: 220px;
+    border-radius: 30px;
+  }
+
+  .ad-headline {
+    font-size: 2rem;
+  }
+
+  .ad-description {
+    font-size: 0.95rem;
+  }
+
+  .ad-stats-strip {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     padding: 1.5rem 0.5rem;
@@ -364,7 +479,7 @@
     border-bottom: 1px solid #f1f5f9;
   }
 
-  .ad-stat { 
+  .ad-stat {
     flex: none;
     padding: 0.5rem 0;
     border-bottom: none;
@@ -374,6 +489,12 @@
     border-left: 1px solid #f1f5f9;
   }
 
-  .stat-number { font-size: 1.25rem; }
-  .stat-label { font-size: 0.55rem; letter-spacing: 1px; }
+  .stat-number {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+  }
 }
