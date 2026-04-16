@@ -125,10 +125,18 @@
   transition: var(--transition);
 }
 
+.add-to-cart:hover {
+  background-color: var(--primary-pink) !important;
+  color: white !important;
+  border-color: var(--primary-pink) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(236, 72, 153, 0.2);
+}
+
 .product-card:hover .add-to-cart {
-  background-color: var(--primary-dark);
-  color: white;
-  border-color: var(--primary-dark);
+  border-color: var(--primary-pink);
+  color: var(--primary-pink);
+  background-color: transparent;
 }
 
 @media (max-width: 1200px) {

@@ -59,9 +59,22 @@
 }
 
 .benefit-card:hover {
-  border-color: #fce7f3;
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(236, 72, 153, 0.05);
+  border-color: var(--primary-pink);
+  background-color: var(--primary-pink-light);
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(236, 72, 153, 0.1);
+}
+
+.benefit-card:hover .icon-wrapper {
+  background-color: var(--primary-pink);
+}
+
+.benefit-card:hover .icon-pink {
+  color: white;
+}
+
+.benefit-card:hover h3 {
+  color: var(--primary-pink);
 }
 
 .icon-wrapper {
