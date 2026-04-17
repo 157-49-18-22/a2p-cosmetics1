@@ -57,7 +57,8 @@
 .explore-categories .icon-wrapper {
   width: 60px;
   height: 60px;
-  background: #f02a63; /* Darker pink */
+  background: #f02a63;
+  /* Darker pink */
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -114,7 +115,8 @@
 
 .explore-categories .cat-card:hover .icon-wrapper {
   transform: rotate(-10deg) scale(1.1);
-  background: #f02a63; /* Darker pink */
+  background: #f02a63;
+  /* Darker pink */
   box-shadow: 0 8px 15px rgba(240, 42, 99, 0.3);
 }
 
