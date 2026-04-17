@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ShoppingBag, User, Heart, Search, Menu, X } from 'lucide-react';
 import './Header.css';
 
@@ -21,17 +22,16 @@ const Header = () => {
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </div>
 
-        <div className="beauty-logo">
+        <Link to="/" className="beauty-logo">
           <img src="/A2P final logo.png" alt="A2P Cosmetics" className="header-logo-img" />
-        </div>
+        </Link>
 
         <nav className={`beauty-nav ${isMenuOpen ? 'active' : ''}`}>
           <ul className="nav-links">
-            <li><a href="/" onClick={() => setIsMenuOpen(false)}>Home</a></li>
-            <li><a href="#brands" onClick={() => setIsMenuOpen(false)}>Brands</a></li>
-            <li><a href="#categories" onClick={() => setIsMenuOpen(false)}>Categories</a></li>
-            <li><a href="#about" onClick={() => setIsMenuOpen(false)}>About Us</a></li>
-            <li><a href="#contact" onClick={() => setIsMenuOpen(false)}>Contact</a></li>
+            <li><Link to="/facewash" onClick={() => setIsMenuOpen(false)}>Face Wash</Link></li>
+            <li><Link to="/faceserum" onClick={() => setIsMenuOpen(false)}>Face Serum</Link></li>
+            <li><a href="#facecream" onClick={() => setIsMenuOpen(false)}>Face Cream</a></li>
+            <li><a href="#bodywash" onClick={() => setIsMenuOpen(false)}>Body Wash</a></li>
           </ul>
         </nav>
 

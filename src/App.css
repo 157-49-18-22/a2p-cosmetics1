@@ -19,7 +19,7 @@
   background-image: url('/backgrounds/hero-bg.png');
   background-size: cover;
   background-position: center;
-  opacity: 0.6;
+  opacity: 0.9;
   pointer-events: none;
   z-index: 0;
 }

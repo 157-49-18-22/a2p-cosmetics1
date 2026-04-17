@@ -3,10 +3,11 @@ import { motion } from 'framer-motion';
 import './Categories.css';
 
 const categories = [
-  { id: 1, name: 'Skincare', image: '/skincare.png', count: '120+ Products' },
-  { id: 2, name: 'Makeup', image: '/makeup.png', count: '85+ Products' },
-  { id: 3, name: 'Fragrance', image: '/fragrance.png', count: '40+ Products' }, 
-  { id: 4, name: 'Haircare', image: '/bestsellers.png', count: '60+ Products' }, 
+  { id: 1, name: 'Face Wash', image: '/skincare.png', count: '15+ Products' },
+  { id: 2, name: 'Face Serum', image: '/hero-cosmetic.png', count: '10+ Products' },
+  { id: 3, name: 'Face Cream', image: '/bestsellers.png', count: '12+ Products' }, 
+  { id: 4, name: 'Body Wash', image: '/skincare.png', count: '8+ Products' }, 
+  { id: 5, name: 'Hair Care', image: '/makeup.png', count: '20+ Products' }, 
 ];
 
 const Categories = () => {

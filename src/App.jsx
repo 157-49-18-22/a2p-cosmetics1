@@ -1,36 +1,31 @@
 import React from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header/Header';
-import Hero from './components/Hero/Hero';
-import Categories from './components/Categories/Categories';
-import AdSection from './components/AdSection/AdSection';
-import Bestsellers from './components/Bestsellers/Bestsellers';
-
-import About from './components/About/About';
-import CTASection from './components/CTASection/CTASection';
-
-import Testimonials from './components/Testimonials/Testimonials';
-
-import Newsletter from './components/Newsletter/Newsletter';
 import Footer from './components/Footer/Footer';
+import Home from './pages/Home/Home';
+import FaceWash from './pages/FaceWash/FaceWash';
+import FaceSerum from './pages/FaceSerum/FaceSerum';
 import './App.css';
+
+// Scroll to top on route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
 
 function App() {
   return (
     <div className="app">
+      <ScrollToTop />
       <Header />
-      <div className="hero-header-stack">
-        <Hero />
-      </div>
-      <main>
-        <Categories />
-        <AdSection />
-        <Bestsellers />
-
-        <About />
-        <CTASection />
-        <Testimonials />
-        <Newsletter />
-      </main>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/facewash" element={<FaceWash />} />
+        <Route path="/faceserum" element={<FaceSerum />} />
+      </Routes>
       <Footer />
     </div>
   );
