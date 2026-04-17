@@ -6,7 +6,7 @@
   background: var(--primary-pink-light);
   ;
   /* Clean white background */
-  padding: 8rem 0 0;
+  padding: 2rem 0 0;
   position: relative;
   overflow: hidden;
 }
@@ -300,8 +300,8 @@
 .ad-stats-strip {
   display: flex;
   background: var(--primary-pink-light);
-  margin-top: 8rem;
-  padding: 4rem 0;
+  margin-top: 1rem;
+  padding: 2rem 0;
   justify-content: center;
   gap: 4rem;
 }

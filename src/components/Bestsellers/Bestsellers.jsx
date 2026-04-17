@@ -4,47 +4,97 @@ import { Star, ShoppingCart, Heart } from 'lucide-react';
 import './Bestsellers.css';
 
 const products = [
-  { id: 1, name: 'Glow Vitamin C Serum', price: '$45.00', rating: 4.9, image: '/skincare.png', tag: 'Bestseller' },
-  { id: 2, name: 'Velvet Matte Lipstick', price: '$28.00', rating: 4.8, image: '/makeup.png', tag: 'New' },
-  { id: 3, name: 'Hydrating Night Cream', price: '$52.00', rating: 5.0, image: '/bestsellers.png', tag: 'Bestseller' },
-  { id: 4, name: 'Essential Oil Cleanser', price: '$35.00', rating: 4.7, image: '/hero-cosmetic.png', tag: '' },
+  {
+    id: 1,
+    name: 'Radiant Glow Face Wash',
+    desc: 'Gentle cleansing formula that reveals your natural radiance',
+    price: '$24.99',
+    rating: 4.8,
+    reviews: 342,
+    image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop',
+    tag: 'Skincare'
+  },
+  {
+    id: 2,
+    name: 'Velvet Matte Lipstick',
+    desc: 'Long-lasting color with a luxurious matte finish',
+    price: '$18.99',
+    rating: 4.9,
+    reviews: 528,
+    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop',
+    tag: 'Makeup'
+  },
+  {
+    id: 3,
+    name: 'Flawless Finish Foundation',
+    desc: 'Buildable coverage for a natural, radiant complexion',
+    price: '$32.99',
+    rating: 4.7,
+    reviews: 416,
+    image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop',
+    tag: 'Makeup'
+  },
+  {
+    id: 4,
+    name: 'Hydra-Luxe Moisturizer',
+    desc: 'Deep hydration that keeps skin soft and supple all day',
+    price: '$28.99',
+    rating: 4.9,
+    reviews: 651,
+    image: 'https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop',
+    tag: 'Skincare'
+  },
 ];
 
 const Bestsellers = () => {
   return (
     <section className="section bestsellers" id="bestsellers">
       <div className="container">
-        <div className="section-header">
-          <span className="subtitle">Must Haves</span>
-          <h2>Our Bestsellers</h2>
+        <div className="section-header text-center">
+          <h2>Featured <span className="highlight-text">Products</span></h2>
+          <p className="section-desc">
+            Discover our carefully curated selection of premium cosmetics<br />
+            designed to enhance your natural beauty
+          </p>
         </div>
 
         <div className="products-grid">
           {products.map((product, index) => (
-            <motion.div 
+            <motion.div
               key={product.id}
               className="product-card"
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <div className="product-image">
-                {product.tag && <span className="product-tag">{product.tag}</span>}
+              <div className="product-image-container">
+                {product.tag && <span className="product-category-tag">{product.tag}</span>}
+                <button className="wishlist-btn"><Heart size={20} /></button>
+
                 <img src={product.image} alt={product.name} />
-                <div className="product-actions">
-                  <button className="icon-btn"><Heart size={18} /></button>
-                  <button className="icon-btn"><ShoppingCart size={18} /></button>
+
+                <div className="add-to-cart-wrapper">
+                  <button className="add-to-cart-overlay">
+                    <ShoppingCart size={18} /> Add to Cart
+                  </button>
                 </div>
               </div>
-              <div className="product-info">
-                <div className="product-rating">
-                  <Star size={14} fill="currentColor" />
-                  <span>{product.rating}</span>
-                </div>
+
+              <div className="product-details">
                 <h3>{product.name}</h3>
+                <p className="product-desc">{product.desc}</p>
+
+                <div className="product-rating-box">
+                  <div className="stars">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={14} fill="#ffb400" color="#ffb400" />
+                    ))}
+                  </div>
+                  <span className="rating-text">{product.rating} ({product.reviews})</span>
+                </div>
+
                 <span className="product-price">{product.price}</span>
-                <button className="add-to-cart">Add to Bag</button>
               </div>
             </motion.div>
           ))}

@@ -9,7 +9,7 @@
   height: 90vh;
   position: relative;
   overflow: hidden;
-  margin-bottom: 2rem;
+  margin-bottom: 0rem;
 }
 
 .lips-banner img {
@@ -282,7 +282,7 @@
   }
 
   .lips-banner {
-    height: 272px;
+    height: 594px;
   }
 
   .lips-banner-content h1 {

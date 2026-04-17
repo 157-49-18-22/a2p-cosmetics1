@@ -1,40 +1,68 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Droplet, Sparkles, Waves, Flower, ArrowRight } from 'lucide-react';
 import './Categories.css';
 
-const categories = [
-  { id: 1, name: 'Face Wash', image: '/skincare.png', count: '15+ Products' },
-  { id: 2, name: 'Face Serum', image: '/hero-cosmetic.png', count: '10+ Products' },
-  { id: 3, name: 'Face Cream', image: '/bestsellers.png', count: '12+ Products' }, 
-  { id: 4, name: 'Body Wash', image: '/skincare.png', count: '8+ Products' }, 
-  { id: 5, name: 'Hair Care', image: '/makeup.png', count: '20+ Products' }, 
+const categoriesData = [
+  {
+    id: 1,
+    title: 'Skincare',
+    desc: 'Nourish and protect your skin',
+    products: '24 Products',
+    icon: <Droplet size={28} color="white" strokeWidth={1.5} />
+  },
+  {
+    id: 2,
+    title: 'Makeup',
+    desc: 'Express your unique beauty',
+    products: '36 Products',
+    icon: <Sparkles size={28} color="white" strokeWidth={1.5} />
+  },
+  {
+    id: 3,
+    title: 'Haircare',
+    desc: 'Beautiful hair, naturally',
+    products: '18 Products',
+    icon: <Waves size={28} color="white" strokeWidth={1.5} />
+  },
+  {
+    id: 4,
+    title: 'Fragrance',
+    desc: 'Signature scents for every moment',
+    products: '12 Products',
+    icon: <Flower size={28} color="white" strokeWidth={1.5} />
+  }
 ];
 
 const Categories = () => {
   return (
-    <section className="section categories" id="collections">
+    <section className="explore-categories">
       <div className="container">
-        <div className="section-header">
-          <span className="subtitle">Collections</span>
-          <h2>Shop by Category</h2>
+        <div className="section-title">
+          <h2>Explore Our <span className="gradient-text">Categories</span></h2>
+          <p>From skincare essentials to glamorous makeup, find everything you need for your beauty routine</p>
         </div>
 
         <div className="categories-grid">
-          {categories.map((cat, index) => (
+          {categoriesData.map((cat, index) => (
             <motion.div 
               key={cat.id}
-              className="category-card"
+              className="cat-card"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <div className="category-image">
-                <img src={cat.image} alt={cat.name} />
-                <div className="category-overlay">
-                  <span className="product-count">{cat.count}</span>
-                  <h3>{cat.name}</h3>
-                  <a href={`#${cat.name.toLowerCase()}`} className="explore-link">Explore Collection</a>
+              <div className="icon-wrapper">
+                {cat.icon}
+              </div>
+              <h3>{cat.title}</h3>
+              <p className="cat-desc">{cat.desc}</p>
+              
+              <div className="cat-footer">
+                <span className="product-count">{cat.products}</span>
+                <div className="arrow-btn">
+                  <ArrowRight size={18} strokeWidth={2} />
                 </div>
               </div>
             </motion.div>

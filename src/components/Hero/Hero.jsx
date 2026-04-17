@@ -1,96 +1,63 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Sparkles, ArrowRight, Star } from 'lucide-react';
 import './Hero.css';
 
-const images = [
-  "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=2000&auto=format&fit=crop", // Vibrant Portrait
-  "https://images.unsplash.com/photo-1594465919760-441fe5908ab0?q=80&w=2000&auto=format&fit=crop", // Soft Portrait
-  "https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=2000&auto=format&fit=crop"  // Product Collage
-];
-
 const Hero = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % images.length);
-    }, 4000); // Change image every 4 seconds
-    return () => clearInterval(timer);
-  }, []);
-
-  const collageTiles = [
-    { id: 1, pos: '0% 0%' },
-    { id: 2, pos: '50% 0%' },
-    { id: 3, pos: '100% 0%' },
-    { id: 4, pos: '0% 100%' },
-    { id: 5, pos: '50% 100%' },
-    { id: 6, pos: '100% 100%' },
-  ];
-
   return (
-    <section className="beauty-hero">
-      <div className="hero-outer-bg">
-        <div className="container hero-inner-container">
-          <div className="hero-grid">
-            <motion.div 
-              className="hero-text-content"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="promo-badge">
-                <div className="promo-thumb"></div>
-                <span>20% off for your first purchase</span>
-              </div>
-
-              <h1>
-                Beauty <br />
-                that feels like <br />
-                <span>self-care every day</span>
-              </h1>
-
-              <p>
-                Clean, conscious skincare and cosmetics — made to love your skin the way it deserves.
-              </p>
-
-              <button className="btn-shop-maroon">Shop now</button>
-            </motion.div>
-
-            <div className="hero-collage-wrapper">
-              <AnimatePresence mode="wait">
-                <motion.div 
-                  key={currentSlide}
-                  className="collage-grid"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.05 }}
-                  transition={{ duration: 0.8 }}
-                >
-                  {collageTiles.map((tile, i) => (
-                    <div 
-                      key={tile.id}
-                      className={`collage-tile tile-${i+1}`}
-                      style={{ 
-                        backgroundImage: `url("${images[currentSlide]}")`,
-                        backgroundPosition: tile.pos
-                      }}
-                    ></div>
-                  ))}
-                </motion.div>
-              </AnimatePresence>
-              
-              <div className="slider-dots">
-                {images.map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`dot ${i === currentSlide ? 'active' : ''}`}
-                    onClick={() => setCurrentSlide(i)}
-                  ></div>
-                ))}
-              </div>
-            </div>
+    <section className="beauty-hero" style={{ backgroundImage: "url('/bg.jpeg')" }}>
+      <div className="hero-overlay"></div>
+      <div className="container hero-inner-container">
+        
+        <motion.div 
+          className="hero-content"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="discover-badge">
+            <Sparkles size={16} />
+            <span>Discover Your Natural Radiance</span>
           </div>
-        </div>
+
+          <h1>
+            <span className="gradient-text">Beauty</span> That Transforms
+          </h1>
+
+          <p>
+            Elevate your skincare and makeup routine with our luxurious, science-backed formulas designed for your pinnacle of beauty.
+          </p>
+
+          <div className="hero-buttons">
+            <button className="btn-shop-now">
+              Shop Now <ArrowRight size={18} />
+            </button>
+            <button className="btn-explore">
+              Explore Products
+            </button>
+          </div>
+        </motion.div>
+
+        <motion.div 
+          className="hero-stats"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <div className="stat-card">
+            <h3>90+</h3>
+            <p>Premium Products</p>
+          </div>
+          <div className="stat-card">
+            <h3>50K+</h3>
+            <p>Happy Customers</p>
+          </div>
+          <div className="stat-card">
+            <h3 className="rating-stat">4.9 <Star size={20} className="star-icon" fill="currentColor" /></h3>
+            <p>Average Rating</p>
+          </div>
+        </motion.div>
+
       </div>
     </section>
   );
