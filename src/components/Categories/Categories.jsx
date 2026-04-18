@@ -26,7 +26,7 @@ const categoriesData = [
     desc: 'Beautiful hair, naturally',
     products: '18 Products',
     icon: <Waves size={24} color="white" strokeWidth={1.5} />,
-    image: 'https://images.unsplash.com/photo-1527799822367-4748a1db3f07?q=80&w=1200'
+    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=1200'
   },
   {
     id: 4,
@@ -63,7 +63,7 @@ const Categories = () => {
 
         <div className="categories-grid">
           {categoriesData.map((cat, index) => (
-            <motion.div 
+            <motion.div
               key={cat.id}
               className="cat-card-next"
               initial={{ opacity: 0, scale: 0.9 }}
@@ -76,7 +76,7 @@ const Categories = () => {
                 <img src={cat.image} alt={cat.title} className="cat-bg-image" />
                 <div className="cat-overlay"></div>
               </div>
-              
+
               <div className="cat-content">
                 <div className="cat-header">
                   <div className="icon-badge">
@@ -84,7 +84,7 @@ const Categories = () => {
                   </div>
                   <span className="product-count-badge">{cat.products}</span>
                 </div>
-                
+
                 <div className="cat-bottom-content">
                   <div className="cat-info">
                     <h3>{cat.title}</h3>
