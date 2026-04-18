@@ -12,7 +12,7 @@ const serumProducts = [
     rating: 4.9,
     reviews: 3200,
     tag: "BESTSELLER",
-    image: "https://images.unsplash.com/photo-1620916566398-39fec21b4a3c?q=80&w=600&auto=format&fit=crop" 
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop"
   },
   {
     id: 2,
@@ -23,7 +23,7 @@ const serumProducts = [
     rating: 4.8,
     reviews: 1540,
     tag: "POPULAR",
-    image: "https://images.unsplash.com/photo-1620917670397-dc711fc811be?q=80&w=600&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop"
   },
   {
     id: 3,
@@ -45,7 +45,7 @@ const serumProducts = [
     rating: 4.8,
     reviews: 4500,
     tag: "BESTSELLER",
-    image: "https://images.unsplash.com/photo-1620916566398-39fec21b4a3c?q=80&w=600&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop"
   },
   {
     id: 5,
@@ -67,7 +67,7 @@ const serumProducts = [
     rating: 5.0,
     reviews: 450,
     tag: "PREMIUM",
-    image: "https://images.unsplash.com/photo-1620916566398-39fec21b4a3c?q=80&w=600&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop"
   }
 ];
 
@@ -76,36 +76,36 @@ const FaceSerum = () => {
     <div className="lips-page serum-page">
       {/* Premium Banner */}
       <div className="lips-banner">
-        <video 
-          src="/video2.mp4" 
-          autoPlay 
-          muted 
-          loop 
-          playsInline 
+        <video
+          src="/video2.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
           className="banner-video"
         />
       </div>
 
       {/* Science Highlights */}
-      <section style={{background: '#000', color: '#fff', padding: '3rem 5%', display: 'flex', justifyContent: 'space-around', textAlign: 'center', gap: '2rem', flexWrap: 'wrap'}}>
+      <section style={{ background: '#000', color: '#fff', padding: '3rem 5%', display: 'flex', justifyContent: 'space-around', textAlign: 'center', gap: '2rem', flexWrap: 'wrap' }}>
         <div>
           <Sparkles size={32} color="#f0bada" />
-          <h4 style={{marginTop: '10px'}}>Targeted Action</h4>
-          <p style={{fontSize: '0.8rem', opacity: 0.7}}>Treats specific skin concerns</p>
+          <h4 style={{ marginTop: '10px' }}>Targeted Action</h4>
+          <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>Treats specific skin concerns</p>
         </div>
         <div>
           <Droplets size={32} color="#f0bada" />
-          <h4 style={{marginTop: '10px'}}>High Potency</h4>
-          <p style={{fontSize: '0.8rem', opacity: 0.7}}>Concentrated active ingredients</p>
+          <h4 style={{ marginTop: '10px' }}>High Potency</h4>
+          <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>Concentrated active ingredients</p>
         </div>
         <div>
           <CheckCircle size={32} color="#f0bada" />
-          <h4 style={{marginTop: '10px'}}>Derm Approved</h4>
-          <p style={{fontSize: '0.8rem', opacity: 0.7}}>Clinically tested formulas</p>
+          <h4 style={{ marginTop: '10px' }}>Derm Approved</h4>
+          <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>Clinically tested formulas</p>
         </div>
       </section>
 
-      <div className="lips-container" style={{marginTop: '4rem'}}>
+      <div className="lips-container" style={{ marginTop: '4rem' }}>
         <aside className="lips-sidebar">
           <div className="filter-section">
             <h3>CONCERN <ChevronDown size={16} /></h3>
@@ -144,7 +144,7 @@ const FaceSerum = () => {
             {serumProducts.map(product => (
               <div key={product.id} className="lip-card">
                 <div className="lip-card-img">
-                  {product.tag && <span className="tag-bestseller" style={{background: '#ff0055'}}>{product.tag}</span>}
+                  {product.tag && <span className="tag-bestseller" style={{ background: '#ff0055' }}>{product.tag}</span>}
                   <img src={product.image} alt={product.name} />
                 </div>
                 <div className="lip-card-info">
@@ -157,7 +157,7 @@ const FaceSerum = () => {
                     <span className="current-price">Rs. {product.price}.00</span>
                     {product.oldPrice && <span className="old-price">Rs. {product.oldPrice}</span>}
                   </div>
-                  <button className="add-btn" style={{background: '#111'}}>BUY NOW</button>
+                  <button className="add-btn" style={{ background: '#111' }}>BUY NOW</button>
                 </div>
               </div>
             ))}
@@ -166,16 +166,16 @@ const FaceSerum = () => {
       </div>
 
       {/* Serum FAQ / Guide Section */}
-      <section style={{padding: '5rem 5%', background: '#fff1f6'}}>
-        <div style={{maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center'}}>
-          <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?q=80&w=800&auto=format&fit=crop" alt="Serum Usage" style={{width: '100%', borderRadius: '20px'}} />
+      <section style={{ padding: '5rem 5%', background: '#fff1f6' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+          <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?q=80&w=800&auto=format&fit=crop" alt="Serum Usage" style={{ width: '100%', borderRadius: '20px' }} />
           <div>
-            <h2 style={{fontSize: '2.5rem', marginBottom: '1.5rem'}}>How to Use Your Serum?</h2>
-            <p style={{color: '#555', lineHeight: '1.8', fontSize: '1.1rem', marginBottom: '2rem'}}>
-              Serums are the heavy hitters of your skincare routine. For best results, apply 2-3 drops after cleansing but before moisturizing. 
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>How to Use Your Serum?</h2>
+            <p style={{ color: '#555', lineHeight: '1.8', fontSize: '1.1rem', marginBottom: '2rem' }}>
+              Serums are the heavy hitters of your skincare routine. For best results, apply 2-3 drops after cleansing but before moisturizing.
               Gently press into the skin until fully absorbed. Use Vitamin C in the morning for protection and Retinol at night for repair.
             </p>
-            <button className="add-btn" style={{maxWidth: '200px'}}>FIND MY ROUTINE</button>
+            <button className="add-btn" style={{ maxWidth: '200px' }}>FIND MY ROUTINE</button>
           </div>
         </div>
       </section>

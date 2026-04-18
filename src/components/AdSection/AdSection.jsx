@@ -126,7 +126,7 @@ const AdSection = () => {
           </div>
 
           <h2 className="ad-headline">
-            Experience<br />the <em>A2P</em><br />Difference
+            Experience<br />the <span className="ad-a2p-badge">A2P</span><br />Difference
           </h2>
 
           <p className="ad-description">

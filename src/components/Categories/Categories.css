@@ -1,6 +1,6 @@
 .explore-categories {
   padding: 10rem 0 8rem 0;
-  background-color: #fafafa;
+  background-color: var(--primary-pink-light);
 }
 
 .explore-categories .section-title {
@@ -59,12 +59,10 @@
   left: -100%;
   width: 50%;
   height: 100%;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
+  background: linear-gradient(to right,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent);
   transform: skewX(-25deg);
   z-index: 4;
   transition: none;
@@ -98,12 +96,10 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.3) 50%,
-    rgba(0, 0, 0, 0.85) 100%
-  );
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.3) 50%,
+      rgba(0, 0, 0, 0.85) 100%);
   z-index: 2;
   transition: all 0.5s ease;
 }
@@ -118,7 +114,8 @@
   z-index: 3;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* This pushes header to top and info to bottom */
+  justify-content: space-between;
+  /* This pushes header to top and info to bottom */
   transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -224,12 +221,10 @@
 }
 
 .cat-card-next:hover .cat-overlay {
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 77, 109, 0.1) 0%,
-    rgba(0, 0, 0, 0.2) 40%,
-    rgba(209, 17, 73, 0.95) 100%
-  );
+  background: linear-gradient(to bottom,
+      rgba(255, 77, 109, 0.1) 0%,
+      rgba(0, 0, 0, 0.2) 40%,
+      rgba(209, 17, 73, 0.95) 100%);
 }
 
 .cat-card-next:hover .icon-badge {
@@ -280,7 +275,8 @@
 
 @media (max-width: 650px) {
   .explore-categories {
-    padding: 4rem 0; /* Reduced from 10rem */
+    padding: 4rem 0;
+    /* Reduced from 10rem */
   }
 
   .categories-grid {
@@ -288,13 +284,15 @@
     padding: 0 1.5rem;
     gap: 2rem;
   }
-  
+
   .cat-card-next {
-    height: 420px; /* Slightly shorter for mobile */
+    height: 420px;
+    /* Slightly shorter for mobile */
   }
-  
+
   .explore-categories .section-title h2 {
-    font-size: 2.2rem; /* Smaller font for mobile */
+    font-size: 2.2rem;
+    /* Smaller font for mobile */
   }
 
   .explore-categories .section-title {

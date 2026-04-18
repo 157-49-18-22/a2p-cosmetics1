@@ -10,7 +10,7 @@ const categoriesData = [
     desc: 'Nourish and protect your skin',
     products: '24 Products',
     icon: <Droplet size={24} color="white" strokeWidth={1.5} />,
-    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=1200'
+    image: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?q=80&w=1200'
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const categoriesData = [
     desc: 'Beautiful hair, naturally',
     products: '18 Products',
     icon: <Waves size={24} color="white" strokeWidth={1.5} />,
-    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=1200'
+    image: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?q=80&w=1200'
   },
   {
     id: 4,

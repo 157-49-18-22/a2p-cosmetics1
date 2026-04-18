@@ -219,6 +219,27 @@
   margin-bottom: 2rem;
 }
 
+.ad-a2p-badge {
+
+  /* Brand Red */
+  color: var(--primary-pink);
+  font-family: var(--font-sans);
+  font-weight: 900;
+
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
+  font-style: normal;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  margin: 0 0.1rem;
+
+  transform: translateY(-5px);
+  /* Lift it to align with text baseline better */
+}
+
 .ad-headline em {
   font-style: italic;
   color: var(--primary-pink);
