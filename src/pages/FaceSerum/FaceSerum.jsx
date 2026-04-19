@@ -106,25 +106,131 @@ const FaceSerum = () => {
       </section>
 
       <div className="lips-container" style={{ marginTop: '4rem' }}>
-        <aside className="lips-sidebar">
-          <div className="filter-section">
-            <h3>CONCERN <ChevronDown size={16} /></h3>
-            <div className="filter-options">
-              <label className="filter-label"><input type="checkbox" /> Brightening</label>
-              <label className="filter-label"><input type="checkbox" /> Anti-Aging</label>
-              <label className="filter-label"><input type="checkbox" /> Acne Control</label>
-              <label className="filter-label"><input type="checkbox" /> Hydration</label>
+        <aside className="lips-sidebar filters-sidebar">
+          <div className="filters-card">
+            <div className="filters-header">
+              <h2>Filter</h2>
+              <button className="advanced-btn">Clear All</button>
             </div>
-          </div>
 
-          <div className="filter-section">
-            <h3>INGREDIENT <ChevronDown size={16} /></h3>
-            <div className="filter-options">
-              <label className="filter-label"><input type="checkbox" /> Vitamin C</label>
-              <label className="filter-label"><input type="checkbox" /> Retinol</label>
-              <label className="filter-label"><input type="checkbox" /> Hyaluronic Acid</label>
-              <label className="filter-label"><input type="checkbox" /> Niacinamide</label>
+            {/* Skin Concern Section */}
+            <div className="filter-section expanded">
+              <div className="filter-section-header">
+                <h3>Skin Concern</h3>
+                <ChevronDown size={18} />
+              </div>
+              <div className="brand-search">
+                <div className="search-input-wrapper">
+                  <span className="search-icon1">🔍</span>
+                  <input type="text" placeholder="Search concern ..." />
+                </div>
+              </div>
+              <div className="filter-options brand-list">
+                <div className="brand-item selected">
+                  <div className="brand-logo-name">
+                    <Sparkles size={16} color="#00bcd4" />
+                    <span>Brightening</span>
+                  </div>
+                  <span className="brand-count">2</span>
+                  <span className="check-mark">✓</span>
+                </div>
+                <div className="brand-item">
+                  <div className="brand-logo-name">
+                    <Droplets size={16} color="#aaa" />
+                    <span>Hydration</span>
+                  </div>
+                  <span className="brand-count">2</span>
+                </div>
+                <div className="brand-item">
+                  <div className="brand-logo-name">
+                    <span className="skin-icon">⏳</span>
+                    <span>Anti-Aging</span>
+                  </div>
+                  <span className="brand-count">2</span>
+                </div>
+                <div className="brand-item">
+                  <div className="brand-logo-name">
+                    <span className="skin-icon">💧</span>
+                    <span>Acne Control</span>
+                  </div>
+                  <span className="brand-count">1</span>
+                </div>
+                <div className="brand-item">
+                  <div className="brand-logo-name">
+                    <span className="skin-icon">⭐</span>
+                    <span>Dark Spots</span>
+                  </div>
+                  <span className="brand-count">1</span>
+                </div>
+              </div>
             </div>
+
+            {/* Price Section */}
+            <div className="filter-section expanded">
+              <div className="filter-section-header">
+                <h3>Price</h3>
+                <ChevronDown size={18} />
+              </div>
+              <div className="price-range-premium">
+                <div className="price-histogram">
+                  <div className="bar" style={{ height: '30%' }}></div>
+                  <div className="bar active" style={{ height: '80%' }}></div>
+                  <div className="bar active" style={{ height: '100%' }}></div>
+                  <div className="bar active" style={{ height: '70%' }}></div>
+                  <div className="bar" style={{ height: '40%' }}></div>
+                  <div className="bar" style={{ height: '20%' }}></div>
+                </div>
+                <div className="range-slider-wrapper">
+                  <div className="range-track"></div>
+                  <div className="range-thumb left"></div>
+                  <div className="range-thumb right"></div>
+                </div>
+                <div className="price-range-labels">
+                  <span>₹ 0</span>
+                  <span>₹ 2,000</span>
+                </div>
+                <div className="price-inputs">
+                  <div className="price-input-box">
+                    <input type="text" defaultValue="₹ 0" />
+                  </div>
+                  <span className="price-separator">—</span>
+                  <div className="price-input-box">
+                    <input type="text" defaultValue="₹ 2,000" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Key Ingredients */}
+            <div className="filter-section expanded">
+              <div className="filter-section-header">
+                <h3>Key Ingredients</h3>
+                <ChevronDown size={18} />
+              </div>
+              <div className="size-grid">
+                <button className="size-btn selected">Vit C</button>
+                <button className="size-btn">Retinol</button>
+                <button className="size-btn">HA 2%</button>
+                <button className="size-btn">Niacinam.</button>
+                <button className="size-btn">Peptide</button>
+                <button className="size-btn">Squalane</button>
+              </div>
+            </div>
+
+            {/* Skin Type */}
+            <div className="filter-section expanded">
+              <div className="filter-section-header">
+                <h3>Skin Type</h3>
+                <ChevronDown size={18} />
+              </div>
+              <div className="size-grid">
+                <button className="size-btn">Oily</button>
+                <button className="size-btn selected">Dry</button>
+                <button className="size-btn">Sensitive</button>
+                <button className="size-btn">All Types</button>
+              </div>
+            </div>
+
           </div>
         </aside>
 

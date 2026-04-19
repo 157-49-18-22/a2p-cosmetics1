@@ -12,7 +12,7 @@ const faceWashProducts = [
     rating: 4.9,
     reviews: 1250,
     tag: "BESTSELLER",
-    image: "/facewash_product.png" 
+    image: "/facewash_product.png"
   },
   {
     id: 2,
@@ -75,35 +75,146 @@ const FaceWash = () => {
   return (
     <div className="lips-page facewash-page">
       <div className="lips-banner">
-        <video 
-          src="/video1.mp4" 
-          autoPlay 
-          muted 
-          loop 
-          playsInline 
+        <video
+          src="/video1.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
           className="banner-video"
         />
       </div>
 
       <div className="lips-container">
-        <aside className="lips-sidebar">
-          <div className="filter-section">
-            <h3>SKIN TYPE <ChevronDown size={16} /></h3>
-            <div className="filter-options">
-              <label className="filter-label"><input type="checkbox" /> Oily Skin</label>
-              <label className="filter-label"><input type="checkbox" /> Dry Skin</label>
-              <label className="filter-label"><input type="checkbox" /> Sensitive Skin</label>
-              <label className="filter-label"><input type="checkbox" /> Combination</label>
+        <aside className="lips-sidebar filters-sidebar">
+          <div className="filters-card">
+            <div className="filters-header">
+              <h2>Filter</h2>
+              <button className="advanced-btn">Clear All</button>
             </div>
-          </div>
 
-          <div className="filter-section">
-            <h3>PRICE <ChevronDown size={16} /></h3>
-            <div className="price-range">
-              <input type="range" min="0" max="1000" style={{width: '100%', accentColor: '#ec4899'}} />
-              <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '10px', fontSize: '0.9rem'}}>
-                <span>₹ 0</span>
-                <span>₹ 1000</span>
+            {/* Skin Type Section */}
+            <div className="filter-section expanded">
+              <div className="filter-section-header">
+                <h3>Skin Type</h3>
+                <ChevronDown size={18} />
+              </div>
+              <div className="brand-search">
+                <div className="search-input-wrapper">
+                  <span className="search-icon1">🔍</span>
+                  <input type="text" placeholder="Search skin type ..." />
+                </div>
+              </div>
+              <div className="filter-options brand-list">
+                <div className="brand-item selected">
+                  <div className="brand-logo-name">
+                    <span className="skin-icon">💧</span>
+                    <span>Oily Skin</span>
+                  </div>
+                  <span className="brand-count">3</span>
+                  <span className="check-mark">✓</span>
+                </div>
+                <div className="brand-item">
+                  <div className="brand-logo-name">
+                    <span className="skin-icon">🌿</span>
+                    <span>Dry Skin</span>
+                  </div>
+                  <span className="brand-count">2</span>
+                </div>
+                <div className="brand-item">
+                  <div className="brand-logo-name">
+                    <span className="skin-icon">✨</span>
+                    <span>Sensitive Skin</span>
+                  </div>
+                  <span className="brand-count">2</span>
+                </div>
+                <div className="brand-item">
+                  <div className="brand-logo-name">
+                    <span className="skin-icon">🔄</span>
+                    <span>Combination</span>
+                  </div>
+                  <span className="brand-count">4</span>
+                </div>
+                <div className="brand-item">
+                  <div className="brand-logo-name">
+                    <span className="skin-icon">🌸</span>
+                    <span>All Skin Types</span>
+                  </div>
+                  <span className="brand-count">6</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Price Section */}
+            <div className="filter-section expanded">
+              <div className="filter-section-header">
+                <h3>Price</h3>
+                <ChevronDown size={18} />
+              </div>
+              <div className="price-range-premium">
+                <div className="price-histogram">
+                  {/* Visual histogram bars mockup */}
+                  <div className="bar" style={{ height: '20%' }}></div>
+                  <div className="bar" style={{ height: '40%' }}></div>
+                  <div className="bar" style={{ height: '70%' }}></div>
+                  <div className="bar active" style={{ height: '90%' }}></div>
+                  <div className="bar active" style={{ height: '100%' }}></div>
+                  <div className="bar active" style={{ height: '80%' }}></div>
+                  <div className="bar" style={{ height: '50%' }}></div>
+                  <div className="bar" style={{ height: '30%' }}></div>
+                </div>
+                <div className="range-slider-wrapper">
+                  <div className="range-track"></div>
+                  <div className="range-thumb left"></div>
+                  <div className="range-thumb right"></div>
+                </div>
+                <div className="price-range-labels">
+                  <span>₹ 0</span>
+                  <span>₹ 1,000</span>
+                </div>
+                <div className="price-inputs">
+                  <div className="price-input-box">
+                    <input type="text" defaultValue="₹ 0" />
+                  </div>
+                  <span className="price-separator">—</span>
+                  <div className="price-input-box">
+                    <input type="text" defaultValue="₹ 1,000" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Key Ingredients Section */}
+            <div className="filter-section expanded">
+              <div className="filter-section-header">
+                <h3>Key Ingredients</h3>
+                <ChevronDown size={18} />
+              </div>
+              <div className="size-grid">
+                <button className="size-btn selected">Salicylic</button>
+                <button className="size-btn">Charcoal</button>
+                <button className="size-btn">Vit C</button>
+                <button className="size-btn">Tea Tree</button>
+                <button className="size-btn">Neem</button>
+                <button className="size-btn">Aloe</button>
+                <button className="size-btn">Foam</button>
+                <button className="size-btn">Turmeric</button>
+              </div>
+            </div>
+
+            {/* Skin Concern Section */}
+            <div className="filter-section expanded">
+              <div className="filter-section-header">
+                <h3>Skin Concern</h3>
+                <ChevronDown size={18} />
+              </div>
+              <div className="size-grid">
+                <button className="size-btn">Acne</button>
+                <button className="size-btn selected">Glow</button>
+                <button className="size-btn">Pores</button>
+                <button className="size-btn">Hydrate</button>
+                <button className="size-btn">Detox</button>
+                <button className="size-btn">Brighten</button>
               </div>
             </div>
           </div>
@@ -173,7 +284,7 @@ const FaceWash = () => {
         <div className="bottom-card">
           <h2>Transform Your Routine</h2>
           <div className="bottom-card-media">
-             <img src="/facewash_banner.png" alt="Skincare Transformation" />
+            <img src="/facewash_banner.png" alt="Skincare Transformation" />
           </div>
         </div>
         <div className="bottom-card shade-finder-card">
