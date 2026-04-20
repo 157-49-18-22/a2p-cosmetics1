@@ -1,0 +1,369 @@
+/* Standardized Product Page Styles (based on FaceWash/FaceSerum) */
+.lips-page {
+  background-color: #fff;
+  min-height: 100vh;
+}
+
+.lips-banner {
+  width: 100%;
+  height: 450px; /* Standard height for consistency */
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.banner-video, .lips-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lips-container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+  padding: 0 5%;
+  max-width: 1440px;
+  margin: 0 auto 5rem;
+}
+
+.filters-sidebar {
+  padding-right: 0;
+  border-right: none;
+}
+
+.filters-card {
+  background: #fdfdfd;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.filters-header h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.advanced-btn {
+  background: none;
+  border: none;
+  color: #ff4d6d;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.filter-section {
+  background: #fff;
+  border-radius: 15px;
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  border: 1px solid #f0f0f0;
+}
+
+.filter-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: 1.2rem;
+}
+
+.filter-section-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.brand-search {
+  margin-bottom: 1.2rem;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon1 {
+  position: absolute;
+  left: 12px;
+  color: #aaa;
+}
+
+.search-input-wrapper input {
+  width: 100%;
+  padding: 10px 15px 10px 35px;
+  border: 1px solid #f4f4f4;
+  border-radius: 10px;
+  background: #f9f9f9;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.brand-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.brand-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.brand-logo-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-item span {
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.brand-count {
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-left: auto;
+  margin-right: 6px;
+}
+
+.brand-item.selected span {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
+.check-mark {
+  color: #ff4d6d;
+  font-weight: bold;
+}
+
+/* Price range styles duplicate from FaceWash */
+.price-range-premium {
+  padding: 0 5px;
+}
+
+.price-histogram {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 40px;
+  margin-bottom: -10px;
+}
+
+.price-histogram .bar {
+  flex: 1;
+  background: #f0f0f0;
+  border-radius: 2px 2px 0 0;
+}
+
+.price-histogram .bar.active {
+  background: #e0faff;
+}
+
+.range-slider-wrapper {
+  position: relative;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.range-track {
+  height: 4px;
+  width: 100%;
+  background: #ff4d6d;
+  border-radius: 2px;
+}
+
+.range-thumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border: 3px solid #ff4d6d;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.range-thumb.left { left: 10%; }
+.range-thumb.right { right: 10%; }
+
+.price-range-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.size-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.size-btn {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 8px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+  cursor: pointer;
+}
+
+.size-btn.selected {
+  background: #e6f9fb;
+  border-color: #ff4d6d;
+  color: #ff4d6d;
+}
+
+/* Product Grid and Card */
+.lips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.lip-card {
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.lip-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+}
+
+.lip-card-img {
+  position: relative;
+  aspect-ratio: 1/1.25;
+  background: #fdfdfd;
+  overflow: hidden;
+}
+
+.lip-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.lip-card:hover .lip-card-img img {
+  transform: scale(1.1);
+}
+
+.tag-bestseller {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  color: #000;
+  padding: 6px 14px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  border-radius: 2px;
+  z-index: 2;
+}
+
+.lip-card-info {
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.lip-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1a1a1a;
+  height: 2.4rem;
+  overflow: hidden;
+}
+
+.lip-card-rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: #444;
+  margin-bottom: 1rem;
+}
+
+.lip-card-price {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  margin-bottom: 1.2rem;
+}
+
+.current-price {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #000;
+}
+
+.old-price {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.discount {
+  color: #ff0055;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.add-btn {
+  width: 100%;
+  padding: 15px;
+  background: #111; /* Consistent with screenshot */
+  color: #fff;
+  border: 1px solid #111;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.add-btn:hover {
+  background: transparent;
+  color: #111;
+}
+
+@media (max-width: 900px) {
+  .lips-container {
+    grid-template-columns: 1fr;
+  }
+  .lips-sidebar {
+    display: none;
+  }
+}

@@ -221,7 +221,7 @@
 
 .ad-a2p-badge {
   /* Outline-only / hollow text effect */
-  color: transparent;
+  color: #ff4d6d;
   -webkit-text-stroke: 2px var(--primary-pink);
   text-stroke: 2px var(--primary-pink);
 

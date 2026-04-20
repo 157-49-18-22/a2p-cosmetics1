@@ -28,16 +28,17 @@
 }
 
 .beauty-logo {
-  position: absolute;
-  left: 0;
-  top: 55%;
-  width: 100%;
-  transform: translateY(-50%);
+  position: relative;
+  left: auto;
+  top: auto;
+  width: auto;
+  transform: none;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  pointer-events: none;
+  pointer-events: auto;
   z-index: 10;
+  flex: 1;
 }
 
 .header-logo-img {
@@ -50,6 +51,8 @@
 
 .beauty-nav {
   flex: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .nav-links {
@@ -73,7 +76,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex: 0 0 auto;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .header-icon-btn {

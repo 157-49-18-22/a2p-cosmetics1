@@ -5,6 +5,8 @@ import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
 import FaceWash from './pages/FaceWash/FaceWash';
 import FaceSerum from './pages/FaceSerum/FaceSerum';
+import FaceCream from './pages/FaceCream/FaceCream';
+import BodyWash from './pages/BodyWash/BodyWash';
 import './App.css';
 
 // Scroll to top on route change
@@ -25,6 +27,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/facewash" element={<FaceWash />} />
         <Route path="/faceserum" element={<FaceSerum />} />
+        <Route path="/facecream" element={<FaceCream />} />
+        <Route path="/bodywash" element={<BodyWash />} />
       </Routes>
       <Footer />
     </div>

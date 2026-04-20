@@ -30,8 +30,8 @@ const Header = () => {
           <ul className="nav-links">
             <li><Link to="/facewash" onClick={() => setIsMenuOpen(false)}>Face Wash</Link></li>
             <li><Link to="/faceserum" onClick={() => setIsMenuOpen(false)}>Face Serum</Link></li>
-            <li><a href="#facecream" onClick={() => setIsMenuOpen(false)}>Face Cream</a></li>
-            <li><a href="#bodywash" onClick={() => setIsMenuOpen(false)}>Body Wash</a></li>
+            <li><Link to="/facecream" onClick={() => setIsMenuOpen(false)}>Face Cream</Link></li>
+            <li><Link to="/bodywash" onClick={() => setIsMenuOpen(false)}>Body Wash</Link></li>
           </ul>
         </nav>
 
