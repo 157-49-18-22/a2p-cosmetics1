@@ -8,6 +8,8 @@ import FaceSerum from './pages/FaceSerum/FaceSerum';
 import FaceCream from './pages/FaceCream/FaceCream';
 import BodyWash from './pages/BodyWash/BodyWash';
 import Articles from './pages/Articles/Articles';
+import Contact from './pages/Contact/Contact';
+
 
 import CartSidebar from './components/Cart/CartSidebar';
 import DistributorDashboard from './pages/DistributorDashboard/DistributorDashboard';
@@ -40,6 +42,8 @@ function App() {
         <Route path="/facecream" element={<FaceCream />} />
         <Route path="/bodywash" element={<BodyWash />} />
         <Route path="/articles" element={<Articles />} />
+        <Route path="/contact" element={<Contact />} />
+
 
         <Route path="/distributor/*" element={<DistributorDashboard />} />
         <Route path="/agent/*" element={<AgentDashboard />} />

@@ -35,6 +35,8 @@ const Header = () => {
             <li><Link to="/facecream" onClick={() => setIsMenuOpen(false)}>Face Cream</Link></li>
             <li><Link to="/bodywash" onClick={() => setIsMenuOpen(false)}>Body Wash</Link></li>
             <li><Link to="/articles" onClick={() => setIsMenuOpen(false)}>Journal</Link></li>
+            <li><Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contact Us</Link></li>
+
           </ul>
         </nav>
 
