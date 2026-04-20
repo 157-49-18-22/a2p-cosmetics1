@@ -36,9 +36,9 @@ const Footer = () => {
           <div className="footer-links">
             <h3>Shop</h3>
             <ul>
-              <li><a href="#">Skincare</a></li>
-              <li><a href="#">Makeup</a></li>
-              <li><a href="#">Fragrance</a></li>
+              <li><a href="/bodywash">Body Wash</a></li>
+              <li><a href="/articles">Journal</a></li>
+              <li><a href="/tracking">Track Order</a></li>
               <li><a href="#">Gift Cards</a></li>
             </ul>
           </div>

@@ -24,3 +24,13 @@
   z-index: 0;
 }
 
+.main-content-padding {
+  padding-top: 100px; /* Space for the fixed header */
+  min-height: calc(100vh - 400px); /* Keeps footer at bottom on short pages */
+}
+
+@media (max-width: 1024px) {
+  .main-content-padding {
+    padding-top: 80px; /* Smaller spacing for mobile header */
+  }
+}

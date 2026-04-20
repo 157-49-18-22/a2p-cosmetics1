@@ -7,6 +7,12 @@ import FaceWash from './pages/FaceWash/FaceWash';
 import FaceSerum from './pages/FaceSerum/FaceSerum';
 import FaceCream from './pages/FaceCream/FaceCream';
 import BodyWash from './pages/BodyWash/BodyWash';
+import Articles from './pages/Articles/Articles';
+
+import CartSidebar from './components/Cart/CartSidebar';
+import DistributorDashboard from './pages/DistributorDashboard/DistributorDashboard';
+import AgentDashboard from './pages/AgentDashboard/AgentDashboard';
+import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import './App.css';
 
 // Scroll to top on route change
@@ -19,18 +25,27 @@ const ScrollToTop = () => {
 };
 
 function App() {
+  const { pathname } = useLocation();
+  const isDashboard = pathname.startsWith('/distributor') || pathname.startsWith('/agent') || pathname.startsWith('/admin');
+
   return (
     <div className="app">
       <ScrollToTop />
-      <Header />
+      <CartSidebar />
+      {!isDashboard && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/facewash" element={<FaceWash />} />
         <Route path="/faceserum" element={<FaceSerum />} />
         <Route path="/facecream" element={<FaceCream />} />
         <Route path="/bodywash" element={<BodyWash />} />
+        <Route path="/articles" element={<Articles />} />
+
+        <Route path="/distributor/*" element={<DistributorDashboard />} />
+        <Route path="/agent/*" element={<AgentDashboard />} />
+        <Route path="/admin/*" element={<AdminDashboard />} />
       </Routes>
-      <Footer />
+      {!isDashboard && <Footer />}
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import React from 'react';
 import { Star, ChevronDown, ShieldCheck, Headphones, CreditCard } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
+import { useNotifications } from '../../components/Notifications/NotificationHub';
 import './FaceWash.css'; // Dedicated FaceWash styles
 
 const faceWashProducts = [
@@ -72,6 +74,19 @@ const faceWashProducts = [
 ];
 
 const FaceWash = () => {
+  const { addToCart } = useCart();
+  const { showNotification } = useNotifications();
+
+  const handleAddToCart = (product) => {
+    addToCart(product);
+    showNotification({
+      type: 'cart',
+      title: 'Added to Selection',
+      message: `${product.name} has been added to your cart successfully.`,
+      duration: 3500
+    });
+  };
+
   return (
     <div className="lips-page facewash-page">
       <div className="lips-banner">
@@ -250,7 +265,7 @@ const FaceWash = () => {
                     {product.oldPrice && <span className="old-price">Rs. {product.oldPrice}</span>}
                     {product.discount && <span className="discount">{product.discount}</span>}
                   </div>
-                  <button className="add-btn">ADD TO CART</button>
+                  <button className="add-btn" onClick={() => handleAddToCart(product)}>ADD TO CART</button>
                 </div>
               </div>
             ))}
