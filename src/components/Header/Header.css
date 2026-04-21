@@ -92,6 +92,7 @@
   padding: 8px;
   border-radius: 50%;
   box-shadow: none !important;
+  position: relative;
 }
 
 .header-icon-btn:hover {

@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Star, ShoppingCart, Heart } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 import './Bestsellers.css';
 
 const products = [
@@ -47,6 +49,18 @@ const products = [
 ];
 
 const Bestsellers = () => {
+  const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist, wishlistItems } = useWishlist();
+
+  const toggleWishlist = (product) => {
+    const existingItem = wishlistItems.find(item => item.name === product.name);
+    if (existingItem) {
+      removeFromWishlist(existingItem.id);
+    } else {
+      addToWishlist(product);
+    }
+  };
+
   return (
     <section className="section bestsellers" id="bestsellers">
       <div className="container">
@@ -70,12 +84,24 @@ const Bestsellers = () => {
             >
               <div className="product-image-container">
                 {product.tag && <span className="product-category-tag">{product.tag}</span>}
-                <button className="wishlist-btn"><Heart size={20} /></button>
+                <button 
+                  className={`wishlist-btn ${isInWishlist(product.name) ? 'active' : ''}`}
+                  onClick={() => toggleWishlist(product)}
+                >
+                  <Heart 
+                    size={20} 
+                    fill={isInWishlist(product.name) ? "var(--accent-color, #ff4d6d)" : "none"}
+                    color={isInWishlist(product.name) ? "var(--accent-color, #ff4d6d)" : "currentColor"}
+                  />
+                </button>
 
                 <img src={product.image} alt={product.name} />
 
                 <div className="add-to-cart-wrapper">
-                  <button className="add-to-cart-overlay">
+                  <button 
+                    className="add-to-cart-overlay"
+                    onClick={() => addToCart(product)}
+                  >
                     <ShoppingCart size={18} /> Add to Cart
                   </button>
                 </div>

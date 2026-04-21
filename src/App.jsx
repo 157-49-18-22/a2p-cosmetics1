@@ -12,6 +12,7 @@ import Contact from './pages/Contact/Contact';
 
 
 import CartSidebar from './components/Cart/CartSidebar';
+import WishlistSidebar from './components/Cart/WishlistSidebar';
 import DistributorDashboard from './pages/DistributorDashboard/DistributorDashboard';
 import AgentDashboard from './pages/AgentDashboard/AgentDashboard';
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
@@ -34,6 +35,7 @@ function App() {
     <div className="app">
       <ScrollToTop />
       <CartSidebar />
+      <WishlistSidebar />
       {!isDashboard && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />

@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, User, Heart, Search, Menu, X, LayoutDashboard, UserCheck, ShieldCheck } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 import './Header.css';
 
 const Header = () => {
   const { cartItems, setIsCartOpen } = useCart();
+  const { wishlistItems, setIsWishlistOpen } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -42,7 +44,10 @@ const Header = () => {
 
         <div className="header-icons">
           <button className="header-icon-btn search-icon"><Search size={18} /></button>
-          <button className="header-icon-btn wishlist-icon"><Heart size={18} /></button>
+          <button className="header-icon-btn wishlist-icon" onClick={() => setIsWishlistOpen(true)}>
+            <Heart size={18} />
+            {wishlistItems.length > 0 && <span className="cart-count">{wishlistItems.length}</span>}
+          </button>
           <button className="header-icon-btn user-icon"><User size={18} /></button>
           <button className="header-icon-btn cart-badge-btn" onClick={() => setIsCartOpen(true)}>
             <ShoppingBag size={18} />

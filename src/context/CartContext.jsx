@@ -1,44 +1,75 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 const CartContext = createContext();
+const API_URL = 'http://localhost:5000/api/cart';
 
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [coupon, setCoupon] = useState(null); // { code: 'A2P20', discount: 20, type: 'percent' }
+  const [coupon, setCoupon] = useState(null);
+
+  // Fetch cart items on load
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  const fetchCart = async () => {
+    try {
+      const response = await axios.get(API_URL);
+      setCartItems(response.data);
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+    }
+  };
+
+  const addToCart = async (product) => {
+    try {
+      // Prepare product data for backend
+      const productData = {
+        name: product.name,
+        price: typeof product.price === 'string' ? parseFloat(product.price.replace('$', '').replace('Rs. ', '')) : product.price,
+        image_url: product.image || product.image_url,
+        quantity: 1
+      };
+
+      await axios.post(API_URL, productData);
+      await fetchCart(); // Refresh cart from server
+      setIsCartOpen(true);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  };
+
+  const removeFromCart = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      await fetchCart();
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+    }
+  };
+
+  const updateQuantity = async (id, delta) => {
+    const item = cartItems.find(i => i.id === id);
+    if (!item) return;
+
+    const newQty = Math.max(1, item.quantity + delta);
+    try {
+      await axios.put(`${API_URL}/${id}`, { quantity: newQty });
+      await fetchCart();
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+    }
+  };
 
   // Mock valid coupons
   const VALID_COUPONS = {
     'A2P20': { discount: 20, type: 'percent' },
     'FREESHIP': { discount: 50, type: 'fixed' }, // Rs. 50 off
     'GLOW50': { discount: 50, type: 'percent' }
-  };
-
-  const addToCart = (product) => {
-    setCartItems(prev => {
-      const exists = prev.find(item => item.id === product.id);
-      if (exists) {
-        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-    setIsCartOpen(true);
-  };
-
-  const removeFromCart = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
-  };
-
-  const updateQuantity = (id, delta) => {
-    setCartItems(prev => prev.map(item => {
-      if (item.id === id) {
-        const newQty = Math.max(1, item.quantity + delta);
-        return { ...item, quantity: newQty };
-      }
-      return item;
-    }));
   };
 
   const applyCoupon = (code) => {
