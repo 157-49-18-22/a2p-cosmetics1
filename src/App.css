@@ -1,5 +1,6 @@
 .app {
   width: 100%;
+  overflow: visible !important;
 }
 
 .hero-header-stack {

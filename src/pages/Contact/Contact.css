@@ -6,7 +6,6 @@
   color: var(--text-main);
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
 }
 
 /* Visual Progress Bar */
@@ -284,8 +283,35 @@
   backdrop-filter: blur(20px);
 }
 
-.portal-header {
+.portal-header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 40px;
+  gap: 20px;
+}
+
+.portal-header {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.portal-lottie {
+  flex-shrink: 0;
+  animation: float-lottie 6s ease-in-out infinite;
+}
+
+@keyframes float-lottie {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@media (max-width: 600px) {
+  .portal-header-wrapper {
+    flex-direction: column-reverse;
+    text-align: center;
+    align-items: center;
+  }
 }
 
 .portal-header h2 {

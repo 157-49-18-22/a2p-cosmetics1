@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Clock, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, Clock, ArrowRight, Sparkles, Filter } from 'lucide-react';
 import './Articles.css';
 
 const articles = [
@@ -55,15 +55,23 @@ const Articles = () => {
 
   return (
     <div className="articles-page">
+      {/* Background Elements */}
+      <div className="bg-blob blob-1"></div>
+      <div className="bg-blob blob-2"></div>
+      <div className="bg-blob blob-3"></div>
+
       {/* Blog Hero Section */}
       <section className="articles-hero">
         <div className="container">
-          <span className="hero-badge"><Sparkles size={14} /> A2P Skincare Journal</span>
+          <div className="hero-badge">
+            <Sparkles size={14} />
+            <span>A2P Skincare Journal</span>
+          </div>
           <h1>Expert Insights for <br /><span>Your Natural Beauty</span></h1>
           <p>Discover the science behind our ingredients and tips for your unique skin journey.</p>
-          
+
           <div className="articles-search-bar">
-            <Search size={20} />
+            <Search size={22} strokeWidth={1.5} />
             <input type="text" placeholder="Search for tips, ingredients, or routines..." />
             <button className="search-btn">Search</button>
           </div>
@@ -86,7 +94,9 @@ const Articles = () => {
                 <p>{featuredArticle.excerpt}</p>
                 <div className="article-meta">
                   <div className="author-info">
-                    <div className="author-avatar">{featuredArticle.author[0]}</div>
+                    <div className="author-avatar">
+                      {featuredArticle.author[0]}
+                    </div>
                     <div>
                       <span className="author-name">{featuredArticle.author}</span>
                       <span className="article-date">{featuredArticle.date}</span>
@@ -98,7 +108,7 @@ const Articles = () => {
                   </div>
                 </div>
                 <button className="read-more-btn">
-                  Read Full Article <ArrowRight size={18} />
+                  Read Full Article <ArrowRight size={20} />
                 </button>
               </div>
             </div>
@@ -110,13 +120,14 @@ const Articles = () => {
           <div className="grid-header">
             <h2 className="section-title">Latest Updates</h2>
             <div className="filter-chips">
-              <button className="chip active">All</button>
+              <button className="chip active">All Stories</button>
               <button className="chip">Routines</button>
               <button className="chip">Ingredients</button>
               <button className="chip">Science</button>
+              <button className="chip">Lifestyle</button>
             </div>
           </div>
-          
+
           <div className="articles-grid">
             {regularArticles.map(article => (
               <div key={article.id} className="article-card">
@@ -133,7 +144,7 @@ const Articles = () => {
                   <h3>{article.title}</h3>
                   <p>{article.excerpt.substring(0, 100)}...</p>
                   <button className="text-link">
-                    Read More <ArrowRight size={14} />
+                    Explore Details
                   </button>
                 </div>
               </div>

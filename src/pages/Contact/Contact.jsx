@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Instagram, Twitter, Facebook, ChevronDown, CheckCircle2, Sparkles, Leaf, Droplets, Globe } from 'lucide-react';
+import Lottie from 'lottie-react';
+import girlAnimation from '../../assets/girl-face.json';
 import './Contact.css';
 
 const Contact = () => {
+  const LottieComponent = Lottie?.default || Lottie;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -122,9 +125,20 @@ const Contact = () => {
 
           <div className="form-portal animate-up">
             <div className="portal-glass">
-              <div className="portal-header">
-                <h2>Share Your Story</h2>
-                <p>We listen, we care, we formulate for you.</p>
+              <div className="portal-header-wrapper">
+                <div className="portal-header">
+                  <h2>Share Your Story</h2>
+                  <p>We listen, we care, we formulate for you.</p>
+                </div>
+                <div className="portal-lottie">
+                  {LottieComponent && (
+                    <LottieComponent
+                      animationData={girlAnimation}
+                      loop={true}
+                      style={{ width: '120px', height: '120px' }}
+                    />
+                  )}
+                </div>
               </div>
 
               {submitted ? (
