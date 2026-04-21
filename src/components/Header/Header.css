@@ -149,6 +149,7 @@
     min-height: 50px;
   }
 
+
   .beauty-nav {
     display: none;
   }
@@ -162,6 +163,7 @@
     justify-content: center;
     order: 2;
     pointer-events: auto;
+    margin-right: 1rem;
   }
 
   .header-logo-img {
