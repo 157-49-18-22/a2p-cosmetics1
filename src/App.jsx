@@ -16,6 +16,13 @@ import WishlistSidebar from './components/Cart/WishlistSidebar';
 import DistributorDashboard from './pages/DistributorDashboard/DistributorDashboard';
 import AgentDashboard from './pages/AgentDashboard/AgentDashboard';
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
+
+// Profile Pages
+import MyOrders from './pages/Profile/MyOrders';
+import MyAddresses from './pages/Profile/MyAddresses';
+import SavedItems from './pages/Profile/SavedItems';
+import SkinProfile from './pages/Profile/SkinProfile';
+
 import './App.css';
 
 // Scroll to top on route change
@@ -46,6 +53,12 @@ function App() {
         <Route path="/articles" element={<Articles />} />
         <Route path="/contact" element={<Contact />} />
 
+        {/* User Profile Routes */}
+        <Route path="/my-orders" element={<MyOrders />} />
+        <Route path="/my-addresses" element={<MyAddresses />} />
+        <Route path="/saved-items" element={<SavedItems />} />
+        <Route path="/wishlist" element={<SavedItems />} />
+        <Route path="/skin-profile" element={<SkinProfile />} />
 
         <Route path="/distributor/*" element={<DistributorDashboard />} />
         <Route path="/agent/*" element={<AgentDashboard />} />
@@ -57,3 +70,4 @@ function App() {
 }
 
 export default App;
+

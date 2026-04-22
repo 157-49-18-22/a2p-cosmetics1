@@ -235,3 +235,182 @@
     padding: 4px;
   }
 }
+
+.user-dropdown-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 20px);
+  right: 0;
+  width: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+    0 20px 40px -5px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(236, 72, 153, 0.05);
+  overflow: hidden;
+  z-index: 1100;
+  transform-origin: top right;
+  padding: 8px;
+}
+
+.user-dropdown-menu::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 20px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  transform: rotate(45deg);
+  box-shadow: -1px -1px 0 rgba(236, 72, 153, 0.05);
+}
+
+.dropdown-header {
+  padding: 1rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.user-avatar-large {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+  color: var(--primary-pink, #ec4899);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(236, 72, 153, 0.1);
+}
+
+.user-avatar-large::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 12px;
+  height: 12px;
+  background: #22c55e;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.welcome-text {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.01em;
+}
+
+.user-email {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  background-color: var(--primary-pink, #ec4899);
+  color: white;
+  padding: 1px 8px;
+  border-radius: 100px;
+  width: fit-content;
+  margin-top: 4px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.03);
+  margin: 4px 0;
+}
+
+.dropdown-links {
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.8rem 1rem;
+  color: #4b5563;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 10px;
+}
+
+.dropdown-item:hover {
+  background-color: #fce7f3;
+  color: var(--primary-pink, #ec4899);
+  transform: translateX(4px);
+}
+
+.item-icon {
+  opacity: 0.8;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-item:hover .item-icon {
+  opacity: 1;
+  color: var(--primary-pink, #ec4899);
+  transform: scale(1.1);
+}
+
+.logout-btn {
+  color: #ef4444;
+  margin-top: 4px;
+}
+
+.logout-btn:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* Staggered animation classes if needed, but we'll use framer-motion in JSX */
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .user-dropdown-menu {
+    position: fixed;
+    top: 70px;
+    right: 1.5rem;
+    left: 1.5rem;
+    width: auto;
+    max-width: 400px;
+    margin: 0 auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+}
