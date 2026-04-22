@@ -1,11 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, ArrowRight, Star } from 'lucide-react';
 import './Hero.css';
 
 const Hero = () => {
+  const [banner, setBanner] = useState(null);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/banners/hero')
+      .then(res => res.json())
+      .then(data => setBanner(data))
+      .catch(err => console.error('Error fetching hero banner:', err));
+  }, []);
+
   return (
-    <section className="beauty-hero" style={{ backgroundImage: "url('/bg.jpeg')" }}>
+    <section 
+      className="beauty-hero" 
+      style={{ backgroundImage: banner?.image_url ? `url('${banner.image_url}')` : "url('/bg.jpeg')" }}
+    >
       <div className="hero-overlay"></div>
       <div className="container hero-inner-container">
         
@@ -21,16 +33,16 @@ const Hero = () => {
           </div>
 
           <h1>
-            <span className="gradient-text">Beauty</span> That Transforms
+            <span className="gradient-text">{banner?.title || 'Beauty'} That Transforms</span>
           </h1>
 
           <p>
-            Elevate your skincare and makeup routine with our luxurious, science-backed formulas designed for your pinnacle of beauty.
+            {banner?.subtitle || 'Elevate your skincare and makeup routine with our luxurious, science-backed formulas designed for your pinnacle of beauty.'}
           </p>
 
           <div className="hero-buttons">
-            <button className="btn-shop-now">
-              Shop Now <ArrowRight size={18} />
+            <button className="btn-shop-now" style={{ backgroundColor: banner?.cta_color || '#3b82f6' }}>
+              {banner?.cta_label || 'Shop Now'} <ArrowRight size={18} />
             </button>
             <button className="btn-explore">
               Explore Products

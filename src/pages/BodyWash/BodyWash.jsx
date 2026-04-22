@@ -12,7 +12,8 @@ const bodyWashProducts = [
     rating: 4.9,
     reviews: 450,
     tag: "BESTSELLER",
-    image: "/body_wash_product.png"
+    image: "/body_wash_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   },
   {
     id: 2,
@@ -23,7 +24,8 @@ const bodyWashProducts = [
     rating: 4.8,
     reviews: 320,
     tag: "NEW LAUNCH",
-    image: "/body_wash_product.png"
+    image: "/body_wash_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   },
   {
     id: 3,
@@ -34,7 +36,8 @@ const bodyWashProducts = [
     rating: 4.7,
     reviews: 210,
     tag: "POPULAR",
-    image: "/body_wash_product.png"
+    image: "/body_wash_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   },
   {
     id: 4,
@@ -45,7 +48,8 @@ const bodyWashProducts = [
     rating: 4.9,
     reviews: 180,
     tag: null,
-    image: "/body_wash_product.png"
+    image: "/body_wash_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   },
   {
     id: 5,
@@ -56,7 +60,8 @@ const bodyWashProducts = [
     rating: 5.0,
     reviews: 120,
     tag: "PREMIUM",
-    image: "/body_wash_product.png"
+    image: "/body_wash_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   },
   {
     id: 6,
@@ -67,7 +72,8 @@ const bodyWashProducts = [
     rating: 4.6,
     reviews: 540,
     tag: null,
-    image: "/body_wash_product.png"
+    image: "/body_wash_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   }
 ];
 
@@ -196,7 +202,8 @@ const BodyWash = () => {
               <div key={product.id} className="lip-card">
                 <div className="lip-card-img">
                   {product.tag && <span className="tag-bestseller">{product.tag}</span>}
-                  <img src={product.image} alt={product.name} />
+                  <img src={product.image} alt={product.name} className="primary-img" />
+                  {product.hoverImage && <img src={product.hoverImage} alt={product.name} className="hover-img" />}
                 </div>
                 <div className="lip-card-info">
                   <h3 className="lip-card-title">{product.name}</h3>

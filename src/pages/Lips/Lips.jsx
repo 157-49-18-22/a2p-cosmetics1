@@ -13,7 +13,8 @@ const lipProducts = [
     reviews: 1444,
     shades: 35,
     tag: "BESTSELLER",
-    image: "/matte_lipstick_product.png" 
+    image: "/matte_lipstick_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   },
   {
     id: 2,
@@ -25,7 +26,8 @@ const lipProducts = [
     reviews: 725,
     shades: 12,
     tag: "BESTSELLER",
-    image: "/matte_lipstick_product.png"
+    image: "/matte_lipstick_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   },
   {
     id: 3,
@@ -37,7 +39,8 @@ const lipProducts = [
     reviews: 402,
     shades: 8,
     tag: "NEW LAUNCH",
-    image: "/matte_lipstick_product.png"
+    image: "/matte_lipstick_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   },
   {
     id: 4,
@@ -49,7 +52,8 @@ const lipProducts = [
     reviews: 1168,
     shades: 15,
     tag: "BESTSELLER",
-    image: "/matte_lipstick_product.png"
+    image: "/matte_lipstick_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   },
   {
     id: 5,
@@ -61,7 +65,8 @@ const lipProducts = [
     reviews: 898,
     shades: null,
     tag: null,
-    image: "/matte_lipstick_product.png"
+    image: "/matte_lipstick_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   },
   {
     id: 6,
@@ -73,7 +78,8 @@ const lipProducts = [
     reviews: 1015,
     shades: 20,
     tag: null,
-    image: "/matte_lipstick_product.png"
+    image: "/matte_lipstick_product.png",
+    hoverImage: "/bodywash_hover_1.png"
   }
 ];
 
@@ -137,7 +143,8 @@ const Lips = () => {
               <div key={product.id} className="lip-card">
                 <div className="lip-card-img">
                   {product.tag && <span className="tag-bestseller">{product.tag}</span>}
-                  <img src={product.image} alt={product.name} />
+                  <img src={product.image} alt={product.name} className="primary-img" />
+                  {product.hoverImage && <img src={product.hoverImage} alt={product.name} className="hover-img" />}
                   {product.shades && <span className="shades-count">+{product.shades} Shades</span>}
                 </div>
                 <div className="lip-card-info">

@@ -6,13 +6,14 @@
 
 .lips-banner {
   width: 100%;
-  height: 450px; 
+  height: 730px;
   position: relative;
   overflow: hidden;
-  margin-bottom: 2rem;
+  margin-bottom: 0rem;
 }
 
-.banner-video, .lips-banner img {
+.banner-video,
+.lips-banner img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -199,8 +200,13 @@
   cursor: pointer;
 }
 
-.range-thumb.left { left: 10%; }
-.range-thumb.right { right: 10%; }
+.range-thumb.left {
+  left: 10%;
+}
+
+.range-thumb.right {
+  right: 10%;
+}
 
 .size-grid {
   display: grid;
@@ -258,11 +264,25 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.lip-card:hover .lip-card-img img {
+.lip-card-img .hover-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
   transform: scale(1.1);
+}
+
+.lip-card:hover .lip-card-img .primary-img {
+  opacity: 0;
+  transform: scale(1.1);
+}
+
+.lip-card:hover .lip-card-img .hover-img {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .tag-bestseller {
@@ -334,7 +354,7 @@
 .add-btn {
   width: 100%;
   padding: 15px;
-  background: #111; 
+  background: #111;
   color: #fff;
   border: 1px solid #111;
   font-weight: 700;
@@ -354,6 +374,7 @@
   .lips-container {
     grid-template-columns: 1fr;
   }
+
   .lips-sidebar {
     display: none;
   }

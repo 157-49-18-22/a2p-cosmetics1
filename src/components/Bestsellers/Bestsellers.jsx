@@ -1,65 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Star, ShoppingCart, Heart } from 'lucide-react';
+import { Star, ShoppingCart, Heart, Package } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import './Bestsellers.css';
 
-const products = [
-  {
-    id: 1,
-    name: 'Radiant Glow Face Wash',
-    desc: 'Gentle cleansing formula that reveals your natural radiance',
-    price: '$24.99',
-    rating: 4.8,
-    reviews: 342,
-    image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop',
-    tag: 'Skincare'
-  },
-  {
-    id: 2,
-    name: 'Velvet Matte Lipstick',
-    desc: 'Long-lasting color with a luxurious matte finish',
-    price: '$18.99',
-    rating: 4.9,
-    reviews: 528,
-    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop',
-    tag: 'Makeup'
-  },
-  {
-    id: 3,
-    name: 'Flawless Finish Foundation',
-    desc: 'Buildable coverage for a natural, radiant complexion',
-    price: '$32.99',
-    rating: 4.7,
-    reviews: 416,
-    image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop',
-    tag: 'Makeup'
-  },
-  {
-    id: 4,
-    name: 'Hydra-Luxe Moisturizer',
-    desc: 'Deep hydration that keeps skin soft and supple all day',
-    price: '$28.99',
-    rating: 4.9,
-    reviews: 651,
-    image: 'https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop',
-    tag: 'Skincare'
-  },
-];
-
 const Bestsellers = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist, wishlistItems } = useWishlist();
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/products')
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching products:', err);
+        setLoading(false);
+      });
+  }, []);
 
   const toggleWishlist = (product) => {
     const existingItem = wishlistItems.find(item => item.name === product.name);
     if (existingItem) {
       removeFromWishlist(existingItem.id);
     } else {
-      addToWishlist(product);
+      addToWishlist({
+        name: product.name,
+        price: product.price,
+        image_url: product.image_url
+      });
     }
   };
+
+  const handleAddToCart = (product) => {
+    addToCart({
+      name: product.name,
+      price: product.price,
+      image_url: product.image_url,
+      quantity: 1
+    });
+  };
+
+  if (loading) {
+    return (
+      <section className="section bestsellers">
+        <div className="container text-center">
+          <p>Loading Featured Products...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="section bestsellers" id="bestsellers">
@@ -73,7 +68,12 @@ const Bestsellers = () => {
         </div>
 
         <div className="products-grid">
-          {products.map((product, index) => (
+          {products.length === 0 ? (
+             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                <Package size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
+                <p>No products available yet. Check back soon!</p>
+             </div>
+          ) : products.slice(0, 8).map((product, index) => (
             <motion.div
               key={product.id}
               className="product-card"
@@ -83,7 +83,7 @@ const Bestsellers = () => {
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <div className="product-image-container">
-                {product.tag && <span className="product-category-tag">{product.tag}</span>}
+                {product.category && <span className="product-category-tag">{product.category}</span>}
                 <button 
                   className={`wishlist-btn ${isInWishlist(product.name) ? 'active' : ''}`}
                   onClick={() => toggleWishlist(product)}
@@ -95,12 +95,16 @@ const Bestsellers = () => {
                   />
                 </button>
 
-                <img src={product.image} alt={product.name} />
+                <img 
+                  src={product.image_url || 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop'} 
+                  alt={product.name} 
+                  onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop'; }}
+                />
 
                 <div className="add-to-cart-wrapper">
                   <button 
                     className="add-to-cart-overlay"
-                    onClick={() => addToCart(product)}
+                    onClick={() => handleAddToCart(product)}
                   >
                     <ShoppingCart size={18} /> Add to Cart
                   </button>
@@ -109,7 +113,7 @@ const Bestsellers = () => {
 
               <div className="product-details">
                 <h3>{product.name}</h3>
-                <p className="product-desc">{product.desc}</p>
+                <p className="product-desc">{product.description || 'Premium quality skincare product'}</p>
 
                 <div className="product-rating-box">
                   <div className="stars">
@@ -117,10 +121,10 @@ const Bestsellers = () => {
                       <Star key={i} size={14} fill="#ffb400" color="#ffb400" />
                     ))}
                   </div>
-                  <span className="rating-text">{product.rating} ({product.reviews})</span>
+                  <span className="rating-text">4.8 (342)</span>
                 </div>
 
-                <span className="product-price">{product.price}</span>
+                <span className="product-price">₹{parseFloat(product.price).toFixed(0)}</span>
               </div>
             </motion.div>
           ))}

@@ -14,7 +14,8 @@ const faceWashProducts = [
     rating: 4.9,
     reviews: 1250,
     tag: "BESTSELLER",
-    image: "/facewash_product.png"
+    image: "/facewash_product.png",
+    hoverImage: "/facewash_hover_1.png"
   },
   {
     id: 2,
@@ -25,7 +26,8 @@ const faceWashProducts = [
     rating: 4.8,
     reviews: 840,
     tag: "NEW LAUNCH",
-    image: "/facewash_product.png"
+    image: "/facewash_product.png",
+    hoverImage: "/facewash_hover_2.png"
   },
   {
     id: 3,
@@ -36,7 +38,8 @@ const faceWashProducts = [
     rating: 4.7,
     reviews: 2100,
     tag: "BESTSELLER",
-    image: "/facewash_product.png"
+    image: "/facewash_product.png",
+    hoverImage: "/facewash_hover_1.png"
   },
   {
     id: 4,
@@ -47,7 +50,8 @@ const faceWashProducts = [
     rating: 4.8,
     reviews: 1560,
     tag: null,
-    image: "/facewash_product.png"
+    image: "/facewash_product.png",
+    hoverImage: "/facewash_hover_2.png"
   },
   {
     id: 5,
@@ -58,7 +62,8 @@ const faceWashProducts = [
     rating: 4.6,
     reviews: 930,
     tag: "POPULAR",
-    image: "/facewash_product.png"
+    image: "/facewash_product.png",
+    hoverImage: "/facewash_hover_1.png"
   },
   {
     id: 6,
@@ -69,7 +74,8 @@ const faceWashProducts = [
     rating: 4.7,
     reviews: 1100,
     tag: null,
-    image: "/facewash_product.png"
+    image: "/facewash_product.png",
+    hoverImage: "/facewash_hover_2.png"
   }
 ];
 
@@ -252,7 +258,8 @@ const FaceWash = () => {
               <div key={product.id} className="lip-card">
                 <div className="lip-card-img">
                   {product.tag && <span className="tag-bestseller">{product.tag}</span>}
-                  <img src={product.image} alt={product.name} />
+                  <img src={product.image} alt={product.name} className="primary-img" />
+                  {product.hoverImage && <img src={product.hoverImage} alt={product.name} className="hover-img" />}
                 </div>
                 <div className="lip-card-info">
                   <h3 className="lip-card-title">{product.name}</h3>

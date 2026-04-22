@@ -12,7 +12,8 @@ const serumProducts = [
     rating: 4.9,
     reviews: 3200,
     tag: "BESTSELLER",
-    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop",
+    hoverImage: "/faceserum_hover_1.png"
   },
   {
     id: 2,
@@ -23,7 +24,8 @@ const serumProducts = [
     rating: 4.8,
     reviews: 1540,
     tag: "POPULAR",
-    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop",
+    hoverImage: "/faceserum_hover_1.png"
   },
   {
     id: 3,
@@ -34,7 +36,8 @@ const serumProducts = [
     rating: 4.7,
     reviews: 2100,
     tag: "NEXT LEVEL",
-    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop",
+    hoverImage: "/faceserum_hover_1.png"
   },
   {
     id: 4,
@@ -45,7 +48,8 @@ const serumProducts = [
     rating: 4.8,
     reviews: 4500,
     tag: "BESTSELLER",
-    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop",
+    hoverImage: "/faceserum_hover_1.png"
   },
   {
     id: 5,
@@ -56,7 +60,8 @@ const serumProducts = [
     rating: 4.6,
     reviews: 1230,
     tag: null,
-    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop",
+    hoverImage: "/faceserum_hover_1.png"
   },
   {
     id: 6,
@@ -67,7 +72,8 @@ const serumProducts = [
     rating: 5.0,
     reviews: 450,
     tag: "PREMIUM",
-    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop",
+    hoverImage: "/faceserum_hover_1.png"
   }
 ];
 
@@ -251,7 +257,8 @@ const FaceSerum = () => {
               <div key={product.id} className="lip-card">
                 <div className="lip-card-img">
                   {product.tag && <span className="tag-bestseller" style={{ background: '#ff0055' }}>{product.tag}</span>}
-                  <img src={product.image} alt={product.name} />
+                  <img src={product.image} alt={product.name} className="primary-img" />
+                  {product.hoverImage && <img src={product.hoverImage} alt={product.name} className="hover-img" />}
                 </div>
                 <div className="lip-card-info">
                   <h3 className="lip-card-title">{product.name}</h3>

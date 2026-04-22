@@ -12,7 +12,8 @@ const faceCreamProducts = [
     rating: 4.9,
     reviews: 850,
     tag: "BESTSELLER",
-    image: "/face_cream_product.png"
+    image: "/face_cream_product.png",
+    hoverImage: "/facecream_hover_1.png"
   },
   {
     id: 2,
@@ -23,7 +24,8 @@ const faceCreamProducts = [
     rating: 4.8,
     reviews: 1200,
     tag: "NEW",
-    image: "/face_cream_product.png"
+    image: "/face_cream_product.png",
+    hoverImage: "/facecream_hover_1.png"
   },
   {
     id: 3,
@@ -34,7 +36,8 @@ const faceCreamProducts = [
     rating: 4.7,
     reviews: 650,
     tag: "TOP RATED",
-    image: "/face_cream_product.png"
+    image: "/face_cream_product.png",
+    hoverImage: "/facecream_hover_1.png"
   },
   {
     id: 4,
@@ -45,7 +48,8 @@ const faceCreamProducts = [
     rating: 4.9,
     reviews: 320,
     tag: null,
-    image: "/face_cream_product.png"
+    image: "/face_cream_product.png",
+    hoverImage: "/facecream_hover_1.png"
   },
   {
     id: 5,
@@ -56,7 +60,8 @@ const faceCreamProducts = [
     rating: 5.0,
     reviews: 150,
     tag: "PREMIUM",
-    image: "/face_cream_product.png"
+    image: "/face_cream_product.png",
+    hoverImage: "/facecream_hover_1.png"
   },
   {
     id: 6,
@@ -67,7 +72,8 @@ const faceCreamProducts = [
     rating: 4.6,
     reviews: 980,
     tag: null,
-    image: "/face_cream_product.png"
+    image: "/face_cream_product.png",
+    hoverImage: "/facecream_hover_1.png"
   }
 ];
 
@@ -200,7 +206,8 @@ const FaceCream = () => {
               <div key={product.id} className="lip-card">
                 <div className="lip-card-img">
                   {product.tag && <span className="tag-bestseller">{product.tag}</span>}
-                  <img src={product.image} alt={product.name} />
+                  <img src={product.image} alt={product.name} className="primary-img" />
+                  {product.hoverImage && <img src={product.hoverImage} alt={product.name} className="hover-img" />}
                 </div>
                 <div className="lip-card-info">
                   <h3 className="lip-card-title">{product.name}</h3>
