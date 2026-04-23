@@ -1,29 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { UserCheck, Plus, Search, CheckCircle, Clock, XCircle, ChevronRight, Upload } from 'lucide-react';
 
 const steps = ['Basic Info', 'Documents', 'Area & Role', 'Review'];
-
-const applicants = [
-  { id: 'OB001', name: 'Sunita Verma', type: 'Dealer', zone: 'Zone A', date: '18 Apr 2026', status: 'Approved' },
-  { id: 'OB002', name: 'Kiran Patel', type: 'Sub-Dealer', zone: 'Zone C', date: '19 Apr 2026', status: 'Pending' },
-  { id: 'OB003', name: 'Mukesh Singh', type: 'Super Stockist', zone: 'Zone B', date: '20 Apr 2026', status: 'Pending' },
-  { id: 'OB004', name: 'Priya Sharma', type: 'Dealer', zone: 'Zone D', date: '17 Apr 2026', status: 'Rejected' },
-  { id: 'OB005', name: 'Amit Joshi', type: 'Dealer', zone: 'Zone A', date: '16 Apr 2026', status: 'Approved' },
-];
+const API_BASE = 'http://localhost:5000/api/distributor';
 
 const statusBadge = (s) => ({
-  Approved: <span className="dd-badge dd-badge-green"><CheckCircle size={11} style={{ marginRight: 4 }} />{s}</span>,
+  Active: <span className="dd-badge dd-badge-green"><CheckCircle size={11} style={{ marginRight: 4 }} />{s}</span>,
   Pending: <span className="dd-badge dd-badge-yellow"><Clock size={11} style={{ marginRight: 4 }} />{s}</span>,
-  Rejected: <span className="dd-badge dd-badge-red"><XCircle size={11} style={{ marginRight: 4 }} />{s}</span>,
-}[s]);
+  Inactive: <span className="dd-badge dd-badge-red"><XCircle size={11} style={{ marginRight: 4 }} />{s}</span>,
+}[s] || <span className="dd-badge dd-badge-yellow">{s}</span>);
 
 const Onboarding = () => {
   const [step, setStep] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState('');
+  const [applicants, setApplicants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const distributorId = 1;
+
+  // Form State
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    type: 'Dealer',
+    business_name: '',
+    gst: '',
+    zone: 'Zone A',
+    role: 'Primary Dealer',
+    credit_limit: ''
+  });
+
+  const fetchApplicants = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/dealers/${distributorId}`);
+      setApplicants(res.data);
+    } catch (err) {
+      console.error('Error fetching applicants:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApplicants();
+  }, []);
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await axios.post(`${API_BASE}/dealers`, {
+        ...formData,
+        distributor_id: distributorId,
+        contact_person: formData.name // Mapping for simplicity
+      });
+      setShowForm(false);
+      setStep(0);
+      fetchApplicants();
+      // Reset form
+      setFormData({
+        name: '', phone: '', email: '', type: 'Dealer',
+        business_name: '', gst: '', zone: 'Zone A',
+        role: 'Primary Dealer', credit_limit: ''
+      });
+    } catch (err) {
+      console.error('Error submitting application:', err);
+      alert('Failed to submit application');
+    }
+  };
 
   const filtered = applicants.filter(a =>
-    a.name.toLowerCase().includes(search.toLowerCase()) || a.zone.toLowerCase().includes(search.toLowerCase())
+    a.name.toLowerCase().includes(search.toLowerCase()) || (a.zone && a.zone.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -41,9 +92,9 @@ const Onboarding = () => {
       {/* Stats */}
       <div className="dd-stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 24 }}>
         {[
-          { label: 'Total Applications', value: '38', color: '#f3eeff', iconColor: '#a855f7' },
-          { label: 'Pending Review', value: '11', color: '#fffbeb', iconColor: '#d97706' },
-          { label: 'Approved This Month', value: '22', color: '#f0fdf4', iconColor: '#16a34a' },
+          { label: 'Total Applications', value: applicants.length, color: '#f3eeff', iconColor: '#a855f7' },
+          { label: 'Active Dealers', value: applicants.filter(a => a.status === 'Active').length, color: '#f0fdf4', iconColor: '#16a34a' },
+          { label: 'Pending Review', value: applicants.filter(a => a.status === 'Pending').length, color: '#fffbeb', iconColor: '#d97706' },
         ].map((s, i) => (
           <div className="dd-stat-card" key={i}>
             <div className="dd-stat-icon" style={{ background: s.color }}>
@@ -63,7 +114,6 @@ const Onboarding = () => {
             <button className="dd-btn dd-btn-outline" style={{ padding: '5px 12px', fontSize: '0.75rem' }} onClick={() => setShowForm(false)}>Cancel</button>
           </div>
 
-          {/* Step indicator */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 0, padding: '18px 22px 0' }}>
             {steps.map((s, i) => (
               <React.Fragment key={i}>
@@ -85,14 +135,14 @@ const Onboarding = () => {
           <div className="dd-card-body">
             {step === 0 && (
               <div className="dd-form-grid">
-                <div className="dd-field"><label>Full Name</label><input placeholder="e.g. Rahul Sharma" /></div>
-                <div className="dd-field"><label>Mobile Number</label><input placeholder="+91 XXXXX XXXXX" /></div>
-                <div className="dd-field"><label>Email Address</label><input placeholder="example@email.com" /></div>
+                <div className="dd-field"><label>Full Name</label><input name="name" value={formData.name} onChange={handleInputChange} placeholder="e.g. Rahul Sharma" /></div>
+                <div className="dd-field"><label>Mobile Number</label><input name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+91 XXXXX XXXXX" /></div>
+                <div className="dd-field"><label>Email Address</label><input name="email" value={formData.email} onChange={handleInputChange} placeholder="example@email.com" /></div>
                 <div className="dd-field"><label>Type</label>
-                  <select><option>Dealer</option><option>Sub-Dealer</option><option>Super Stockist</option></select>
+                  <select name="type" value={formData.type} onChange={handleInputChange}><option>Dealer</option><option>Sub-Dealer</option></select>
                 </div>
-                <div className="dd-field"><label>Business Name</label><input placeholder="Enter firm name" /></div>
-                <div className="dd-field"><label>GST Number</label><input placeholder="GSTIN" /></div>
+                <div className="dd-field"><label>Business Name</label><input name="business_name" value={formData.business_name} onChange={handleInputChange} placeholder="Enter firm name" /></div>
+                <div className="dd-field"><label>GST Number</label><input name="gst" value={formData.gst} onChange={handleInputChange} placeholder="GSTIN" /></div>
               </div>
             )}
             {step === 1 && (
@@ -111,15 +161,15 @@ const Onboarding = () => {
             {step === 2 && (
               <div className="dd-form-grid">
                 <div className="dd-field"><label>Assigned Zone</label>
-                  <select><option>Zone A</option><option>Zone B</option><option>Zone C</option><option>Zone D</option></select>
+                  <select name="zone" value={formData.zone} onChange={handleInputChange}><option>Zone A</option><option>Zone B</option><option>Zone C</option><option>Zone D</option></select>
                 </div>
                 <div className="dd-field"><label>Role</label>
-                  <select><option>Primary Dealer</option><option>Sub-Dealer</option><option>Super Stockist</option></select>
+                  <select name="role" value={formData.role} onChange={handleInputChange}><option>Primary Dealer</option><option>Sub-Dealer</option></select>
                 </div>
                 <div className="dd-field"><label>Product Categories</label>
-                  <select><option>All Products</option><option>Face Care</option><option>Body Care</option><option>Hair Care</option></select>
+                  <select><option>All Products</option><option>Face Care</option><option>Body Care</option></select>
                 </div>
-                <div className="dd-field"><label>Credit Limit (₹)</label><input placeholder="e.g. 50000" /></div>
+                <div className="dd-field"><label>Credit Limit (₹)</label><input name="credit_limit" value={formData.credit_limit} onChange={handleInputChange} placeholder="e.g. 50000" /></div>
               </div>
             )}
             {step === 3 && (
@@ -134,7 +184,7 @@ const Onboarding = () => {
               {step > 0 && <button className="dd-btn dd-btn-outline" onClick={() => setStep(s => s - 1)}>← Back</button>}
               {step < steps.length - 1
                 ? <button className="dd-btn dd-btn-primary" onClick={() => setStep(s => s + 1)}>Next <ChevronRight size={14} /></button>
-                : <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(false)}><CheckCircle size={14} /> Submit Application</button>
+                : <button className="dd-btn dd-btn-primary" onClick={handleSubmit}><CheckCircle size={14} /> Submit Application</button>
               }
             </div>
           </div>
@@ -151,29 +201,30 @@ const Onboarding = () => {
           </div>
         </div>
         <div className="dd-table-wrap">
-          <table className="dd-table">
-            <thead>
-              <tr><th>ID</th><th>Name</th><th>Type</th><th>Zone</th><th>Date</th><th>Status</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-              {filtered.map(a => (
-                <tr key={a.id}>
-                  <td style={{ color: '#7c3aed', fontWeight: 600 }}>{a.id}</td>
-                  <td style={{ fontWeight: 600 }}>{a.name}</td>
-                  <td><span className="dd-badge dd-badge-purple">{a.type}</span></td>
-                  <td>{a.zone}</td>
-                  <td>{a.date}</td>
-                  <td>{statusBadge(a.status)}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <button className="dd-btn dd-btn-outline" style={{ padding: '5px 10px', fontSize: '0.73rem' }}>View</button>
-                      {a.status === 'Pending' && <button className="dd-btn dd-btn-success" style={{ padding: '5px 10px', fontSize: '0.73rem' }}>Approve</button>}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {loading ? <p style={{ padding: 20, textAlign: 'center' }}>Loading applicants...</p> : (
+            <table className="dd-table">
+              <thead>
+                <tr><th>ID</th><th>Name</th><th>Type</th><th>Zone</th><th>Date</th><th>Status</th><th>Action</th></tr>
+              </thead>
+              <tbody>
+                {filtered.map(a => (
+                  <tr key={a.id}>
+                    <td style={{ color: '#7c3aed', fontWeight: 600 }}>#{a.id}</td>
+                    <td style={{ fontWeight: 600 }}>{a.name}</td>
+                    <td><span className="dd-badge dd-badge-purple">{a.type}</span></td>
+                    <td>{a.zone}</td>
+                    <td>{new Date(a.created_at).toLocaleDateString()}</td>
+                    <td>{statusBadge(a.status)}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button className="dd-btn dd-btn-outline" style={{ padding: '5px 10px', fontSize: '0.73rem' }}>View</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
@@ -181,3 +232,5 @@ const Onboarding = () => {
 };
 
 export default Onboarding;
+
+

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   QrCode, 
   Copy, 
@@ -12,19 +13,37 @@ import {
   Eye
 } from 'lucide-react';
 
-const ReferralCode = () => {
-  const codes = [
-    { code: 'A2P-SUMMER-24', agent: 'Sneha Rao', uses: 124, revenue: '₹42,000', expiry: '30 Jun 2026', status: 'Active' },
-    { code: 'A2P-GOLD-007', agent: 'Rahul Bose', uses: 86, revenue: '₹18,500', expiry: 'Unlimited', status: 'Active' },
-    { code: 'A2P-RETAIL-X', agent: 'Amit Shah', uses: 42, revenue: '₹12,400', expiry: 'Expired', status: 'Inactive' },
-  ];
+const API_BASE = 'http://localhost:5000/api/agent';
 
+const ReferralCode = () => {
+  const [codes, setCodes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(null);
 
+  useEffect(() => {
+    const fetchCodes = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/referral-codes`);
+        setCodes(res.data);
+      } catch (err) {
+        console.error('Error fetching referral codes:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCodes();
+  }, []);
+
   const handleCopy = (code) => {
+    navigator.clipboard.writeText(code);
     setCopied(code);
     setTimeout(() => setCopied(null), 2000);
   };
+
+  const totalUses = codes.reduce((acc, c) => acc + (c.usage_count || 0), 0);
+  const activeCodes = codes.filter(c => c.status === 'Active').length;
+
+  if (loading) return <div className="ag-loading">Loading Codes...</div>;
 
   return (
     <div className="ag-enter">
@@ -38,9 +57,9 @@ const ReferralCode = () => {
 
       <div className="ag-stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
         {[
-          { label: 'Active Codes', value: '1,240', icon: QrCode, color: '#0ea5e9' },
-          { label: 'Referral Sales', value: '4.2K', icon: TrendingUp, color: '#16a34a' },
-          { label: 'Network Size', value: '850', icon: Users, color: '#6366f1' },
+          { label: 'Active Codes', value: activeCodes, icon: QrCode, color: '#0ea5e9' },
+          { label: 'Total Uses', value: totalUses, icon: TrendingUp, color: '#16a34a' },
+          { label: 'Network Size', value: codes.length, icon: Users, color: '#6366f1' },
           { label: 'Rewards Claimed', value: '₹45K', icon: Gift, color: '#f59e0b' },
         ].map((stat, i) => (
           <div className="ag-stat-card" key={i}>
@@ -65,7 +84,6 @@ const ReferralCode = () => {
                   <th>Referral Code</th>
                   <th>Agent Owner</th>
                   <th>Total Uses</th>
-                  <th>Revenue</th>
                   <th>Status</th>
                   <th>Action</th>
                 </tr>
@@ -88,9 +106,8 @@ const ReferralCode = () => {
                         </button>
                       </div>
                     </td>
-                    <td style={{ fontWeight: 600 }}>{c.agent}</td>
-                    <td style={{ fontWeight: 700 }}>{c.uses}</td>
-                    <td style={{ color: '#16a34a', fontWeight: 800 }}>{c.revenue}</td>
+                    <td style={{ fontWeight: 600 }}>{c.agent_name}</td>
+                    <td style={{ fontWeight: 700 }}>{c.usage_count}</td>
                     <td>
                       <span className={`ag-badge ${c.status === 'Active' ? 'ag-badge-green' : 'ag-badge-red'}`}>{c.status}</span>
                     </td>
@@ -113,18 +130,18 @@ const ReferralCode = () => {
           </div>
           <div className="ag-card-body" style={{ textAlign: 'center' }}>
             <img 
-              src="https://ui-avatars.com/api/?name=Sneha+Rao&background=0ea5e9&color=fff&size=80" 
+              src="https://ui-avatars.com/api/?name=Karan+Mehra&background=0ea5e9&color=fff&size=80" 
               alt="top agent" 
               style={{ borderRadius: '20px', marginBottom: '16px', border: '4px solid #eff6ff' }}
             />
-            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Sneha Rao</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Karan Mehra</h3>
             <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>Level 3 • Super Agent</p>
             
             <div className="ag-divider" />
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px' }}>
-                <p style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>412</p>
+                <p style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>{codes[0]?.usage_count || 0}</p>
                 <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Total Signups</span>
               </div>
               <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px' }}>

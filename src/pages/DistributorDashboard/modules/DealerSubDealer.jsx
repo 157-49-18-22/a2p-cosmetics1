@@ -1,25 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Users, Plus, Search, Phone, Mail, MapPin, Edit2, Trash2, CheckCircle, Clock, Star } from 'lucide-react';
 
-const dealers = [
-  { id: 'DL001', name: 'Sharma Traders', type: 'Dealer', zone: 'Zone A', phone: '+91 98100 12345', email: 'sharma@traders.com', city: 'Delhi', status: 'Active', rev: '₹82K', joined: 'Jan 2025' },
-  { id: 'DL002', name: 'Priya Sub-Stores', type: 'Sub-Dealer', zone: 'Zone A', phone: '+91 99901 54321', email: 'priya@substores.com', city: 'Rohini', status: 'Active', rev: '₹18K', joined: 'Mar 2025' },
-  { id: 'DL003', name: 'Ravi Distribution', type: 'Dealer', zone: 'Zone B', phone: '+91 98200 11223', email: 'ravi@dist.com', city: 'Noida', status: 'Active', rev: '₹68K', joined: 'Feb 2025' },
-  { id: 'DL004', name: 'Kiran Agencies', type: 'Sub-Dealer', zone: 'Zone B', phone: '+91 97300 44556', email: 'kiran@agencies.com', city: 'Ghaziabad', status: 'Inactive', rev: '₹6K', joined: 'Jun 2025' },
-  { id: 'DL005', name: 'Mehta Co.', type: 'Dealer', zone: 'Zone C', phone: '+91 96100 77889', email: 'mehta@co.com', city: 'Gurugram', status: 'Active', rev: '₹74K', joined: 'Jan 2025' },
-  { id: 'DL006', name: 'Sunita Verma Stores', type: 'Sub-Dealer', zone: 'Zone D', phone: '+91 95500 33441', email: 'sunita@stores.com', city: 'Jaipur', status: 'Active', rev: '₹22K', joined: 'Apr 2025' },
-];
+const API_BASE = 'http://localhost:5000/api/distributor';
 
 const DealerSubDealer = () => {
+  const [dealers, setDealers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [showForm, setShowForm] = useState(false);
   const [view, setView] = useState('table'); // 'table' | 'cards'
+  const distributorId = 1;
+
+  const fetchDealers = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/dealers/${distributorId}`);
+      setDealers(res.data);
+    } catch (err) {
+      console.error('Error fetching dealers:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDealers();
+  }, []);
 
   const filtered = dealers.filter(d =>
     (filterType === 'All' || d.type === filterType) &&
-    (d.name.toLowerCase().includes(search.toLowerCase()) || d.zone.toLowerCase().includes(search.toLowerCase()) || d.city.toLowerCase().includes(search.toLowerCase()))
+    (d.name.toLowerCase().includes(search.toLowerCase()) || (d.zone && d.zone.toLowerCase().includes(search.toLowerCase())))
   );
+
+  if (loading) return <div className="dd-loading">Loading Network...</div>;
 
   return (
     <div className="dd-module-enter">
@@ -51,31 +65,6 @@ const DealerSubDealer = () => {
         ))}
       </div>
 
-      {/* Add Form */}
-      {showForm && (
-        <div className="dd-card" style={{ marginBottom: 24 }}>
-          <div className="dd-card-header">
-            <span className="dd-card-title">Add Dealer / Sub-Dealer</span>
-            <button className="dd-btn dd-btn-outline" style={{ padding: '5px 12px', fontSize: '0.75rem' }} onClick={() => setShowForm(false)}>Cancel</button>
-          </div>
-          <div className="dd-card-body">
-            <div className="dd-form-grid">
-              <div className="dd-field"><label>Full Name / Business</label><input placeholder="Enter name" /></div>
-              <div className="dd-field"><label>Type</label><select><option>Dealer</option><option>Sub-Dealer</option></select></div>
-              <div className="dd-field"><label>Zone</label><select><option>Zone A</option><option>Zone B</option><option>Zone C</option><option>Zone D</option><option>Zone E</option></select></div>
-              <div className="dd-field"><label>City</label><input placeholder="e.g. Delhi" /></div>
-              <div className="dd-field"><label>Phone</label><input placeholder="+91 XXXXX XXXXX" /></div>
-              <div className="dd-field"><label>Email</label><input placeholder="email@example.com" /></div>
-              <div className="dd-field"><label>Parent Dealer (for Sub-Dealer)</label><select><option>None</option>{dealers.filter(d => d.type === 'Dealer').map(d => <option key={d.id}>{d.name}</option>)}</select></div>
-              <div className="dd-field"><label>Credit Limit (₹)</label><input type="number" placeholder="e.g. 50000" /></div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18 }}>
-              <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(false)}><CheckCircle size={14} /> Save</button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Filters */}
       <div className="dd-card">
         <div className="dd-card-header" style={{ flexWrap: 'wrap', gap: 10 }}>
@@ -103,19 +92,19 @@ const DealerSubDealer = () => {
                     <div style={{ width: 38, height: 38, borderRadius: 10, background: 'linear-gradient(135deg,#ec4899,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '0.9rem' }}>{d.name[0]}</div>
                     <div>
                       <p style={{ fontWeight: 700, fontSize: '0.88rem', color: '#1e1b2e' }}>{d.name}</p>
-                      <p style={{ fontSize: '0.72rem', color: '#9ca3af' }}>{d.id}</p>
+                      <p style={{ fontSize: '0.72rem', color: '#9ca3af' }}>#{d.id}</p>
                     </div>
                   </div>
                   <span className={`dd-badge ${d.type === 'Dealer' ? 'dd-badge-purple' : 'dd-badge-blue'}`}>{d.type}</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <p style={{ fontSize: '0.77rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><MapPin size={12} color="#ec4899" /> {d.city} · {d.zone}</p>
-                  <p style={{ fontSize: '0.77rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><Phone size={12} color="#a855f7" /> {d.phone}</p>
-                  <p style={{ fontSize: '0.77rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><Mail size={12} color="#2563eb" /> {d.email}</p>
+                  <p style={{ fontSize: '0.77rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><MapPin size={12} color="#ec4899" /> {d.zone || 'N/A'}</p>
+                  <p style={{ fontSize: '0.77rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><Phone size={12} color="#a855f7" /> {d.phone || 'N/A'}</p>
+                  <p style={{ fontSize: '0.77rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><Mail size={12} color="#2563eb" /> {d.email || 'N/A'}</p>
                 </div>
                 <div className="dd-divider" style={{ margin: '12px 0' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 700, color: '#16a34a', fontSize: '0.88rem' }}>{d.rev} <span style={{ fontWeight: 400, color: '#9ca3af', fontSize: '0.72rem' }}>/ month</span></span>
+                  <span style={{ fontWeight: 700, color: '#16a34a', fontSize: '0.88rem' }}>₹0 <span style={{ fontWeight: 400, color: '#9ca3af', fontSize: '0.72rem' }}>/ month</span></span>
                   <span className={`dd-badge ${d.status === 'Active' ? 'dd-badge-green' : 'dd-badge-red'}`}>{d.status}</span>
                 </div>
               </div>
@@ -124,17 +113,15 @@ const DealerSubDealer = () => {
         ) : (
           <div className="dd-table-wrap">
             <table className="dd-table">
-              <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Zone</th><th>City</th><th>Phone</th><th>Revenue</th><th>Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Zone</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 {filtered.map(d => (
                   <tr key={d.id}>
-                    <td style={{ color: '#7c3aed', fontWeight: 600 }}>{d.id}</td>
+                    <td style={{ color: '#7c3aed', fontWeight: 600 }}>#{d.id}</td>
                     <td style={{ fontWeight: 600 }}>{d.name}</td>
                     <td><span className={`dd-badge ${d.type === 'Dealer' ? 'dd-badge-purple' : 'dd-badge-blue'}`}>{d.type}</span></td>
-                    <td>{d.zone}</td>
-                    <td>{d.city}</td>
-                    <td>{d.phone}</td>
-                    <td style={{ fontWeight: 700, color: '#16a34a' }}>{d.rev}</td>
+                    <td>{d.zone || 'N/A'}</td>
+                    <td>{d.phone || 'N/A'}</td>
                     <td><span className={`dd-badge ${d.status === 'Active' ? 'dd-badge-green' : 'dd-badge-red'}`}>{d.status}</span></td>
                     <td><div style={{ display: 'flex', gap: 6 }}>
                       <button className="dd-btn dd-btn-outline" style={{ padding: '5px 9px' }}><Edit2 size={12} /></button>
@@ -152,3 +139,5 @@ const DealerSubDealer = () => {
 };
 
 export default DealerSubDealer;
+
+

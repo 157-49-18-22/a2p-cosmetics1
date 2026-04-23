@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   BadgeDollarSign, 
   Plus, 
@@ -10,13 +11,16 @@ import {
   Target
 } from 'lucide-react';
 
+const API_BASE = 'http://localhost:5000/api/agent';
+
 const CommissionSetup = () => {
-  const categories = [
-    { name: 'Core Product', base: '10%', bonus: '2%', status: 'Active' },
-    { name: 'New Launches', base: '12%', bonus: '3%', status: 'Active' },
-    { name: 'Accessories', base: '8%', bonus: '1%', status: 'Inactive' },
-    { name: 'Skincare Premium', base: '15%', bonus: '5%', status: 'Active' },
-  ];
+  const [categories, setCategories] = useState([]);
+  const [settings, setSettings] = useState({
+    referral_bonus_percent: 0,
+    min_payout_threshold: 0,
+    commission_cycle_days: 0
+  });
+  const [loading, setLoading] = useState(true);
 
   const tiers = [
     { name: 'Bronze', range: '₹0 - ₹50K', multiplier: '1.0x', color: '#c8a882' },
@@ -24,6 +28,26 @@ const CommissionSetup = () => {
     { name: 'Gold', range: '₹2L - ₹5L', multiplier: '1.5x', color: '#f59e0b' },
     { name: 'Platinum', range: '₹5L+', multiplier: '2.0x', color: '#6366f1' },
   ];
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const [rulesRes, settingsRes] = await Promise.all([
+          axios.get(`${API_BASE}/commission-rules`),
+          axios.get(`${API_BASE}/settings`)
+        ]);
+        setCategories(rulesRes.data);
+        setSettings(settingsRes.data);
+      } catch (err) {
+        console.error('Error fetching commission config:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchConfig();
+  }, []);
+
+  if (loading) return <div className="ag-loading">Loading Configuration...</div>;
 
   return (
     <div className="ag-enter">
@@ -71,9 +95,9 @@ const CommissionSetup = () => {
               <tbody>
                 {categories.map((cat, i) => (
                   <tr key={i}>
-                    <td style={{ fontWeight: 600 }}>{cat.name}</td>
-                    <td style={{ fontWeight: 700, color: '#0ea5e9' }}>{cat.base}</td>
-                    <td style={{ fontWeight: 700, color: '#16a34a' }}>{cat.bonus}</td>
+                    <td style={{ fontWeight: 600 }}>{cat.category_name}</td>
+                    <td style={{ fontWeight: 700, color: '#0ea5e9' }}>{cat.base_rate}</td>
+                    <td style={{ fontWeight: 700, color: '#16a34a' }}>{cat.bonus_margin}</td>
                     <td>
                       <span className={`ag-badge ${cat.status === 'Active' ? 'ag-badge-green' : 'ag-badge-red'}`}>
                         {cat.status}
@@ -105,18 +129,18 @@ const CommissionSetup = () => {
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Zap size={14} color="#f59e0b" /> Referral Bonus (%)
               </label>
-              <input type="number" defaultValue={2} />
+              <input type="number" value={settings.referral_bonus_percent} onChange={(e) => setSettings({...settings, referral_bonus_percent: e.target.value})} />
               <p style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Extra percentage for agents who bring in new sales through referrals.</p>
             </div>
             
             <div className="ag-field">
               <label>Minimum Payout Threshold (₹)</label>
-              <input type="number" defaultValue={5000} />
+              <input type="number" value={settings.min_payout_threshold} onChange={(e) => setSettings({...settings, min_payout_threshold: e.target.value})} />
             </div>
 
             <div className="ag-field">
               <label>Commission Cycle (Days)</label>
-              <select defaultValue="15">
+              <select value={settings.commission_cycle_days} onChange={(e) => setSettings({...settings, commission_cycle_days: e.target.value})}>
                 <option value="7">Weekly (7 Days)</option>
                 <option value="15">Bi-Weekly (15 Days)</option>
                 <option value="30">Monthly (30 Days)</option>

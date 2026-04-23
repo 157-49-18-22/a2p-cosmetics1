@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   Users, 
   TrendingUp, 
@@ -11,20 +12,57 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-const AgentHome = () => {
-  const stats = [
-    { label: 'Total Agents', value: '1,280', change: '+12%', up: true, icon: Users, color: '#0ea5e9' },
-    { label: 'Active Referrals', value: '450', change: '+5%', up: true, icon: TrendingUp, color: '#6366f1' },
-    { label: 'Total Commission', value: '₹12.5L', change: '+18%', up: true, icon: BadgeDollarSign, color: '#f59e0b' },
-    { label: 'Pending Payouts', value: '₹1.2L', change: '-2%', up: false, icon: Wallet, color: '#e11d48' },
-  ];
+const API_BASE = 'http://localhost:5000/api/agent';
 
-  const recentRequests = [
-    { id: 'REQ-101', agent: 'Sneha Rao', type: 'Payout', amount: '₹15,000', status: 'Pending', time: '2 hrs ago' },
-    { id: 'REQ-102', agent: 'Rahul Jain', type: 'Onboarding', amount: '-', status: 'Approved', time: '4 hrs ago' },
-    { id: 'REQ-103', agent: 'Amit Shah', type: 'Commission', amount: '₹2,500', status: 'Rejected', time: '6 hrs ago' },
-    { id: 'REQ-104', agent: 'Priya Verma', type: 'Payout', amount: '₹8,000', status: 'Approved', time: '1 day ago' },
-  ];
+const AgentHome = () => {
+  const [stats, setStats] = useState([
+    { label: 'Total Agents', value: '0', change: '+0%', up: true, icon: Users, color: '#0ea5e9' },
+    { label: 'Active Referrals', value: '0', change: '+0%', up: true, icon: TrendingUp, color: '#6366f1' },
+    { label: 'Total Commission', value: '₹0', change: '+0%', up: true, icon: BadgeDollarSign, color: '#f59e0b' },
+    { label: 'Pending Payouts', value: '₹0', change: '+0%', up: false, icon: Wallet, color: '#e11d48' },
+  ]);
+  const [recentRequests, setRecentRequests] = useState([]);
+  const [topAgents, setTopAgents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      const [statsRes, reqRes, topRes] = await Promise.all([
+        axios.get(`${API_BASE}/stats`),
+        axios.get(`${API_BASE}/requests`),
+        axios.get(`${API_BASE}/top`)
+      ]);
+
+      const s = statsRes.data;
+      setStats([
+        { label: 'Total Agents', value: s.total_agents.toLocaleString(), change: '+12%', up: true, icon: Users, color: '#0ea5e9' },
+        { label: 'Active Referrals', value: s.active_referrals.toLocaleString(), change: '+5%', up: true, icon: TrendingUp, color: '#6366f1' },
+        { label: 'Total Commission', value: `₹${(s.total_commission / 100000).toFixed(1)}L`, change: '+18%', up: true, icon: BadgeDollarSign, color: '#f59e0b' },
+        { label: 'Pending Payouts', value: `₹${(s.pending_payouts / 1000).toFixed(1)}K`, change: '-2%', up: false, icon: Wallet, color: '#e11d48' },
+      ]);
+
+      setRecentRequests(reqRes.data.map(r => ({
+        id: `REQ-${r.id}`,
+        agent: r.agent_name,
+        type: r.activity_type,
+        amount: r.activity_type === 'Payout' ? '₹15,000' : '-', // Amount logic can be expanded
+        status: r.status,
+        time: new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      })));
+
+      setTopAgents(topRes.data);
+    } catch (err) {
+      console.error('Error fetching agent home data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  if (loading) return <div className="ag-loading">Loading Overview...</div>;
 
   return (
     <div className="ag-enter">
@@ -104,12 +142,7 @@ const AgentHome = () => {
             <h3 className="ag-card-title">Top Performing Agents</h3>
           </div>
           <div className="ag-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {[
-              { name: 'Karan Mehra', tier: 'Platinum', rev: '₹2.4L', img: 'https://ui-avatars.com/api/?name=Karan+Mehra&background=6366f1&color=fff' },
-              { name: 'Surbhi Gupta', tier: 'Gold', rev: '₹1.8L', img: 'https://ui-avatars.com/api/?name=Surbhi+Gupta&background=f59e0b&color=fff' },
-              { name: 'Vikram Singh', tier: 'Silver', rev: '₹1.2L', img: 'https://ui-avatars.com/api/?name=Vikram+Singh&background=94a3b8&color=fff' },
-              { name: 'Anita Desai', tier: 'Gold', rev: '₹1.1L', img: 'https://ui-avatars.com/api/?name=Anita+Desai&background=f59e0b&color=fff' },
-            ].map((agent, i) => (
+            {topAgents.map((agent, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <img src={agent.img} alt={agent.name} style={{ width: '40px', height: '40px', borderRadius: '10px' }} />
                 <div style={{ flex: 1 }}>

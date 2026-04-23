@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   Wallet, 
   ArrowUpRight, 
@@ -12,14 +13,31 @@ import {
   Banknote
 } from 'lucide-react';
 
+const API_BASE = 'http://localhost:5000/api/agent';
+
 const Payout = () => {
-  const payouts = [
-    { id: 'PAY-8821', agent: 'Sunita Sharma', amount: '₹12,450', date: '20 Apr 2026', method: 'Bank Transfer', status: 'Completed' },
-    { id: 'PAY-8822', agent: 'Rahul Bose', amount: '₹8,200', date: '19 Apr 2026', method: 'UPI', status: 'Processing' },
-    { id: 'PAY-8823', agent: 'Amit Malviya', amount: '₹5,600', date: '18 Apr 2026', method: 'Bank Transfer', status: 'Failed' },
-    { id: 'PAY-8824', agent: 'Divya Khosla', amount: '₹22,100', date: '17 Apr 2026', method: 'UPI', status: 'Completed' },
-    { id: 'PAY-8825', agent: 'Vikram Batra', amount: '₹15,000', date: '15 Apr 2026', method: 'Check', status: 'Completed' },
-  ];
+  const [payouts, setPayouts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPayouts = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/payouts`);
+        setPayouts(res.data);
+      } catch (err) {
+        console.error('Error fetching payouts:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPayouts();
+  }, []);
+
+  const totalPaid = payouts.filter(p => p.status === 'Paid').reduce((acc, p) => acc + Number(p.amount), 0);
+  const pendingPaid = payouts.filter(p => p.status === 'Pending' || p.status === 'Approved').reduce((acc, p) => acc + Number(p.amount), 0);
+  const failedPaid = payouts.filter(p => p.status === 'Rejected').reduce((acc, p) => acc + Number(p.amount), 0);
+
+  if (loading) return <div className="ag-loading">Loading Payouts...</div>;
 
   return (
     <div className="ag-enter">
@@ -37,21 +55,21 @@ const Payout = () => {
       <div className="ag-stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
         <div className="ag-stat-card">
           <div className="ag-stat-icon" style={{ background: '#0ea5e915' }}><Wallet size={20} color="#0ea5e9" /></div>
-          <div className="ag-stat-value">₹8.42L</div>
-          <div className="ag-stat-label">Total Paid (This Month)</div>
-          <div className="ag-stat-change up"><ArrowUpRight size={14} /> 15% increase</div>
+          <div className="ag-stat-value">₹{(totalPaid / 1000).toFixed(1)}K</div>
+          <div className="ag-stat-label">Total Paid (All Time)</div>
+          <div className="ag-stat-change up"><ArrowUpRight size={14} /> Overall history</div>
         </div>
         <div className="ag-stat-card">
           <div className="ag-stat-icon" style={{ background: '#f59e0b15' }}><Clock size={20} color="#f59e0b" /></div>
-          <div className="ag-stat-value">₹1.15L</div>
+          <div className="ag-stat-value">₹{(pendingPaid / 1000).toFixed(1)}K</div>
           <div className="ag-stat-label">Pending Settlements</div>
           <div className="ag-stat-change">Awaiting bank verification</div>
         </div>
         <div className="ag-stat-card">
           <div className="ag-stat-icon" style={{ background: '#e11d4815' }}><AlertCircle size={20} color="#e11d48" /></div>
-          <div className="ag-stat-value">₹12.5K</div>
+          <div className="ag-stat-value">₹{(failedPaid / 1000).toFixed(1)}K</div>
           <div className="ag-stat-label">Failed Transactions</div>
-          <div className="ag-stat-change down">Action required for 3 IDs</div>
+          <div className="ag-stat-change down">Action required for rejected</div>
         </div>
       </div>
 
@@ -77,7 +95,6 @@ const Payout = () => {
                 <th>Agent Name</th>
                 <th>Amount</th>
                 <th>Date</th>
-                <th>Method</th>
                 <th>Status</th>
                 <th>Action</th>
               </tr>
@@ -85,22 +102,17 @@ const Payout = () => {
             <tbody>
               {payouts.map((pay, i) => (
                 <tr key={i}>
-                  <td style={{ fontWeight: 600, color: '#0ea5e9' }}>{pay.id}</td>
-                  <td style={{ fontWeight: 600 }}>{pay.agent}</td>
-                  <td style={{ fontWeight: 800 }}>{pay.amount}</td>
-                  <td style={{ color: '#64748b' }}>{pay.date}</td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem' }}>
-                      <Banknote size={14} color="#94a3b8" /> {pay.method}
-                    </div>
-                  </td>
+                  <td style={{ fontWeight: 600, color: '#0ea5e9' }}>PAY-{pay.id}</td>
+                  <td style={{ fontWeight: 600 }}>{pay.agent_name}</td>
+                  <td style={{ fontWeight: 800 }}>₹{Number(pay.amount).toLocaleString()}</td>
+                  <td style={{ color: '#64748b' }}>{new Date(pay.request_time).toLocaleDateString()}</td>
                   <td>
                     <span className={`ag-badge ${
-                      pay.status === 'Completed' ? 'ag-badge-green' : 
-                      pay.status === 'Processing' ? 'ag-badge-yellow' : 'ag-badge-red'
+                      pay.status === 'Paid' ? 'ag-badge-green' : 
+                      pay.status === 'Pending' || pay.status === 'Approved' ? 'ag-badge-yellow' : 'ag-badge-red'
                     }`}>
-                      {pay.status === 'Completed' ? <CheckCircle2 size={12} style={{marginRight: 4}} /> : 
-                       pay.status === 'Processing' ? <Clock size={12} style={{marginRight: 4}} /> : 
+                      {pay.status === 'Paid' ? <CheckCircle2 size={12} style={{marginRight: 4}} /> : 
+                       pay.status === 'Pending' || pay.status === 'Approved' ? <Clock size={12} style={{marginRight: 4}} /> : 
                        <AlertCircle size={12} style={{marginRight: 4}} />}
                       {pay.status}
                     </span>

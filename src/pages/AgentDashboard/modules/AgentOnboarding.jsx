@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   UserPlus, 
   Upload, 
@@ -11,17 +12,61 @@ import {
   XCircle
 } from 'lucide-react';
 
+const API_BASE = 'http://localhost:5000/api/agent';
+
 const AgentOnboarding = () => {
   const [showForm, setShowForm] = useState(false);
   const [step, setStep] = useState(1);
   const [search, setSearch] = useState('');
+  const [applicants, setApplicants] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const applicants = [
-    { id: 'AG-ONB-001', name: 'Raj Kumar', email: 'raj@gmail.com', city: 'Mumbai', status: 'Pending', date: '20 Apr 2026' },
-    { id: 'AG-ONB-002', name: 'Sneha Jain', email: 'sneha@yahoo.com', city: 'Delhi', status: 'Approved', date: '19 Apr 2026' },
-    { id: 'AG-ONB-003', name: 'Mohit Sharma', email: 'mohit@outlook.com', city: 'Bangalore', status: 'Rejected', date: '18 Apr 2026' },
-    { id: 'AG-ONB-004', name: 'Pooja Singh', email: 'pooja@gmail.com', city: 'Pune', status: 'Pending', date: '17 Apr 2026' },
-  ];
+  // Form State
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    city: '',
+    address: ''
+  });
+
+  const fetchApplicants = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/applicants`);
+      setApplicants(res.data);
+    } catch (err) {
+      console.error('Error fetching applicants:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApplicants();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await axios.post(`${API_BASE}/onboard`, formData);
+      setShowForm(false);
+      setStep(1);
+      setFormData({ name: '', email: '', phone: '', city: '', address: '' });
+      fetchApplicants();
+    } catch (err) {
+      console.error('Error submitting application:', err);
+      alert('Failed to submit application');
+    }
+  };
+
+  const filtered = applicants.filter(app =>
+    app.name.toLowerCase().includes(search.toLowerCase()) || 
+    app.city?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="ag-enter">
@@ -60,13 +105,13 @@ const AgentOnboarding = () => {
 
             {step === 1 && (
               <div className="ag-form-grid">
-                <div className="ag-field"><label>Full Name</label><input placeholder="e.g. Rahul Sharma" /></div>
-                <div className="ag-field"><label>Email Address</label><input placeholder="rahul@example.com" /></div>
-                <div className="ag-field"><label>Phone Number</label><input placeholder="+91 9876543210" /></div>
-                <div className="ag-field"><label>City</label><input placeholder="Mumbai" /></div>
+                <div className="ag-field"><label>Full Name</label><input name="name" value={formData.name} onChange={handleInputChange} placeholder="e.g. Rahul Sharma" /></div>
+                <div className="ag-field"><label>Email Address</label><input name="email" value={formData.email} onChange={handleInputChange} placeholder="rahul@example.com" /></div>
+                <div className="ag-field"><label>Phone Number</label><input name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+91 9876543210" /></div>
+                <div className="ag-field"><label>City</label><input name="city" value={formData.city} onChange={handleInputChange} placeholder="Mumbai" /></div>
                 <div className="ag-field" style={{ gridColumn: 'span 2' }}>
                   <label>Full Address</label>
-                  <textarea placeholder="Line 1, Line 2, Pincode" />
+                  <textarea name="address" value={formData.address} onChange={handleInputChange} placeholder="Line 1, Line 2, Pincode" />
                 </div>
               </div>
             )}
@@ -103,7 +148,7 @@ const AgentOnboarding = () => {
                   Continue <ChevronRight size={16} />
                 </button>
               ) : (
-                <button className="ag-btn ag-btn-primary" onClick={() => setShowForm(false)}>
+                <button className="ag-btn ag-btn-primary" onClick={handleSubmit}>
                   Submit Application
                 </button>
               )}
@@ -134,9 +179,9 @@ const AgentOnboarding = () => {
               </tr>
             </thead>
             <tbody>
-              {applicants.map((app, i) => (
+              {filtered.map((app, i) => (
                 <tr key={i}>
-                  <td style={{ fontWeight: 600, color: '#0ea5e9' }}>{app.id}</td>
+                  <td style={{ fontWeight: 600, color: '#0ea5e9' }}>#{app.id}</td>
                   <td style={{ fontWeight: 600 }}>{app.name}</td>
                   <td>{app.email}</td>
                   <td>{app.city}</td>
@@ -151,7 +196,7 @@ const AgentOnboarding = () => {
                       {app.status}
                     </span>
                   </td>
-                  <td style={{ color: '#94a3b8' }}>{app.date}</td>
+                  <td style={{ color: '#94a3b8' }}>{new Date(app.created_at).toLocaleDateString()}</td>
                   <td>
                     <button className="ag-icon-btn"><MoreVertical size={14} /></button>
                   </td>

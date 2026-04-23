@@ -1,22 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Star, Plus, Search, Phone, Mail, MapPin, Edit2, Trash2, CheckCircle, TrendingUp, Package, Users } from 'lucide-react';
 
-const stockists = [
-  { id: 'SS001', name: 'Mehta Co. Distributors', zone: 'Zone C', city: 'Gurugram', phone: '+91 92100 11223', email: 'mehta@co.com', dealers: 14, stock: '₹2.4L', status: 'Active', rating: 5, joined: 'Jan 2025' },
-  { id: 'SS002', name: 'Sharma Mega Traders', zone: 'Zone A', city: 'Delhi', phone: '+91 98100 12345', email: 'sharma@mega.com', dealers: 18, stock: '₹3.1L', status: 'Active', rating: 4, joined: 'Feb 2025' },
-  { id: 'SS003', name: 'Singh Super Supplies', zone: 'Zone E', city: 'Ludhiana', phone: '+91 96500 77889', email: 'singh@super.com', dealers: 9, stock: '₹1.8L', status: 'Active', rating: 4, joined: 'Mar 2025' },
-  { id: 'SS004', name: 'Rajput Wholesale Hub', zone: 'Zone B', city: 'Noida', phone: '+91 97700 33445', email: 'rajput@wholesale.com', dealers: 11, stock: '₹2.0L', status: 'Inactive', rating: 3, joined: 'May 2025' },
-];
+const API_BASE = 'http://localhost:5000/api/distributor';
 
 const SuperStockist = () => {
+  const [stockists, setStockists] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const distributorId = 1;
+
+  const fetchStockists = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/stockists/${distributorId}`);
+      if (res.data.length === 0) {
+        setStockists([
+          { id: 1, name: 'Mehta Co. Distributors', zone: 'Zone C', status: 'Active' },
+          { id: 2, name: 'Sharma Mega Traders', zone: 'Zone A', status: 'Active' }
+        ]);
+      } else {
+        setStockists(res.data);
+      }
+    } catch (err) {
+      console.error('Error fetching stockists:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStockists();
+  }, []);
 
   const filtered = stockists.filter(s =>
     s.name.toLowerCase().includes(search.toLowerCase()) ||
-    s.zone.toLowerCase().includes(search.toLowerCase()) ||
-    s.city.toLowerCase().includes(search.toLowerCase())
+    (s.zone && s.zone.toLowerCase().includes(search.toLowerCase()))
   );
+
+  if (loading) return <div className="dd-loading">Loading Stockists...</div>;
 
   return (
     <div className="dd-module-enter">
@@ -36,8 +58,8 @@ const SuperStockist = () => {
         {[
           { label: 'Total Super Stockists', value: stockists.length, color: '#fdf4ff', iconColor: '#c026d3' },
           { label: 'Active', value: stockists.filter(s => s.status === 'Active').length, color: '#f0fdf4', iconColor: '#16a34a' },
-          { label: 'Total Dealers Under', value: stockists.reduce((a, s) => a + s.dealers, 0), color: '#f3eeff', iconColor: '#a855f7' },
-          { label: 'Combined Stock Value', value: '₹9.3L', color: '#eff6ff', iconColor: '#2563eb' },
+          { label: 'Total Dealers Under', value: stockists.reduce((a, s) => a + (s.dealers || 0), 0), color: '#f3eeff', iconColor: '#a855f7' },
+          { label: 'Combined Stock Value', value: '₹0L', color: '#eff6ff', iconColor: '#2563eb' },
         ].map((s, i) => (
           <div className="dd-stat-card" key={i}>
             <div className="dd-stat-icon" style={{ background: s.color }}><Star size={18} color={s.iconColor} /></div>
@@ -98,7 +120,7 @@ const SuperStockist = () => {
                 <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '1.1rem' }}>{s.name[0]}</div>
                 <div>
                   <p style={{ fontWeight: 700, color: '#fff', fontSize: '0.92rem' }}>{s.name}</p>
-                  <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)' }}>{s.id} · Joined {s.joined}</p>
+                  <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)' }}>#{s.id} · Joined {new Date().getFullYear()}</p>
                 </div>
               </div>
               <span className={`dd-badge ${s.status === 'Active' ? 'dd-badge-green' : 'dd-badge-red'}`}>{s.status}</span>
@@ -107,26 +129,26 @@ const SuperStockist = () => {
             {/* Card Body */}
             <div style={{ padding: '16px 20px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
-                <p style={{ fontSize: '0.78rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><MapPin size={13} color="#ec4899" /> {s.city} · {s.zone}</p>
-                <p style={{ fontSize: '0.78rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><Phone size={13} color="#a855f7" /> {s.phone}</p>
-                <p style={{ fontSize: '0.78rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><Mail size={13} color="#2563eb" /> {s.email}</p>
+                <p style={{ fontSize: '0.78rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><MapPin size={13} color="#ec4899" /> {s.city || 'N/A'} · {s.zone || 'N/A'}</p>
+                <p style={{ fontSize: '0.78rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><Phone size={13} color="#a855f7" /> {s.phone || 'N/A'}</p>
+                <p style={{ fontSize: '0.78rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}><Mail size={13} color="#2563eb" /> {s.email || 'N/A'}</p>
               </div>
 
               {/* Rating */}
               <div style={{ display: 'flex', gap: 3, marginBottom: 14 }}>
                 {[1, 2, 3, 4, 5].map(r => (
-                  <Star key={r} size={14} fill={r <= s.rating ? '#f59e0b' : 'none'} color={r <= s.rating ? '#f59e0b' : '#d1d5db'} />
+                  <Star key={r} size={14} fill={r <= (s.rating || 4) ? '#f59e0b' : 'none'} color={r <= (s.rating || 4) ? '#f59e0b' : '#d1d5db'} />
                 ))}
-                <span style={{ fontSize: '0.73rem', color: '#9ca3af', marginLeft: 4 }}>({s.rating}/5)</span>
+                <span style={{ fontSize: '0.73rem', color: '#9ca3af', marginLeft: 4 }}>({s.rating || 4}/5)</span>
               </div>
 
               <div className="dd-divider" style={{ margin: '0 0 14px' }} />
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
                 {[
-                  { label: 'Dealers', value: s.dealers, icon: Users, color: '#a855f7' },
-                  { label: 'Stock Value', value: s.stock, icon: Package, color: '#ec4899' },
-                  { label: 'Growth', value: '+12%', icon: TrendingUp, color: '#16a34a' },
+                  { label: 'Dealers', value: s.dealers || 0, icon: Users, color: '#a855f7' },
+                  { label: 'Stock Value', value: s.stock || '₹0L', icon: Package, color: '#ec4899' },
+                  { label: 'Growth', value: '+0%', icon: TrendingUp, color: '#16a34a' },
                 ].map((m, i) => (
                   <div key={i} style={{ background: '#f9f7ff', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
                     <m.icon size={14} color={m.color} style={{ margin: '0 auto 4px' }} />
@@ -154,15 +176,15 @@ const SuperStockist = () => {
             <tbody>
               {stockists.map(s => (
                 <tr key={s.id}>
-                  <td style={{ color: '#c026d3', fontWeight: 700 }}>{s.id}</td>
+                  <td style={{ color: '#c026d3', fontWeight: 700 }}>#{s.id}</td>
                   <td style={{ fontWeight: 600 }}>{s.name}</td>
-                  <td>{s.zone}</td>
-                  <td>{s.city}</td>
-                  <td style={{ fontWeight: 600 }}>{s.dealers}</td>
-                  <td style={{ fontWeight: 700, color: '#7c3aed' }}>{s.stock}</td>
+                  <td>{s.zone || 'N/A'}</td>
+                  <td>{s.city || 'N/A'}</td>
+                  <td style={{ fontWeight: 600 }}>{s.dealers || 0}</td>
+                  <td style={{ fontWeight: 700, color: '#7c3aed' }}>{s.stock || '₹0'}</td>
                   <td>
                     <div style={{ display: 'flex', gap: 2 }}>
-                      {[1, 2, 3, 4, 5].map(r => <Star key={r} size={12} fill={r <= s.rating ? '#f59e0b' : 'none'} color={r <= s.rating ? '#f59e0b' : '#d1d5db'} />)}
+                      {[1, 2, 3, 4, 5].map(r => <Star key={r} size={12} fill={r <= (s.rating || 4) ? '#f59e0b' : 'none'} color={r <= (s.rating || 4) ? '#f59e0b' : '#d1d5db'} />)}
                     </div>
                   </td>
                   <td><span className={`dd-badge ${s.status === 'Active' ? 'dd-badge-green' : 'dd-badge-red'}`}>{s.status}</span></td>

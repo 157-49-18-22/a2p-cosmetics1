@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   ScrollText, 
   Search, 
@@ -10,24 +11,37 @@ import {
   Info,
   User,
   Settings,
-  MoreVertical
+  MoreVertical,
+  Clock
 } from 'lucide-react';
 
+const API_BASE = 'http://localhost:5000/api/agent';
+
 const Logs = () => {
-  const activityLogs = [
-    { id: '#8891', user: 'Admin', action: 'Commission Setup Updated', category: 'Settings', time: '10 min ago', status: 'Success' },
-    { id: '#8890', user: 'Sneha Rao', action: 'New Agent Onboarded', category: 'Onboarding', time: '25 min ago', status: 'Success' },
-    { id: '#8889', user: 'System', action: 'Payout Batch Failed', category: 'Payout', time: '1 hr ago', status: 'Error' },
-    { id: '#8888', user: 'Rahul Bose', action: 'Referral Code Generated', category: 'Marketing', time: '3 hr ago', status: 'Success' },
-    { id: '#8887', user: 'Admin', action: 'Hierarchy Level Added', category: 'Hierarchy', time: '5 hr ago', status: 'Warning' },
-    { id: '#8886', user: 'System', action: 'Daily Backup Completed', category: 'Database', time: '12 hr ago', status: 'Success' },
-    { id: '#8885', user: 'Amit Shah', action: 'Login Attempt Failed', category: 'Security', time: '1 day ago', status: 'Warning' },
-  ];
+  const [activityLogs, setActivityLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/logs`);
+        setActivityLogs(res.data);
+      } catch (err) {
+        console.error('Error fetching logs:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLogs();
+  }, []);
 
   const getStatusIcon = (status) => {
     switch(status) {
+      case 'Approved':
       case 'Success': return <CheckCircle size={14} color="#16a34a" />;
+      case 'Rejected':
       case 'Error': return <AlertCircle size={14} color="#e11d48" />;
+      case 'Pending':
       case 'Warning': return <AlertCircle size={14} color="#f59e0b" />;
       default: return <Info size={14} color="#0ea5e9" />;
     }
@@ -37,9 +51,12 @@ const Logs = () => {
     switch(cat) {
       case 'Settings': return <Settings size={14} color="#64748b" />;
       case 'Onboarding': return <User size={14} color="#0ea5e9" />;
+      case 'Payout': return <Clock size={14} color="#64748b" />;
       default: return <ScrollText size={14} color="#64748b" />;
     }
   };
+
+  if (loading) return <div className="ag-loading">Loading Logs...</div>;
 
   return (
     <div className="ag-enter">
@@ -89,30 +106,30 @@ const Logs = () => {
             <tbody>
               {activityLogs.map((log, i) => (
                 <tr key={i}>
-                  <td style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{log.id}</td>
+                  <td style={{ color: '#94a3b8', fontSize: '0.75rem' }}>#{log.id}</td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700, color: '#0ea5e9' }}>
-                        {log.user[0]}
+                        {log.agent_name ? log.agent_name[0] : 'S'}
                       </div>
-                      <span style={{ fontWeight: 600 }}>{log.user}</span>
+                      <span style={{ fontWeight: 600 }}>{log.agent_name || 'System'}</span>
                     </div>
                   </td>
-                  <td style={{ fontWeight: 500 }}>{log.action}</td>
+                  <td style={{ fontWeight: 500 }}>{log.activity_text}</td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
-                      {getCategoryIcon(log.category)}
-                      {log.category}
+                      {getCategoryIcon(log.activity_type)}
+                      {log.activity_type}
                     </div>
                   </td>
-                  <td style={{ color: '#94a3b8', fontSize: '0.78rem' }}>{log.time}</td>
+                  <td style={{ color: '#94a3b8', fontSize: '0.78rem' }}>{new Date(log.created_at).toLocaleString()}</td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       {getStatusIcon(log.status)}
                       <span style={{ 
                         fontSize: '0.75rem', 
                         fontWeight: 700, 
-                        color: log.status === 'Success' ? '#16a34a' : log.status === 'Error' ? '#e11d48' : '#f59e0b'
+                        color: log.status === 'Success' || log.status === 'Approved' ? '#16a34a' : log.status === 'Error' || log.status === 'Rejected' ? '#e11d48' : '#f59e0b'
                       }}>{log.status}</span>
                     </div>
                   </td>
@@ -123,13 +140,6 @@ const Logs = () => {
               ))}
             </tbody>
           </table>
-        </div>
-        <div className="ag-card-body" style={{ borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>Showing 1-7 of 1,240 results</p>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="ag-btn ag-btn-outline" style={{ padding: '6px 12px' }}>Previous</button>
-            <button className="ag-btn ag-btn-outline" style={{ padding: '6px 12px' }}>Next</button>
-          </div>
         </div>
       </div>
     </div>
