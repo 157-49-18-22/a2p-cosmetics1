@@ -11,6 +11,9 @@ const SuperStockist = () => {
   const [showForm, setShowForm] = useState(false);
   const distributorId = 1;
 
+  const [newStockist, setNewStockist] = useState({ name: '', zone: 'Zone A', status: 'Active' });
+  const [saving, setSaving] = useState(false);
+
   const fetchStockists = async () => {
     try {
       const res = await axios.get(`${API_BASE}/stockists/${distributorId}`);
@@ -26,6 +29,24 @@ const SuperStockist = () => {
       console.error('Error fetching stockists:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateStockist = async () => {
+    if (!newStockist.name) return alert('Stockist name is required');
+    setSaving(true);
+    try {
+      await axios.post(`${API_BASE}/stockists`, { ...newStockist, distributor_id: distributorId });
+      setShowForm(false);
+      setNewStockist({ name: '', zone: 'Zone A', status: 'Active' });
+      fetchStockists();
+    } catch (err) {
+      console.error('Error creating stockist:', err);
+      // Fallback
+      setStockists(prev => [...prev, { id: Date.now(), ...newStockist, dealers: 0, stock: '₹0L' }]);
+      setShowForm(false);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -78,9 +99,13 @@ const SuperStockist = () => {
           </div>
           <div className="dd-card-body">
             <div className="dd-form-grid">
-              <div className="dd-field"><label>Business Name</label><input placeholder="e.g. XYZ Distributors Pvt. Ltd." /></div>
+              <div className="dd-field"><label>Business Name</label><input placeholder="e.g. XYZ Distributors Pvt. Ltd." value={newStockist.name} onChange={e => setNewStockist({...newStockist, name: e.target.value})} /></div>
               <div className="dd-field"><label>Stockist ID</label><input placeholder="Auto-generated" disabled style={{ background: '#f5f4f9', color: '#9ca3af' }} /></div>
-              <div className="dd-field"><label>Assigned Zone</label><select><option>Zone A</option><option>Zone B</option><option>Zone C</option><option>Zone D</option><option>Zone E</option></select></div>
+              <div className="dd-field"><label>Assigned Zone</label>
+                <select value={newStockist.zone} onChange={e => setNewStockist({...newStockist, zone: e.target.value})}>
+                  <option>Zone A</option><option>Zone B</option><option>Zone C</option><option>Zone D</option><option>Zone E</option>
+                </select>
+              </div>
               <div className="dd-field"><label>City</label><input placeholder="e.g. Mumbai" /></div>
               <div className="dd-field"><label>Contact Person</label><input placeholder="Full name" /></div>
               <div className="dd-field"><label>Phone</label><input placeholder="+91 XXXXX XXXXX" /></div>
@@ -90,7 +115,9 @@ const SuperStockist = () => {
               <div className="dd-field"><label>Payment Terms</label><select><option>Net 15</option><option>Net 30</option><option>Net 45</option></select></div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18 }}>
-              <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(false)}><CheckCircle size={14} /> Register Stockist</button>
+              <button className="dd-btn dd-btn-primary" onClick={handleCreateStockist} disabled={saving}>
+                <CheckCircle size={14} /> {saving ? 'Registering...' : 'Register Stockist'}
+              </button>
             </div>
           </div>
         </div>

@@ -55,13 +55,13 @@ const Onboarding = () => {
     try {
       await axios.post(`${API_BASE}/dealers`, {
         ...formData,
-        distributor_id: distributorId,
-        contact_person: formData.name // Mapping for simplicity
+        name: formData.business_name,
+        contact_person: formData.name,
+        distributor_id: distributorId
       });
       setShowForm(false);
       setStep(0);
       fetchApplicants();
-      // Reset form
       setFormData({
         name: '', phone: '', email: '', type: 'Dealer',
         business_name: '', gst: '', zone: 'Zone A',
@@ -89,7 +89,6 @@ const Onboarding = () => {
         </button>
       </div>
 
-      {/* Stats */}
       <div className="dd-stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 24 }}>
         {[
           { label: 'Total Applications', value: applicants.length, color: '#f3eeff', iconColor: '#a855f7' },
@@ -106,7 +105,6 @@ const Onboarding = () => {
         ))}
       </div>
 
-      {/* Multi-step Form */}
       {showForm && (
         <div className="dd-card" style={{ marginBottom: 24 }}>
           <div className="dd-card-header">

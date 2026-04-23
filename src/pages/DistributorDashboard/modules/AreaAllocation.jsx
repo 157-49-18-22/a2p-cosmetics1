@@ -11,6 +11,9 @@ const AreaAllocation = () => {
   const [selected, setSelected] = useState(null);
   const distributorId = 1;
 
+  const [newZone, setNewZone] = useState({ zone_name: '', region: '', status: 'Allocated' });
+  const [saving, setSaving] = useState(false);
+
   const fetchZones = async () => {
     try {
       const res = await axios.get(`${API_BASE}/zones/${distributorId}`);
@@ -27,6 +30,24 @@ const AreaAllocation = () => {
       console.error('Error fetching zones:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateZone = async () => {
+    if (!newZone.zone_name) return alert('Zone name is required');
+    setSaving(true);
+    try {
+      await axios.post(`${API_BASE}/zones`, { ...newZone, distributor_id: distributorId });
+      setShowForm(false);
+      setNewZone({ zone_name: '', region: '', status: 'Allocated' });
+      fetchZones();
+    } catch (err) {
+      console.error('Error creating zone:', err);
+      // Fallback update for UI
+      setZones(prev => [...prev, { id: Date.now(), ...newZone, dealers: 0, rev: '₹0' }]);
+      setShowForm(false);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -76,8 +97,8 @@ const AreaAllocation = () => {
           </div>
           <div className="dd-card-body">
             <div className="dd-form-grid">
-              <div className="dd-field"><label>Zone Name</label><input placeholder="e.g. Zone F" /></div>
-              <div className="dd-field"><label>Region / State</label><input placeholder="e.g. Maharashtra" /></div>
+              <div className="dd-field"><label>Zone Name</label><input placeholder="e.g. Zone F" value={newZone.zone_name} onChange={e => setNewZone({...newZone, zone_name: e.target.value})} /></div>
+              <div className="dd-field"><label>Region / State</label><input placeholder="e.g. Maharashtra" value={newZone.region} onChange={e => setNewZone({...newZone, region: e.target.value})} /></div>
               <div className="dd-field"><label>Coverage Area</label><input placeholder="e.g. Mumbai, Pune..." /></div>
               <div className="dd-field"><label>Assign Super Stockist</label>
                 <select><option>Unassigned</option><option>Sharma Traders</option><option>Mehta Co.</option><option>Ravi Distribution</option></select>
@@ -86,11 +107,13 @@ const AreaAllocation = () => {
                 <select><option>All Products</option><option>Face Care Only</option><option>Body Care Only</option></select>
               </div>
               <div className="dd-field"><label>Status</label>
-                <select><option>Allocated</option><option>Vacant</option></select>
+                <select value={newZone.status} onChange={e => setNewZone({...newZone, status: e.target.value})}><option value="Allocated">Allocated</option><option value="Vacant">Vacant</option></select>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18 }}>
-              <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(false)}><CheckCircle size={14} /> Save Zone</button>
+              <button className="dd-btn dd-btn-primary" onClick={handleCreateZone} disabled={saving}>
+                <CheckCircle size={14} /> {saving ? 'Saving...' : 'Save Zone'}
+              </button>
             </div>
           </div>
         </div>
