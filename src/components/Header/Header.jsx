@@ -8,16 +8,20 @@ import {
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import SearchOverlay from './SearchOverlay';
 import './Header.css';
+
 
 const Header = () => {
   const { cartItems, setIsCartOpen } = useCart();
   const { wishlistItems, setIsWishlistOpen } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const dropdownRef = useRef(null);
+
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -79,8 +83,15 @@ const Header = () => {
         </nav>
 
         <div className="header-icons">
-          <button className="header-icon-btn search-icon"><Search size={18} /></button>
+          <button 
+            className="header-icon-btn search-icon" 
+            onClick={() => setIsSearchOpen(true)}
+          >
+            <Search size={18} />
+          </button>
           
+          <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
           <button className="header-icon-btn wishlist-icon" onClick={() => setIsWishlistOpen(true)}>
             <Heart size={18} />
             {wishlistItems.length > 0 && <span className="cart-count">{wishlistItems.length}</span>}
