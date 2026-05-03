@@ -151,7 +151,7 @@ const AgentDashboard = () => {
 
         {/* Module Content */}
         <main className="ag-content">
-          <ActiveModule />
+          <ActiveModule onNavigate={setActive} />
         </main>
       </div>
     </div>

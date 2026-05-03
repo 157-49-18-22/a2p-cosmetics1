@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Filter, Edit2, Trash2, Tag, Star, X, Save, Package } from 'lucide-react';
+import { Search, Plus, Filter, Edit2, Trash2, Tag, Star, X, Save, Package, Upload } from 'lucide-react';
 
 const API = 'http://localhost:5000/api';
 
-const EMPTY_FORM = { name: '', category: '', price: '', stock: '', image_url: '', description: '', status: 'Active' };
+const EMPTY_FORM = { name: '', category: '', price: '', stock: '', image_url: '', hover_image_url: '', description: '', status: 'Active' };
 
-const ProductManager = () => {
+const ProductManager = ({ initialCategory = null }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState({ ...EMPTY_FORM, category: initialCategory || '' });
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
 
@@ -37,13 +37,22 @@ const ProductManager = () => {
 
   const openAdd = () => {
     setEditingProduct(null);
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, category: initialCategory || '' });
     setShowModal(true);
   };
 
   const openEdit = (p) => {
     setEditingProduct(p);
-    setForm({ name: p.name, category: p.category || '', price: p.price, stock: p.stock, image_url: p.image_url || '', description: p.description || '', status: p.status });
+    setForm({ 
+      name: p.name, 
+      category: p.category || '', 
+      price: p.price, 
+      stock: p.stock, 
+      image_url: p.image_url || '', 
+      hover_image_url: p.hover_image_url || '', 
+      description: p.description || '', 
+      status: p.status 
+    });
     setShowModal(true);
   };
 
@@ -76,7 +85,31 @@ const ProductManager = () => {
     }
   };
 
-  const filtered = products.filter(p => p.name?.toLowerCase().includes(search.toLowerCase()) || p.category?.toLowerCase().includes(search.toLowerCase()));
+  const handleFileUpload = async (file, field) => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch(`${API}/upload`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.imageUrl) {
+        setForm(prev => ({ ...prev, [field]: data.imageUrl }));
+        showToast('Image uploaded successfully!');
+      }
+    } catch (e) {
+      showToast('Upload failed', 'danger');
+    }
+  };
+
+  const filtered = products.filter(p => {
+    const matchesSearch = p.name?.toLowerCase().includes(search.toLowerCase()) || 
+                          p.category?.toLowerCase().includes(search.toLowerCase());
+    if (initialCategory) {
+      // If we are in category-specific view, only show products of that category slug
+      return matchesSearch && (p.category?.toLowerCase() === initialCategory.toLowerCase());
+    }
+    return matchesSearch;
+  });
 
   return (
     <div className="adm-fade-in">
@@ -90,8 +123,12 @@ const ProductManager = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Master Product List</h2>
-          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Manage all product details, pricing, and visibility.</p>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>
+            {initialCategory ? `${initialCategory.charAt(0).toUpperCase() + initialCategory.slice(1)} Products` : 'Master Product List'}
+          </h2>
+          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
+            {initialCategory ? `Showing all products in ${initialCategory} category.` : 'Manage all product details, pricing, and visibility.'}
+          </p>
         </div>
         <button className="adm-btn adm-btn-primary" onClick={openAdd}><Plus size={18} /> New Product</button>
       </div>
@@ -179,55 +216,156 @@ const ProductManager = () => {
 
       {/* Modal */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
-          <div style={{ background: '#fff', borderRadius: '20px', width: '560px', maxHeight: '90vh', overflow: 'auto', boxShadow: '0 32px 64px rgba(0,0,0,0.2)' }}>
-            <div style={{ padding: '24px 28px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontWeight: 800, fontSize: '1.1rem' }}>{editingProduct ? 'Edit Product' : 'Add New Product'}</h3>
-              <button className="adm-icon-btn" onClick={() => setShowModal(false)}><X size={18} /></button>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', padding: '20px' }}>
+          <div className="adm-fade-in" style={{ background: '#fff', borderRadius: '24px', width: '640px', maxHeight: '90vh', overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column' }}>
+            
+            {/* Modal Header */}
+            <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(to right, #f8fafc, #fff)' }}>
+              <div>
+                <h3 style={{ fontWeight: 800, fontSize: '1.25rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {editingProduct ? <Edit2 size={20} color="#3b82f6" /> : <Plus size={20} color="#3b82f6" />}
+                  {editingProduct ? 'Update Product' : 'Add New Product'}
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>Fill in the details below to {editingProduct ? 'modify' : 'create'} your product.</p>
+              </div>
+              <button className="adm-icon-btn" onClick={() => setShowModal(false)} style={{ borderRadius: '12px' }}><X size={18} /></button>
             </div>
-            <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className="adm-field">
-                <label>Product Name *</label>
-                <input style={{ padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem' }} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Face Wash Neem" />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div className="adm-field">
-                  <label>Price (₹) *</label>
-                  <input type="number" style={{ padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem' }} value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="149" />
+
+            {/* Modal Body */}
+            <div style={{ padding: '32px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '28px' }}>
+              
+              {/* Section: Basic Info */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Tag size={14} />
+                  </div>
+                  <h4 style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Basic Information</h4>
                 </div>
-                <div className="adm-field">
-                  <label>Stock Quantity</label>
-                  <input type="number" style={{ padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem' }} value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} placeholder="100" />
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div className="adm-field">
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '6px', display: 'block' }}>Product Name <span style={{ color: '#f43f5e' }}>*</span></label>
+                    <input style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '0.9rem', transition: '0.2s', outline: 'none' }} 
+                      value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Face Wash Neem" 
+                      onFocus={e => e.target.style.borderColor = '#3b82f6'} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="adm-field">
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '6px', display: 'block' }}>Category</label>
+                      <input style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '0.9rem', outline: 'none' }} 
+                        value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} placeholder="Face Wash" 
+                        onFocus={e => e.target.style.borderColor = '#3b82f6'} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
+                    </div>
+                    <div className="adm-field">
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '6px', display: 'block' }}>Status</label>
+                      <select style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '0.9rem', outline: 'none', background: '#fff', cursor: 'pointer' }} 
+                        value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
+                        <option>Active</option>
+                        <option>Inactive</option>
+                        <option>Out of Stock</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div className="adm-field">
-                  <label>Category</label>
-                  <input style={{ padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem' }} value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} placeholder="Face Wash" />
+
+              {/* Section: Inventory & Pricing */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: '#f0fdf4', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Package size={14} />
+                  </div>
+                  <h4 style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Inventory & Pricing</h4>
                 </div>
-                <div className="adm-field">
-                  <label>Status</label>
-                  <select style={{ padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem' }} value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
-                    <option>Active</option>
-                    <option>Inactive</option>
-                    <option>Out of Stock</option>
-                  </select>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div className="adm-field">
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '6px', display: 'block' }}>Price (₹) <span style={{ color: '#f43f5e' }}>*</span></label>
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontWeight: 700 }}>₹</span>
+                      <input type="number" style={{ width: '100%', padding: '12px 16px 12px 32px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '0.9rem', outline: 'none' }} 
+                        value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0.00" 
+                        onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
+                    </div>
+                  </div>
+                  <div className="adm-field">
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '6px', display: 'block' }}>Stock Quantity</label>
+                    <input type="number" style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '0.9rem', outline: 'none' }} 
+                      value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} placeholder="0" 
+                      onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
+                  </div>
                 </div>
               </div>
-              <div className="adm-field">
-                <label>Image URL</label>
-                <input style={{ padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem' }} value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
+
+              {/* Section: Media */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: '#fef2f2', color: '#f43f5e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Star size={14} />
+                  </div>
+                  <h4 style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Product Media</h4>
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  {/* Primary Image */}
+                  <div className="adm-field">
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '6px', display: 'block' }}>Primary Image</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ flex: 1, position: 'relative' }}>
+                        <input style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '0.8rem', outline: 'none' }} 
+                          value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} placeholder="URL or Upload..." />
+                      </div>
+                      <label className="adm-btn adm-btn-outline" style={{ padding: '0 14px', cursor: 'pointer', borderRadius: '12px' }}>
+                        <Upload size={16} />
+                        <input type="file" hidden onChange={e => handleFileUpload(e.target.files[0], 'image_url')} />
+                      </label>
+                    </div>
+                    {form.image_url && <img src={form.image_url} alt="preview" style={{ width: '50px', height: '50px', borderRadius: '8px', marginTop: '8px', objectFit: 'cover', border: '1px solid #e2e8f0' }} />}
+                  </div>
+                  
+                  {/* Hover Image */}
+                  <div className="adm-field">
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '6px', display: 'block' }}>Hover Image</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ flex: 1, position: 'relative' }}>
+                        <input style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '0.8rem', outline: 'none' }} 
+                          value={form.hover_image_url} onChange={e => setForm({ ...form, hover_image_url: e.target.value })} placeholder="URL or Upload..." />
+                      </div>
+                      <label className="adm-btn adm-btn-outline" style={{ padding: '0 14px', cursor: 'pointer', borderRadius: '12px' }}>
+                        <Upload size={16} />
+                        <input type="file" hidden onChange={e => handleFileUpload(e.target.files[0], 'hover_image_url')} />
+                      </label>
+                    </div>
+                    {form.hover_image_url && <img src={form.hover_image_url} alt="preview" style={{ width: '50px', height: '50px', borderRadius: '8px', marginTop: '8px', objectFit: 'cover', border: '1px solid #e2e8f0' }} />}
+                  </div>
+                </div>
               </div>
-              <div className="adm-field">
-                <label>Description</label>
-                <textarea style={{ padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem', minHeight: '80px', resize: 'vertical' }} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Product description..." />
+
+              {/* Section: Description */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '10px', display: 'block' }}>Product Description</label>
+                <textarea style={{ width: '100%', padding: '16px', border: '1.5px solid #e2e8f0', borderRadius: '16px', fontSize: '0.9rem', minHeight: '120px', outline: 'none', resize: 'vertical', background: '#f8fafc' }} 
+                  value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Write a compelling description for your product..." 
+                  onFocus={e => e.target.style.borderColor = '#3b82f6'} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
               </div>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '8px' }}>
-                <button className="adm-btn adm-btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
-                <button className="adm-btn adm-btn-primary" onClick={handleSave} disabled={saving}>
-                  <Save size={16} /> {saving ? 'Saving...' : editingProduct ? 'Update Product' : 'Add Product'}
-                </button>
-              </div>
+
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ padding: '24px 32px', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button className="adm-btn adm-btn-outline" onClick={() => setShowModal(false)} style={{ borderRadius: '12px', padding: '12px 24px' }}>Cancel</button>
+              <button className="adm-btn adm-btn-primary" onClick={handleSave} disabled={saving} style={{ borderRadius: '12px', padding: '12px 32px', background: 'linear-gradient(135deg, #3b82f6, #2563eb)', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}>
+                {saving ? (
+                  <>Saving...</>
+                ) : (
+                  <>
+                    <Save size={18} />
+                    {editingProduct ? 'Update Product' : 'Add Product'}
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

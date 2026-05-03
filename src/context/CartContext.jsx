@@ -65,6 +65,26 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const clearCart = async () => {
+    try {
+      // If backend supports clearing all, use that, otherwise loop or just clear state
+      // For now, let's clear the state and optionally call backend if there's an endpoint
+      // Assuming we might need to delete each item or have a clear endpoint
+      await axios.delete(`${API_URL}/clear/all`).catch(() => {
+        // Fallback if endpoint doesn't exist: clear locally
+        console.log('Clear all endpoint not found, clearing locally');
+      });
+      setCartItems([]);
+      setCoupon(null);
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      // Even if API fails, clear locally for better UX
+      setCartItems([]);
+      setCoupon(null);
+    }
+  };
+
+
   // Mock valid coupons
   const VALID_COUPONS = {
     'A2P20': { discount: 20, type: 'percent' },
@@ -109,8 +129,10 @@ export const CartProvider = ({ children }) => {
       coupon,
       subtotal,
       discountAmount,
-      total
+      total,
+      clearCart
     }}>
+
       {children}
     </CartContext.Provider>
   );

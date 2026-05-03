@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Heart, Trash2, ShoppingBag } from 'lucide-react';
+import { X, Heart, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useWishlist } from '../../context/WishlistContext';
 import { useCart } from '../../context/CartContext';
 import './WishlistSidebar.css';
@@ -36,18 +36,21 @@ const WishlistSidebar = () => {
 
         <div className="wishlist-content">
           {wishlistItems.length === 0 ? (
-            <div className="empty-wishlist">
-              <div className="empty-icon-wrap">
-                <Heart size={48} />
+            <div className="empty-wishlist-premium">
+              <div className="empty-wishlist-header">
+                <h1>FAVORITES</h1>
+                <div className="empty-divider"></div>
               </div>
-              <h3>Your wishlist is empty</h3>
-              <p>Save your favorite items here to find them easily later.</p>
-              <button 
-                className="move-to-cart-btn" 
-                style={{ marginTop: '20px', padding: '12px 30px' }}
-                onClick={() => setIsWishlistOpen(false)}
-              >
-                Start Exploring
+              
+              <div className="empty-wishlist-content">
+                <div className="empty-message-wrap">
+                  <h2>Nothing saved yet?</h2>
+                  <h2 className="sad-text">That's lonely.</h2>
+                </div>
+              </div>
+
+              <button className="start-exploring-btn" onClick={() => setIsWishlistOpen(false)}>
+                BROWSE PRODUCTS <ArrowRight size={18} />
               </button>
             </div>
           ) : (

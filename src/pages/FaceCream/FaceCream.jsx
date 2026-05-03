@@ -1,83 +1,63 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, ChevronDown, Sparkles, Droplets } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
+import { useNotifications } from '../../components/Notifications/NotificationHub';
 import './FaceCream.css'; 
 
-const faceCreamProducts = [
-  {
-    id: 1,
-    name: "REJUVENATING OVERNIGHT ELIXIR",
-    price: 1299,
-    oldPrice: 1599,
-    discount: "18% Off",
-    rating: 4.9,
-    reviews: 850,
-    tag: "BESTSELLER",
-    image: "/face_cream_product.png",
-    hoverImage: "/facecream_hover_1.png"
-  },
-  {
-    id: 2,
-    name: "HYDRA-GLOW 24H MOISTURIZER",
-    price: 899,
-    oldPrice: null,
-    discount: null,
-    rating: 4.8,
-    reviews: 1200,
-    tag: "NEW",
-    image: "/face_cream_product.png",
-    hoverImage: "/facecream_hover_1.png"
-  },
-  {
-    id: 3,
-    name: "VITAMINC C RADIANCE CREAM",
-    price: 949,
-    oldPrice: 1100,
-    discount: "14% Off",
-    rating: 4.7,
-    reviews: 650,
-    tag: "TOP RATED",
-    image: "/face_cream_product.png",
-    hoverImage: "/facecream_hover_1.png"
-  },
-  {
-    id: 4,
-    name: "CALMING CICA REPAIR BALM",
-    price: 749,
-    oldPrice: null,
-    discount: null,
-    rating: 4.9,
-    reviews: 320,
-    tag: null,
-    image: "/face_cream_product.png",
-    hoverImage: "/facecream_hover_1.png"
-  },
-  {
-    id: 5,
-    name: "GOLD INFUSED FIRMING CREAM",
-    price: 2499,
-    oldPrice: 2999,
-    discount: "16% Off",
-    rating: 5.0,
-    reviews: 150,
-    tag: "PREMIUM",
-    image: "/face_cream_product.png",
-    hoverImage: "/facecream_hover_1.png"
-  },
-  {
-    id: 6,
-    name: "LIGHTWEIGHT DAY DEFENSE",
-    price: 649,
-    oldPrice: 799,
-    discount: "15% Off",
-    rating: 4.6,
-    reviews: 980,
-    tag: null,
-    image: "/face_cream_product.png",
-    hoverImage: "/facecream_hover_1.png"
-  }
-];
-
 const FaceCream = () => {
+  const { addToCart } = useCart();
+  const { showNotification } = useNotifications();
+  const [allProducts, setAllProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeSkinType, setActiveSkinType] = useState('All Skin Types');
+  const [activeConcern, setActiveConcern] = useState('All');
+  const [priceRange, setPriceRange] = useState([0, 2000]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/products?category=Face Cream')
+      .then(res => res.json())
+      .then(data => {
+        setAllProducts(data);
+        setFilteredProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    let result = allProducts;
+    if (activeSkinType !== 'All Skin Types') {
+      result = result.filter(p => p.skin_type === activeSkinType || !p.skin_type);
+    }
+    if (activeConcern !== 'All') {
+      result = result.filter(p => p.concern === activeConcern || !p.concern);
+    }
+    result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    setFilteredProducts(result);
+  }, [activeSkinType, activeConcern, priceRange, allProducts]);
+
+  const handleAddToCart = (product) => {
+    const cartProduct = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image_url || "/face_cream_product.png",
+      rating: 4.9,
+      reviews: 85
+    };
+    addToCart(cartProduct);
+    showNotification({
+      type: 'cart',
+      title: 'Added to Selection',
+      message: `${product.name} has been added to your cart successfully.`,
+      duration: 3500
+    });
+  };
+
   return (
     <div className="lips-page facewash-page facecream-page-alt">
       <div className="lips-banner">
@@ -96,51 +76,68 @@ const FaceCream = () => {
           <div className="filters-card">
             <div className="filters-header">
               <h2>Filter</h2>
-              <button className="advanced-btn">Clear All</button>
+              <button className="advanced-btn" onClick={() => {
+                setActiveSkinType('All Skin Types');
+                setActiveConcern('All');
+                setPriceRange([0, 2000]);
+              }}>Clear All</button>
             </div>
 
-            {/* Skin Type Section - Using FaceWash style */}
+            {/* Skin Type Section */}
             <div className="filter-section expanded">
               <div className="filter-section-header">
                 <h3>Skin Type</h3>
                 <ChevronDown size={18} />
               </div>
-              <div className="brand-search">
-                <div className="search-input-wrapper">
-                  <span className="search-icon1">🔍</span>
-                  <input type="text" placeholder="Search skin type ..." />
-                </div>
+              <div className="filter-options brand-list">
+                {[
+                  { name: 'Oily Skin', icon: '💧' },
+                  { name: 'Dry Skin', icon: '🌿' },
+                  { name: 'Sensitive Skin', icon: '✨' },
+                  { name: 'Combination', icon: '🔄' },
+                  { name: 'All Skin Types', icon: '🌸' }
+                ].map(type => (
+                  <div 
+                    key={type.name} 
+                    className={`brand-item ${activeSkinType === type.name ? 'selected' : ''}`}
+                    onClick={() => setActiveSkinType(type.name)}
+                  >
+                    <div className="brand-logo-name">
+                      <span className="skin-icon">{type.icon}</span>
+                      <span>{type.name}</span>
+                    </div>
+                    {activeSkinType === type.name && <span className="check-mark">✓</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Skin Concern Section */}
+            <div className="filter-section expanded">
+              <div className="filter-section-header">
+                <h3>Skin Concern</h3>
+                <ChevronDown size={18} />
               </div>
               <div className="filter-options brand-list">
-                <div className="brand-item selected">
-                  <div className="brand-logo-name">
-                    <span className="skin-icon">💧</span>
-                    <span>Oily Skin</span>
+                {[
+                  { name: 'Brightening', icon: '✨' },
+                  { name: 'Hydration', icon: '💧' },
+                  { name: 'Anti-Aging', icon: '⏳' },
+                  { name: 'Acne Control', icon: '💧' },
+                  { name: 'Dark Spots', icon: '⭐' }
+                ].map(concern => (
+                  <div 
+                    key={concern.name} 
+                    className={`brand-item ${activeConcern === concern.name ? 'selected' : ''}`}
+                    onClick={() => setActiveConcern(concern.name)}
+                  >
+                    <div className="brand-logo-name">
+                      <span>{concern.icon}</span>
+                      <span>{concern.name}</span>
+                    </div>
+                    {activeConcern === concern.name && <span className="check-mark">✓</span>}
                   </div>
-                  <span className="brand-count">3</span>
-                  <span className="check-mark">✓</span>
-                </div>
-                <div className="brand-item">
-                  <div className="brand-logo-name">
-                    <span className="skin-icon">🌿</span>
-                    <span>Dry Skin</span>
-                  </div>
-                  <span className="brand-count">2</span>
-                </div>
-                <div className="brand-item">
-                  <div className="brand-logo-name">
-                    <span className="skin-icon">✨</span>
-                    <span>Sensitive Skin</span>
-                  </div>
-                  <span className="brand-count">2</span>
-                </div>
-                <div className="brand-item">
-                  <div className="brand-logo-name">
-                    <span className="skin-icon">🔄</span>
-                    <span>Combination</span>
-                  </div>
-                  <span className="brand-count">4</span>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -151,39 +148,44 @@ const FaceCream = () => {
                 <ChevronDown size={18} />
               </div>
               <div className="price-range-premium">
-                <div className="price-histogram">
-                  <div className="bar" style={{ height: '20%' }}></div>
-                  <div className="bar" style={{ height: '40%' }}></div>
-                  <div className="bar active" style={{ height: '70%' }}></div>
-                  <div className="bar active" style={{ height: '90%' }}></div>
-                  <div className="bar" style={{ height: '50%' }}></div>
-                  <div className="bar" style={{ height: '30%' }}></div>
+                <div className="price-inputs" style={{ marginBottom: '15px' }}>
+                  <div className="price-input-box">
+                    <input 
+                      type="number" 
+                      value={priceRange[0]} 
+                      onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
+                    />
+                  </div>
+                  <span className="price-separator">—</span>
+                  <div className="price-input-box">
+                    <input 
+                      type="number" 
+                      value={priceRange[1]} 
+                      onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 0])}
+                    />
+                  </div>
                 </div>
-                <div className="range-slider-wrapper">
-                  <div className="range-track"></div>
-                  <div className="range-thumb left"></div>
-                  <div className="range-thumb right"></div>
-                </div>
-                <div className="price-range-labels">
-                  <span>₹ 0</span>
-                  <span>₹ 3,000</span>
-                </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="3000" 
+                  value={priceRange[1]} 
+                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                  style={{ width: '100%', accentColor: '#ff6b81' }}
+                />
               </div>
             </div>
 
-            {/* Key Ingredients Section */}
+            {/* Key Ingredients */}
             <div className="filter-section expanded">
               <div className="filter-section-header">
                 <h3>Key Ingredients</h3>
                 <ChevronDown size={18} />
               </div>
               <div className="size-grid">
-                <button className="size-btn selected">Retinol</button>
-                <button className="size-btn">Hyaluronic</button>
-                <button className="size-btn">Vit C</button>
-                <button className="size-btn">Peptides</button>
-                <button className="size-btn">Cica</button>
-                <button className="size-btn">Gold</button>
+                {['Vit C', 'Retinol', 'HA 2%', 'Niacinam.', 'Peptide', 'Squalane'].map(ing => (
+                  <button key={ing} className="size-btn">{ing}</button>
+                ))}
               </div>
             </div>
           </div>
@@ -191,39 +193,43 @@ const FaceCream = () => {
 
         <main className="products-content">
           <div className="products-header">
-            <span className="products-count">{faceCreamProducts.length} Premium Face Creams Found</span>
-            <div className="sort-dropdown">
-              <select>
-                <option>SORT BY: RELEVANCE</option>
-                <option>PRICE: LOW TO HIGH</option>
-                <option>PRICE: HIGH TO LOW</option>
-              </select>
-            </div>
+            <span className="products-count">{filteredProducts.length} Premium Face Creams Found</span>
           </div>
 
           <div className="grid container-grid lips-grid">
-            {faceCreamProducts.map(product => (
-              <div key={product.id} className="lip-card">
-                <div className="lip-card-img">
-                  {product.tag && <span className="tag-bestseller">{product.tag}</span>}
-                  <img src={product.image} alt={product.name} className="primary-img" />
-                  {product.hoverImage && <img src={product.hoverImage} alt={product.name} className="hover-img" />}
-                </div>
-                <div className="lip-card-info">
-                  <h3 className="lip-card-title">{product.name}</h3>
-                  <div className="lip-card-rating">
-                    <Star size={14} fill="#000" />
-                    <span>{product.rating} ({product.reviews})</span>
+            {loading ? (
+              <div style={{ textAlign: 'center', gridColumn: '1/-1', padding: '100px', color: '#64748b' }}>Loading products...</div>
+            ) : filteredProducts.length === 0 ? (
+              <div style={{ textAlign: 'center', gridColumn: '1/-1', padding: '100px', color: '#64748b' }}>No products found matching your filters.</div>
+            ) : (
+              filteredProducts.map(product => (
+                <div key={product.id} className="lip-card">
+
+                  <div className="lip-card-img">
+                    {product.status === 'Out of Stock' && <span className="tag-bestseller" style={{ background: '#f43f5e' }}>OUT OF STOCK</span>}
+                    <img src={product.image_url || "/face_cream_product.png"} alt={product.name} className="primary-img" />
+                    {product.hover_image_url && <img src={product.hover_image_url} alt={product.name} className="hover-img" />}
                   </div>
-                  <div className="lip-card-price">
-                    <span className="current-price">Rs. {product.price}.00</span>
-                    {product.oldPrice && <span className="old-price">Rs. {product.oldPrice}</span>}
-                    {product.discount && <span className="discount">{product.discount}</span>}
+                  <div className="lip-card-info">
+                    <h3 className="lip-card-title">{product.name}</h3>
+                    <div className="lip-card-rating">
+                      <Star size={14} />
+                      <span>4.9 (85)</span>
+                    </div>
+                    <div className="lip-card-price">
+                      <span className="current-price">Rs. {parseFloat(product.price).toFixed(0)}.00</span>
+                    </div>
+                    <button 
+                      className="add-btn" 
+                      onClick={() => handleAddToCart(product)}
+                      disabled={product.status === 'Out of Stock'}
+                    >
+                      {product.status === 'Out of Stock' ? 'OUT OF STOCK' : 'ADD TO CART'}
+                    </button>
                   </div>
-                  <button className="add-btn">BUY NOW</button>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </main>
       </div>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { UserCheck, Plus, Search, CheckCircle, Clock, XCircle, ChevronRight, Upload } from 'lucide-react';
+import { UserCheck, Plus, Search, CheckCircle, Clock, XCircle, ChevronRight, Upload, X, Phone, Mail, MapPin, Briefcase, FileText, ShieldCheck } from 'lucide-react';
 
 const steps = ['Basic Info', 'Documents', 'Area & Role', 'Review'];
-const API_BASE = 'http://localhost:5000/api/distributor';
+const API_BASE = 'http://localhost:5000/api/distributors';
 
 const statusBadge = (s) => ({
   Active: <span className="dd-badge dd-badge-green"><CheckCircle size={11} style={{ marginRight: 4 }} />{s}</span>,
@@ -17,6 +17,8 @@ const Onboarding = () => {
   const [search, setSearch] = useState('');
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
   const distributorId = 1;
 
   // Form State
@@ -34,7 +36,7 @@ const Onboarding = () => {
 
   const fetchApplicants = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/dealers/${distributorId}`);
+      const res = await axios.get(`${API_BASE}/${distributorId}/dealers`);
       setApplicants(res.data);
     } catch (err) {
       console.error('Error fetching applicants:', err);
@@ -71,6 +73,28 @@ const Onboarding = () => {
       console.error('Error submitting application:', err);
       alert('Failed to submit application');
     }
+  };
+
+  const handleStatusUpdate = async (id, newStatus) => {
+    try {
+      // In a real app, this would be a PATCH/PUT request to the backend
+      // await axios.patch(`${API_BASE}/dealers/${id}`, { status: newStatus });
+      
+      // For now, let's update local state to show it works
+      setApplicants(applicants.map(a => a.id === id ? { ...a, status: newStatus } : a));
+      if (selectedApplicant && selectedApplicant.id === id) {
+        setSelectedApplicant({ ...selectedApplicant, status: newStatus });
+      }
+      alert(`Application ${newStatus} successfully!`);
+    } catch (err) {
+      console.error('Error updating status:', err);
+      alert('Failed to update status');
+    }
+  };
+
+  const handleViewDetails = (applicant) => {
+    setSelectedApplicant(applicant);
+    setShowDetails(true);
   };
 
   const filtered = applicants.filter(a =>
@@ -215,7 +239,13 @@ const Onboarding = () => {
                     <td>{statusBadge(a.status)}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="dd-btn dd-btn-outline" style={{ padding: '5px 10px', fontSize: '0.73rem' }}>View</button>
+                        <button 
+                          className="dd-btn dd-btn-outline" 
+                          style={{ padding: '5px 10px', fontSize: '0.73rem' }}
+                          onClick={() => handleViewDetails(a)}
+                        >
+                          View
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -225,6 +255,106 @@ const Onboarding = () => {
           )}
         </div>
       </div>
+
+      {/* Details Modal */}
+      {showDetails && selectedApplicant && (
+        <div className="dd-modal-overlay" onClick={() => setShowDetails(false)}>
+          <div className="dd-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 700 }}>
+            <div className="dd-modal-header">
+              <div>
+                <h2 className="dd-modal-title">Application Details</h2>
+                <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 4 }}>ID: #{selectedApplicant.id} • Submitted on {new Date(selectedApplicant.created_at).toLocaleDateString()}</p>
+              </div>
+              <button className="dd-modal-close" onClick={() => setShowDetails(false)}><X size={18} /></button>
+            </div>
+
+            <div className="dd-modal-body">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+                {/* Left Column: Info */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <section>
+                    <h4 style={{ fontSize: '0.75rem', color: '#a855f7', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <UserCheck size={14} /> Contact Information
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f3eeff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7c3aed' }}><Briefcase size={15} /></div>
+                        <div><p style={{ fontSize: '0.85rem', fontWeight: 600 }}>{selectedApplicant.name}</p><p style={{ fontSize: '0.72rem', color: '#9ca3af' }}>Business Name</p></div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f3eeff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7c3aed' }}><UserCheck size={15} /></div>
+                        <div><p style={{ fontSize: '0.85rem', fontWeight: 600 }}>{selectedApplicant.contact_person || 'N/A'}</p><p style={{ fontSize: '0.72rem', color: '#9ca3af' }}>Contact Person</p></div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: '#fdf4ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ec4899' }}><Phone size={15} /></div>
+                        <div><p style={{ fontSize: '0.85rem', fontWeight: 600 }}>{selectedApplicant.phone || 'N/A'}</p><p style={{ fontSize: '0.72rem', color: '#9ca3af' }}>Phone Number</p></div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}><Mail size={15} /></div>
+                        <div><p style={{ fontSize: '0.85rem', fontWeight: 600 }}>{selectedApplicant.email || 'N/A'}</p><p style={{ fontSize: '0.72rem', color: '#9ca3af' }}>Email Address</p></div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section>
+                    <h4 style={{ fontSize: '0.75rem', color: '#a855f7', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <MapPin size={14} /> Territory & Role
+                    </h4>
+                    <div style={{ background: '#f9f7ff', borderRadius: 12, padding: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div><p style={{ fontSize: '0.7rem', color: '#9ca3af' }}>Zone</p><p style={{ fontSize: '0.82rem', fontWeight: 600 }}>{selectedApplicant.zone}</p></div>
+                      <div><p style={{ fontSize: '0.7rem', color: '#9ca3af' }}>Type</p><span className="dd-badge dd-badge-purple" style={{ marginTop: 2 }}>{selectedApplicant.type}</span></div>
+                    </div>
+                  </section>
+                </div>
+
+                {/* Right Column: Status & Docs */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <section>
+                    <h4 style={{ fontSize: '0.75rem', color: '#a855f7', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <ShieldCheck size={14} /> Verification Status
+                    </h4>
+                    <div style={{ padding: '16px', borderRadius: 16, border: '1px solid #ede9f5', textAlign: 'center' }}>
+                      <div style={{ marginBottom: 10 }}>{statusBadge(selectedApplicant.status)}</div>
+                      <p style={{ fontSize: '0.77rem', color: '#6b7280' }}>
+                        {selectedApplicant.status === 'Pending' 
+                          ? "This application is currently under review by our compliance team."
+                          : selectedApplicant.status === 'Active'
+                          ? "The dealer is verified and authorized to place orders."
+                          : "This application has been rejected or deactivated."
+                        }
+                      </p>
+                    </div>
+                  </section>
+
+                  <section>
+                    <h4 style={{ fontSize: '0.75rem', color: '#a855f7', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <FileText size={14} /> Uploaded Documents
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {['Aadhar Card', 'PAN Card', 'GST Certificate'].map(doc => (
+                        <div key={doc} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: '#f5f4f9', borderRadius: 10 }}>
+                          <span style={{ fontSize: '0.77rem', fontWeight: 500 }}>{doc}</span>
+                          <button className="dd-btn" style={{ padding: '4px 8px', fontSize: '0.65rem', background: '#fff', border: '1px solid #ede9f5', color: '#7c3aed' }}>Preview</button>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+
+            <div className="dd-modal-footer">
+              <button className="dd-btn dd-btn-outline" onClick={() => setShowDetails(false)}>Close</button>
+              {selectedApplicant.status === 'Pending' && (
+                <>
+                  <button className="dd-btn dd-btn-danger" onClick={() => handleStatusUpdate(selectedApplicant.id, 'Inactive')}>Reject Application</button>
+                  <button className="dd-btn dd-btn-primary" onClick={() => handleStatusUpdate(selectedApplicant.id, 'Active')}>Approve Dealer</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

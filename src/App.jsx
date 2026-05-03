@@ -22,6 +22,9 @@ import MyOrders from './pages/Profile/MyOrders';
 import MyAddresses from './pages/Profile/MyAddresses';
 import SavedItems from './pages/Profile/SavedItems';
 import SkinProfile from './pages/Profile/SkinProfile';
+import Checkout from './pages/Checkout/Checkout';
+import OrderSuccess from './pages/Checkout/OrderSuccess';
+
 
 import './App.css';
 
@@ -59,6 +62,9 @@ function App() {
         <Route path="/saved-items" element={<SavedItems />} />
         <Route path="/wishlist" element={<SavedItems />} />
         <Route path="/skin-profile" element={<SkinProfile />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
+
 
         <Route path="/distributor/*" element={<DistributorDashboard />} />
         <Route path="/agent/*" element={<AgentDashboard />} />

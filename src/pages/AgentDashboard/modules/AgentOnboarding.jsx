@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { 
   UserPlus, 
@@ -20,6 +20,15 @@ const AgentOnboarding = () => {
   const [search, setSearch] = useState('');
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState(null);
+
+  useEffect(() => {
+    const closeDropdown = () => setOpenDropdown(null);
+    if (openDropdown !== null) {
+      document.addEventListener('click', closeDropdown);
+    }
+    return () => document.removeEventListener('click', closeDropdown);
+  }, [openDropdown]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -30,6 +39,12 @@ const AgentOnboarding = () => {
     address: ''
   });
 
+  const [aadharFile, setAadharFile] = useState(null);
+  const [photoFile, setPhotoFile] = useState(null);
+
+  const aadharInputRef = useRef(null);
+  const photoInputRef = useRef(null);
+
   const fetchApplicants = async () => {
     try {
       const res = await axios.get(`${API_BASE}/applicants`);
@@ -38,6 +53,18 @@ const AgentOnboarding = () => {
       console.error('Error fetching applicants:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this agent?')) {
+      try {
+        await axios.delete(`${API_BASE}/${id}`);
+        fetchApplicants();
+      } catch (err) {
+        console.error('Error deleting agent:', err);
+        alert('Failed to delete agent');
+      }
     }
   };
 
@@ -51,15 +78,47 @@ const AgentOnboarding = () => {
   };
 
   const handleSubmit = async () => {
+    if (!formData.name || !formData.email || !formData.phone) {
+      alert('Please fill out all required fields (Name, Email, Phone).');
+      return;
+    }
+
     try {
-      await axios.post(`${API_BASE}/onboard`, formData);
+      let document_url = '';
+      let profile_pic = '';
+
+      // Upload Aadhar/Pan if exists
+      if (aadharFile) {
+        const aadharFormData = new FormData();
+        aadharFormData.append('image', aadharFile);
+        const res = await axios.post('http://localhost:5000/api/upload', aadharFormData);
+        document_url = res.data.imageUrl;
+      }
+
+      // Upload Photo if exists
+      if (photoFile) {
+        const photoFormData = new FormData();
+        photoFormData.append('image', photoFile);
+        const res = await axios.post('http://localhost:5000/api/upload', photoFormData);
+        profile_pic = res.data.imageUrl;
+      }
+
+      await axios.post(`${API_BASE}/onboard`, {
+        ...formData,
+        document_url,
+        profile_pic
+      });
+
       setShowForm(false);
       setStep(1);
       setFormData({ name: '', email: '', phone: '', city: '', address: '' });
+      setAadharFile(null);
+      setPhotoFile(null);
       fetchApplicants();
     } catch (err) {
-      console.error('Error submitting application:', err);
-      alert('Failed to submit application');
+      const errorMsg = err.response?.data?.error || err.message;
+      console.error('Error submitting application:', errorMsg, err);
+      alert('Failed to submit application: ' + errorMsg);
     }
   };
 
@@ -118,17 +177,45 @@ const AgentOnboarding = () => {
 
             {step === 2 && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div style={{ border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
-                  <Upload size={32} color="#94a3b8" style={{ marginBottom: '12px' }} />
-                  <p style={{ fontWeight: 600, fontSize: '0.85rem' }}>Upload Aadhar / Pan</p>
+                <div 
+                  style={{ border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '32px', textAlign: 'center', cursor: 'pointer' }}
+                  onClick={() => aadharInputRef.current.click()}
+                >
+                  <input 
+                    type="file" 
+                    ref={aadharInputRef} 
+                    style={{ display: 'none' }} 
+                    onChange={(e) => setAadharFile(e.target.files[0])}
+                    accept=".pdf,.jpg,.jpeg"
+                  />
+                  <Upload size={32} color={aadharFile ? "#0ea5e9" : "#94a3b8"} style={{ marginBottom: '12px' }} />
+                  <p style={{ fontWeight: 600, fontSize: '0.85rem' }}>
+                    {aadharFile ? aadharFile.name : 'Upload Aadhar / Pan'}
+                  </p>
                   <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>PDF, JPG (Max 5MB)</p>
-                  <button className="ag-btn ag-btn-outline" style={{ marginTop: '12px' }}>Browse Files</button>
+                  <button className="ag-btn ag-btn-outline" style={{ marginTop: '12px' }}>
+                    {aadharFile ? 'Change File' : 'Browse Files'}
+                  </button>
                 </div>
-                <div style={{ border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
-                  <Upload size={32} color="#94a3b8" style={{ marginBottom: '12px' }} />
-                  <p style={{ fontWeight: 600, fontSize: '0.85rem' }}>Agent Photo</p>
+                <div 
+                  style={{ border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '32px', textAlign: 'center', cursor: 'pointer' }}
+                  onClick={() => photoInputRef.current.click()}
+                >
+                  <input 
+                    type="file" 
+                    ref={photoInputRef} 
+                    style={{ display: 'none' }} 
+                    onChange={(e) => setPhotoFile(e.target.files[0])}
+                    accept=".jpg,.jpeg,.png"
+                  />
+                  <Upload size={32} color={photoFile ? "#0ea5e9" : "#94a3b8"} style={{ marginBottom: '12px' }} />
+                  <p style={{ fontWeight: 600, fontSize: '0.85rem' }}>
+                    {photoFile ? photoFile.name : 'Agent Photo'}
+                  </p>
                   <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>JPG, PNG (Professional Profile)</p>
-                  <button className="ag-btn ag-btn-outline" style={{ marginTop: '12px' }}>Browse Files</button>
+                  <button className="ag-btn ag-btn-outline" style={{ marginTop: '12px' }}>
+                    {photoFile ? 'Change Photo' : 'Browse Files'}
+                  </button>
                 </div>
               </div>
             )}
@@ -197,8 +284,115 @@ const AgentOnboarding = () => {
                     </span>
                   </td>
                   <td style={{ color: '#94a3b8' }}>{new Date(app.created_at).toLocaleDateString()}</td>
-                  <td>
-                    <button className="ag-icon-btn"><MoreVertical size={14} /></button>
+                  <td style={{ position: 'relative' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      {app.status === 'Pending' && (
+                        <>
+                          <button 
+                            className="ag-btn ag-btn-primary" 
+                            style={{ padding: '4px 8px', fontSize: '0.65rem' }}
+                            onClick={async () => {
+                              try {
+                                await axios.put(`${API_BASE}/applicants/${app.id}/status`, { status: 'Active' });
+                                fetchApplicants();
+                              } catch (err) { console.error(err); }
+                            }}
+                          >Approve</button>
+                          <button 
+                            className="ag-btn ag-btn-outline" 
+                            style={{ padding: '4px 8px', fontSize: '0.65rem', color: '#e11d48', borderColor: '#e11d48' }}
+                            onClick={async () => {
+                              try {
+                                await axios.put(`${API_BASE}/applicants/${app.id}/status`, { status: 'Rejected' });
+                                fetchApplicants();
+                              } catch (err) { console.error(err); }
+                            }}
+                          >Reject</button>
+                        </>
+                      )}
+                      <button 
+                        className="ag-icon-btn" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenDropdown(openDropdown === app.id ? null : app.id);
+                        }}
+                      >
+                        <MoreVertical size={14} />
+                      </button>
+
+                      {openDropdown === app.id && (
+                        <div 
+                          style={{
+                            position: 'absolute',
+                            right: '40px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: '#fff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                            zIndex: 10,
+                            minWidth: '140px',
+                            overflow: 'hidden'
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button 
+                            style={{ display: 'block', width: '100%', padding: '10px 16px', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '0.85rem', color: '#475569' }}
+                            onMouseEnter={(e) => e.target.style.background = '#f8fafc'}
+                            onMouseLeave={(e) => e.target.style.background = 'none'}
+                            onClick={() => {
+                              alert(`Agent Details:\nName: ${app.name}\nEmail: ${app.email}\nPhone: ${app.phone}\nCity: ${app.city}`);
+                              setOpenDropdown(null);
+                            }}
+                          >
+                            View Details
+                          </button>
+                          
+                          {app.status !== 'Active' && (
+                            <button 
+                              style={{ display: 'block', width: '100%', padding: '10px 16px', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '0.85rem', color: '#16a34a' }}
+                              onMouseEnter={(e) => e.target.style.background = '#f8fafc'}
+                              onMouseLeave={(e) => e.target.style.background = 'none'}
+                              onClick={async () => {
+                                await axios.put(`${API_BASE}/applicants/${app.id}/status`, { status: 'Active' });
+                                fetchApplicants();
+                                setOpenDropdown(null);
+                              }}
+                            >
+                              Mark Active
+                            </button>
+                          )}
+
+                          {app.status !== 'Inactive' && (
+                            <button 
+                              style={{ display: 'block', width: '100%', padding: '10px 16px', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '0.85rem', color: '#eab308' }}
+                              onMouseEnter={(e) => e.target.style.background = '#f8fafc'}
+                              onMouseLeave={(e) => e.target.style.background = 'none'}
+                              onClick={async () => {
+                                await axios.put(`${API_BASE}/applicants/${app.id}/status`, { status: 'Inactive' });
+                                fetchApplicants();
+                                setOpenDropdown(null);
+                              }}
+                            >
+                              Mark Inactive
+                            </button>
+                          )}
+
+                          <button 
+                            style={{ display: 'block', width: '100%', padding: '10px 16px', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '0.85rem', color: '#e11d48' }}
+                            onMouseEnter={(e) => e.target.style.background = '#f8fafc'}
+                            onMouseLeave={(e) => e.target.style.background = 'none'}
+                            onClick={() => {
+                              handleDelete(app.id);
+                              setOpenDropdown(null);
+                            }}
+                          >
+                            Delete Agent
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

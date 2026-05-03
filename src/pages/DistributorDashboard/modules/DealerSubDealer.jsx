@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Users, Plus, Search, Phone, Mail, MapPin, Edit2, Trash2, CheckCircle, Clock, Star } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api/distributor';
+const API_BASE = 'http://localhost:5000/api/distributors';
 
 const DealerSubDealer = () => {
   const [dealers, setDealers] = useState([]);
@@ -13,14 +13,74 @@ const DealerSubDealer = () => {
   const [view, setView] = useState('table'); // 'table' | 'cards'
   const distributorId = 1;
 
+  const [newDealer, setNewDealer] = useState({ name: '', type: 'Dealer', zone: 'Zone A', phone: '', email: '', status: 'Active' });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [saving, setSaving] = useState(false);
+
   const fetchDealers = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/dealers/${distributorId}`);
+      const res = await axios.get(`${API_BASE}/${distributorId}/dealers`);
       setDealers(res.data);
     } catch (err) {
       console.error('Error fetching dealers:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveDealer = async () => {
+    if (!newDealer.name) return alert('Name is required');
+    setSaving(true);
+    try {
+      if (isEditing) {
+        // In a real app: await axios.put(`${API_BASE}/dealers/${editId}`, newDealer);
+        setDealers(prev => prev.map(d => d.id === editId ? { ...d, ...newDealer } : d));
+      } else {
+        await axios.post(`${API_BASE}/dealers`, { ...newDealer, distributor_id: distributorId });
+        fetchDealers();
+      }
+      setShowForm(false);
+      setIsEditing(false);
+      setEditId(null);
+      setNewDealer({ name: '', type: 'Dealer', zone: 'Zone A', phone: '', email: '', status: 'Active' });
+    } catch (err) {
+      console.error('Error saving dealer:', err);
+      // Fallback for UI
+      if (!isEditing) setDealers(prev => [...prev, { id: Date.now(), ...newDealer }]);
+      setShowForm(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEditClick = (d) => {
+    setNewDealer({ name: d.name, type: d.type, zone: d.zone, phone: d.phone, email: d.email, status: d.status });
+    setEditId(d.id);
+    setIsEditing(true);
+    setShowForm(true);
+  };
+
+  const handleExportDealers = () => {
+    if (dealers.length === 0) return alert('No network data to export');
+    const headers = ['ID', 'Business Name', 'Type', 'Zone', 'Phone', 'Email', 'Status'];
+    const rows = dealers.map(d => [d.id, d.name, d.type, d.zone, d.phone, d.email, d.status]);
+    const csvContent = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `A2P_Dealer_Network_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this dealer?')) return;
+    try {
+      await axios.delete(`${API_BASE}/dealers/${id}`);
+      fetchDealers();
+    } catch (err) {
+      console.error('Error deleting dealer:', err);
     }
   };
 
@@ -43,10 +103,11 @@ const DealerSubDealer = () => {
           <p className="dd-module-subtitle">Manage your entire dealer network and sub-dealer relationships</p>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
+          <button className="dd-btn dd-btn-outline" onClick={handleExportDealers}>Export Network</button>
           <button className="dd-btn dd-btn-outline" onClick={() => setView(view === 'table' ? 'cards' : 'table')}>
             {view === 'table' ? '⊞ Card View' : '≡ Table View'}
           </button>
-          <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(!showForm)}><Plus size={15} /> Add Dealer</button>
+          <button className="dd-btn dd-btn-primary" onClick={() => { setIsEditing(false); setNewDealer({ name: '', type: 'Dealer', zone: 'Zone A', phone: '', email: '', status: 'Active' }); setShowForm(true); }}><Plus size={15} /> Add Dealer</button>
         </div>
       </div>
 
@@ -64,6 +125,36 @@ const DealerSubDealer = () => {
           </div>
         ))}
       </div>
+
+      {showForm && (
+        <div className="dd-card" style={{ marginBottom: 24 }}>
+          <div className="dd-card-header">
+            <span className="dd-card-title">{isEditing ? 'Edit Dealer Details' : 'Add New Dealer'}</span>
+            <button className="dd-btn dd-btn-outline" style={{ padding: '5px 12px', fontSize: '0.75rem' }} onClick={() => { setShowForm(false); setIsEditing(false); }}>Cancel</button>
+          </div>
+          <div className="dd-card-body">
+            <div className="dd-form-grid">
+              <div className="dd-field"><label>Business Name</label><input placeholder="e.g. Sharma Traders" value={newDealer.name} onChange={e => setNewDealer({ ...newDealer, name: e.target.value })} /></div>
+              <div className="dd-field"><label>Type</label>
+                <select value={newDealer.type} onChange={e => setNewDealer({ ...newDealer, type: e.target.value })}><option>Dealer</option><option>Sub-Dealer</option></select>
+              </div>
+              <div className="dd-field"><label>Zone</label>
+                <select value={newDealer.zone} onChange={e => setNewDealer({ ...newDealer, zone: e.target.value })}><option>Zone A</option><option>Zone B</option><option>Zone C</option><option>Zone D</option></select>
+              </div>
+              <div className="dd-field"><label>Phone</label><input placeholder="9876543210" value={newDealer.phone} onChange={e => setNewDealer({ ...newDealer, phone: e.target.value })} /></div>
+              <div className="dd-field"><label>Email</label><input placeholder="dealer@example.com" value={newDealer.email} onChange={e => setNewDealer({ ...newDealer, email: e.target.value })} /></div>
+              <div className="dd-field"><label>Status</label>
+                <select value={newDealer.status} onChange={e => setNewDealer({ ...newDealer, status: e.target.value })}><option>Active</option><option>Inactive</option></select>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18 }}>
+              <button className="dd-btn dd-btn-primary" onClick={handleSaveDealer} disabled={saving}>
+                <CheckCircle size={14} /> {saving ? 'Saving...' : isEditing ? 'Update Details' : 'Save Dealer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="dd-card">
@@ -124,8 +215,8 @@ const DealerSubDealer = () => {
                     <td>{d.phone || 'N/A'}</td>
                     <td><span className={`dd-badge ${d.status === 'Active' ? 'dd-badge-green' : 'dd-badge-red'}`}>{d.status}</span></td>
                     <td><div style={{ display: 'flex', gap: 6 }}>
-                      <button className="dd-btn dd-btn-outline" style={{ padding: '5px 9px' }}><Edit2 size={12} /></button>
-                      <button className="dd-btn dd-btn-danger" style={{ padding: '5px 9px' }}><Trash2 size={12} /></button>
+                      <button className="dd-btn dd-btn-outline" style={{ padding: '5px 9px' }} onClick={() => handleEditClick(d)}><Edit2 size={12} /></button>
+                      <button className="dd-btn dd-btn-danger" style={{ padding: '5px 9px' }} onClick={() => handleDelete(d.id)}><Trash2 size={12} /></button>
                     </div></td>
                   </tr>
                 ))}

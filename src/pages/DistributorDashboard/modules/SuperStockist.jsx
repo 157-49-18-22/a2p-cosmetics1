@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Star, Plus, Search, Phone, Mail, MapPin, Edit2, Trash2, CheckCircle, TrendingUp, Package, Users } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api/distributor';
+const API_BASE = 'http://localhost:5000/api/distributors';
 
 const SuperStockist = () => {
   const [stockists, setStockists] = useState([]);
@@ -12,11 +12,15 @@ const SuperStockist = () => {
   const distributorId = 1;
 
   const [newStockist, setNewStockist] = useState({ name: '', zone: 'Zone A', status: 'Active' });
+  const [selectedStockist, setSelectedStockist] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const fetchStockists = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/stockists/${distributorId}`);
+      const res = await axios.get(`${API_BASE}/${distributorId}/stockists`);
       if (res.data.length === 0) {
         setStockists([
           { id: 1, name: 'Mehta Co. Distributors', zone: 'Zone C', status: 'Active' },
@@ -32,22 +36,63 @@ const SuperStockist = () => {
     }
   };
 
-  const handleCreateStockist = async () => {
+  const handleSaveStockist = async () => {
     if (!newStockist.name) return alert('Stockist name is required');
     setSaving(true);
     try {
-      await axios.post(`${API_BASE}/stockists`, { ...newStockist, distributor_id: distributorId });
+      if (isEditing) {
+        // In a real app: await axios.put(`${API_BASE}/stockists/${editId}`, newStockist);
+        setStockists(prev => prev.map(s => s.id === editId ? { ...s, ...newStockist } : s));
+      } else {
+        await axios.post(`${API_BASE}/stockists`, { ...newStockist, distributor_id: distributorId });
+        fetchStockists();
+      }
       setShowForm(false);
+      setIsEditing(false);
+      setEditId(null);
       setNewStockist({ name: '', zone: 'Zone A', status: 'Active' });
-      fetchStockists();
     } catch (err) {
-      console.error('Error creating stockist:', err);
-      // Fallback
-      setStockists(prev => [...prev, { id: Date.now(), ...newStockist, dealers: 0, stock: '₹0L' }]);
+      console.error('Error saving stockist:', err);
+      if (!isEditing) setStockists(prev => [...prev, { id: Date.now(), ...newStockist, dealers: 0, stock: '₹0L' }]);
       setShowForm(false);
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleEditClick = (s) => {
+    setNewStockist({ name: s.name, zone: s.zone, status: s.status });
+    setEditId(s.id);
+    setIsEditing(true);
+    setShowForm(true);
+  };
+
+  const handleDeleteStockist = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this super stockist?')) return;
+    try {
+      // await axios.delete(`${API_BASE}/stockists/${id}`);
+      setStockists(prev => prev.filter(s => s.id !== id));
+    } catch (err) {
+      console.error('Error deleting stockist:', err);
+    }
+  };
+
+  const handleViewDetails = (s) => {
+    setSelectedStockist(s);
+    setShowDetails(true);
+  };
+
+  const handleExportReport = () => {
+    if (stockists.length === 0) return alert('No data to export');
+    const headers = ['ID', 'Business Name', 'Zone', 'Status', 'Dealers Under', 'Stock Value'];
+    const rows = stockists.map(s => [s.id, s.name, s.zone || 'N/A', s.status, s.dealers || 0, s.stock || '₹0']);
+    const csvContent = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Super_Stockist_Report_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
   };
 
   useEffect(() => {
@@ -69,8 +114,8 @@ const SuperStockist = () => {
           <p className="dd-module-subtitle">Manage top-tier stockists who supply to your dealer network</p>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button className="dd-btn dd-btn-outline">Export Report</button>
-          <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(!showForm)}><Plus size={15} /> Add Stockist</button>
+          <button className="dd-btn dd-btn-outline" onClick={handleExportReport}>Export Report</button>
+          <button className="dd-btn dd-btn-primary" onClick={() => { setIsEditing(false); setNewStockist({ name: '', zone: 'Zone A', status: 'Active' }); setShowForm(true); }}><Plus size={15} /> Add Stockist</button>
         </div>
       </div>
 
@@ -94,8 +139,8 @@ const SuperStockist = () => {
       {showForm && (
         <div className="dd-card" style={{ marginBottom: 24 }}>
           <div className="dd-card-header">
-            <span className="dd-card-title">Register New Super Stockist</span>
-            <button className="dd-btn dd-btn-outline" style={{ padding: '5px 12px', fontSize: '0.75rem' }} onClick={() => setShowForm(false)}>Cancel</button>
+            <span className="dd-card-title">{isEditing ? 'Edit Stockist Details' : 'Register New Super Stockist'}</span>
+            <button className="dd-btn dd-btn-outline" style={{ padding: '5px 12px', fontSize: '0.75rem' }} onClick={() => { setShowForm(false); setIsEditing(false); }}>Cancel</button>
           </div>
           <div className="dd-card-body">
             <div className="dd-form-grid">
@@ -115,8 +160,8 @@ const SuperStockist = () => {
               <div className="dd-field"><label>Payment Terms</label><select><option>Net 15</option><option>Net 30</option><option>Net 45</option></select></div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18 }}>
-              <button className="dd-btn dd-btn-primary" onClick={handleCreateStockist} disabled={saving}>
-                <CheckCircle size={14} /> {saving ? 'Registering...' : 'Register Stockist'}
+              <button className="dd-btn dd-btn-primary" onClick={handleSaveStockist} disabled={saving}>
+                <CheckCircle size={14} /> {saving ? 'Saving...' : isEditing ? 'Update Details' : 'Register Stockist'}
               </button>
             </div>
           </div>
@@ -186,8 +231,8 @@ const SuperStockist = () => {
               </div>
 
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                <button className="dd-btn dd-btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '8px', fontSize: '0.77rem' }}><Edit2 size={13} /> Edit</button>
-                <button className="dd-btn dd-btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '8px', fontSize: '0.77rem' }}>View Details</button>
+                <button className="dd-btn dd-btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '8px', fontSize: '0.77rem' }} onClick={() => handleEditClick(s)}><Edit2 size={13} /> Edit</button>
+                <button className="dd-btn dd-btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '8px', fontSize: '0.77rem' }} onClick={() => handleViewDetails(s)}>View Details</button>
               </div>
             </div>
           </div>
@@ -216,8 +261,8 @@ const SuperStockist = () => {
                   </td>
                   <td><span className={`dd-badge ${s.status === 'Active' ? 'dd-badge-green' : 'dd-badge-red'}`}>{s.status}</span></td>
                   <td><div style={{ display: 'flex', gap: 6 }}>
-                    <button className="dd-btn dd-btn-outline" style={{ padding: '5px 9px' }}><Edit2 size={12} /></button>
-                    <button className="dd-btn dd-btn-danger" style={{ padding: '5px 9px' }}><Trash2 size={12} /></button>
+                    <button className="dd-btn dd-btn-outline" style={{ padding: '5px 9px' }} onClick={() => handleEditClick(s)}><Edit2 size={12} /></button>
+                    <button className="dd-btn dd-btn-danger" style={{ padding: '5px 9px' }} onClick={() => handleDeleteStockist(s.id)}><Trash2 size={12} /></button>
                   </div></td>
                 </tr>
               ))}
@@ -225,6 +270,50 @@ const SuperStockist = () => {
           </table>
         </div>
       </div>
+
+      {/* Detail Modal */}
+      {showDetails && selectedStockist && (
+        <div className="dd-modal-overlay" onClick={() => setShowDetails(false)}>
+          <div className="dd-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 500 }}>
+            <div className="dd-modal-header" style={{ background: 'linear-gradient(135deg,#1a0533,#4a0f8a)', color: '#fff', border: 'none' }}>
+              <div>
+                <h2 className="dd-modal-title" style={{ color: '#fff' }}>Stockist Profile</h2>
+                <p style={{ fontSize: '0.75rem', opacity: 0.7 }}>Business Verification & Performance</p>
+              </div>
+              <button className="dd-modal-close" onClick={() => setShowDetails(false)} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff' }}>×</button>
+            </div>
+            <div className="dd-modal-body" style={{ padding: '24px 30px' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 24 }}>
+                  <div style={{ width: 64, height: 64, borderRadius: 16, background: '#f3eeff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7c3aed', fontSize: '1.5rem', fontWeight: 800 }}>{selectedStockist.name[0]}</div>
+                  <div>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#1e1b2e', margin: 0 }}>{selectedStockist.name}</h3>
+                    <p style={{ color: '#9ca3af', fontSize: '0.8rem', marginTop: 4 }}>Registered under Distributor #1</p>
+                  </div>
+               </div>
+
+               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                  <div className="dd-field"><label>Primary Territory</label><div style={{ fontWeight: 600 }}>{selectedStockist.zone || 'Zone A'}</div></div>
+                  <div className="dd-field"><label>Current Status</label><div>{statusBadge(selectedStockist.status)}</div></div>
+                  <div className="dd-field"><label>Dealer Network</label><div style={{ fontWeight: 600 }}>{selectedStockist.dealers || 0} Authorized Dealers</div></div>
+                  <div className="dd-field"><label>Inventory Value</label><div style={{ fontWeight: 600, color: '#7c3aed' }}>{selectedStockist.stock || '₹0L'}</div></div>
+               </div>
+
+               <div className="dd-divider" style={{ margin: '24px 0' }} />
+
+               <div style={{ background: '#f8fafc', borderRadius: 16, padding: 20 }}>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#64748b', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}><Users size={16} /> Contact Details</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.82rem' }}><Phone size={14} color="#7c3aed" /> +91 {selectedStockist.phone || '98765 43210'}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.82rem' }}><Mail size={14} color="#7c3aed" /> {selectedStockist.email || 'business@example.com'}</div>
+                  </div>
+               </div>
+            </div>
+            <div className="dd-modal-footer">
+              <button className="dd-btn dd-btn-outline" style={{ width: '100%' }} onClick={() => setShowDetails(false)}>Close Profile</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

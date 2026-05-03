@@ -78,37 +78,85 @@
   padding: 30px;
 }
 
-.empty-wishlist {
+.empty-wishlist-premium {
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 20px;
+  background: #000;
+  margin: -30px;
+  padding: 40px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
 }
 
-.empty-icon-wrap {
-  width: 100px;
-  height: 100px;
-  background: #fff5f7;
-  border-radius: 50%;
+.empty-wishlist-header h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 5rem;
+  font-weight: 900;
+  letter-spacing: -2px;
+  margin: 0;
+  line-height: 0.9;
+  color: #fff;
+}
+
+.empty-divider {
+  width: 100%;
+  height: 2px;
+  background: #fff;
+  margin: 20px 0;
+}
+
+.empty-wishlist-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.empty-message-wrap h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.empty-message-wrap h2.sad-text {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.start-exploring-btn {
+  margin-top: auto;
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 20px;
+  font-size: 1rem;
+  font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ff4d6d;
-  margin-bottom: 10px;
+  gap: 15px;
+  cursor: pointer;
+  transition: 0.4s;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
-.empty-wishlist h3 {
-  font-size: 1.4rem;
-  font-weight: 400;
+.start-exploring-btn:hover {
+  background: #ff4d6d;
+  color: #fff;
+  transform: translateY(-5px);
 }
 
-.empty-wishlist p {
-  color: #777;
-  max-width: 250px;
-  line-height: 1.6;
+@media (max-width: 480px) {
+  .empty-wishlist-header h1 {
+    font-size: 3.5rem;
+  }
+  .empty-message-wrap h2 {
+    font-size: 1.8rem;
+  }
 }
 
 .wishlist-items-list {

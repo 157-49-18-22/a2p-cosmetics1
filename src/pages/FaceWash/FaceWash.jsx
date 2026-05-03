@@ -82,9 +82,51 @@ const faceWashProducts = [
 const FaceWash = () => {
   const { addToCart } = useCart();
   const { showNotification } = useNotifications();
+  const [allProducts, setAllProducts] = React.useState([]);
+  const [filteredProducts, setFilteredProducts] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [activeSkinType, setActiveSkinType] = React.useState('All Skin Types');
+  const [priceRange, setPriceRange] = React.useState([0, 1000]);
+
+  React.useEffect(() => {
+    fetch('http://localhost:5000/api/products?category=Face Wash')
+      .then(res => res.json())
+      .then(data => {
+        setAllProducts(data);
+        setFilteredProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  React.useEffect(() => {
+    let result = allProducts;
+
+    // Filter by Skin Type (Mocking since DB doesn't have skin_type yet, but we'll assume it exists or use name for demo)
+    if (activeSkinType !== 'All Skin Types') {
+      // For now, let's just do a simple match or mock if data is missing
+      result = result.filter(p => p.skin_type === activeSkinType || !p.skin_type); 
+    }
+
+    // Filter by Price
+    result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+
+    setFilteredProducts(result);
+  }, [activeSkinType, priceRange, allProducts]);
 
   const handleAddToCart = (product) => {
-    addToCart(product);
+    const cartProduct = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image_url || "/facewash_product.png",
+      rating: 4.8,
+      reviews: 120
+    };
+    addToCart(cartProduct);
     showNotification({
       type: 'cart',
       title: 'Added to Selection',
@@ -92,6 +134,7 @@ const FaceWash = () => {
       duration: 3500
     });
   };
+
 
   return (
     <div className="lips-page facewash-page">
@@ -111,7 +154,10 @@ const FaceWash = () => {
           <div className="filters-card">
             <div className="filters-header">
               <h2>Filter</h2>
-              <button className="advanced-btn">Clear All</button>
+              <button className="advanced-btn" onClick={() => {
+                setActiveSkinType('All Skin Types');
+                setPriceRange([0, 1000]);
+              }}>Clear All</button>
             </div>
 
             {/* Skin Type Section */}
@@ -120,49 +166,29 @@ const FaceWash = () => {
                 <h3>Skin Type</h3>
                 <ChevronDown size={18} />
               </div>
-              <div className="brand-search">
-                <div className="search-input-wrapper">
-                  <span className="search-icon1">🔍</span>
-                  <input type="text" placeholder="Search skin type ..." />
-                </div>
-              </div>
               <div className="filter-options brand-list">
-                <div className="brand-item selected">
-                  <div className="brand-logo-name">
-                    <span className="skin-icon">💧</span>
-                    <span>Oily Skin</span>
+                {[
+                  { name: 'Oily Skin', icon: '💧' },
+                  { name: 'Dry Skin', icon: '🌿' },
+                  { name: 'Sensitive Skin', icon: '✨' },
+                  { name: 'Combination', icon: '🔄' },
+                  { name: 'All Skin Types', icon: '🌸' }
+                ].map(type => (
+                  <div 
+                    key={type.name} 
+                    className={`brand-item ${activeSkinType === type.name ? 'selected' : ''}`}
+                    onClick={() => setActiveSkinType(type.name)}
+                  >
+                    <div className="brand-logo-name">
+                      <span className="skin-icon">{type.icon}</span>
+                      <span>{type.name}</span>
+                    </div>
+                    <span className="brand-count">
+                      {type.name === 'All Skin Types' ? allProducts.length : allProducts.filter(p => p.skin_type === type.name).length}
+                    </span>
+                    {activeSkinType === type.name && <span className="check-mark">✓</span>}
                   </div>
-                  <span className="brand-count">3</span>
-                  <span className="check-mark">✓</span>
-                </div>
-                <div className="brand-item">
-                  <div className="brand-logo-name">
-                    <span className="skin-icon">🌿</span>
-                    <span>Dry Skin</span>
-                  </div>
-                  <span className="brand-count">2</span>
-                </div>
-                <div className="brand-item">
-                  <div className="brand-logo-name">
-                    <span className="skin-icon">✨</span>
-                    <span>Sensitive Skin</span>
-                  </div>
-                  <span className="brand-count">2</span>
-                </div>
-                <div className="brand-item">
-                  <div className="brand-logo-name">
-                    <span className="skin-icon">🔄</span>
-                    <span>Combination</span>
-                  </div>
-                  <span className="brand-count">4</span>
-                </div>
-                <div className="brand-item">
-                  <div className="brand-logo-name">
-                    <span className="skin-icon">🌸</span>
-                    <span>All Skin Types</span>
-                  </div>
-                  <span className="brand-count">6</span>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -173,35 +199,31 @@ const FaceWash = () => {
                 <ChevronDown size={18} />
               </div>
               <div className="price-range-premium">
-                <div className="price-histogram">
-                  {/* Visual histogram bars mockup */}
-                  <div className="bar" style={{ height: '20%' }}></div>
-                  <div className="bar" style={{ height: '40%' }}></div>
-                  <div className="bar" style={{ height: '70%' }}></div>
-                  <div className="bar active" style={{ height: '90%' }}></div>
-                  <div className="bar active" style={{ height: '100%' }}></div>
-                  <div className="bar active" style={{ height: '80%' }}></div>
-                  <div className="bar" style={{ height: '50%' }}></div>
-                  <div className="bar" style={{ height: '30%' }}></div>
-                </div>
-                <div className="range-slider-wrapper">
-                  <div className="range-track"></div>
-                  <div className="range-thumb left"></div>
-                  <div className="range-thumb right"></div>
-                </div>
-                <div className="price-range-labels">
-                  <span>₹ 0</span>
-                  <span>₹ 1,000</span>
-                </div>
-                <div className="price-inputs">
+                <div className="price-inputs" style={{ marginBottom: '15px' }}>
                   <div className="price-input-box">
-                    <input type="text" defaultValue="₹ 0" />
+                    <input 
+                      type="number" 
+                      value={priceRange[0]} 
+                      onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
+                    />
                   </div>
                   <span className="price-separator">—</span>
                   <div className="price-input-box">
-                    <input type="text" defaultValue="₹ 1,000" />
+                    <input 
+                      type="number" 
+                      value={priceRange[1]} 
+                      onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 0])}
+                    />
                   </div>
                 </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="2000" 
+                  value={priceRange[1]} 
+                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                  style={{ width: '100%', accentColor: '#ff6b81' }}
+                />
               </div>
             </div>
 
@@ -212,30 +234,9 @@ const FaceWash = () => {
                 <ChevronDown size={18} />
               </div>
               <div className="size-grid">
-                <button className="size-btn selected">Salicylic</button>
-                <button className="size-btn">Charcoal</button>
-                <button className="size-btn">Vit C</button>
-                <button className="size-btn">Tea Tree</button>
-                <button className="size-btn">Neem</button>
-                <button className="size-btn">Aloe</button>
-                <button className="size-btn">Foam</button>
-                <button className="size-btn">Turmeric</button>
-              </div>
-            </div>
-
-            {/* Skin Concern Section */}
-            <div className="filter-section expanded">
-              <div className="filter-section-header">
-                <h3>Skin Concern</h3>
-                <ChevronDown size={18} />
-              </div>
-              <div className="size-grid">
-                <button className="size-btn">Acne</button>
-                <button className="size-btn selected">Glow</button>
-                <button className="size-btn">Pores</button>
-                <button className="size-btn">Hydrate</button>
-                <button className="size-btn">Detox</button>
-                <button className="size-btn">Brighten</button>
+                {['Salicylic', 'Charcoal', 'Vit C', 'Tea Tree', 'Neem', 'Aloe'].map(ing => (
+                  <button key={ing} className="size-btn">{ing}</button>
+                ))}
               </div>
             </div>
           </div>
@@ -243,9 +244,17 @@ const FaceWash = () => {
 
         <main className="products-content">
           <div className="products-header">
-            <span className="products-count">{faceWashProducts.length} Face Washes Found</span>
+            <span className="products-count">{filteredProducts.length} Face Washes Found</span>
             <div className="sort-dropdown">
-              <select>
+              <select onChange={(e) => {
+                const sort = e.target.value;
+                const sorted = [...filteredProducts].sort((a, b) => {
+                  if (sort === 'PRICE: LOW TO HIGH') return a.price - b.price;
+                  if (sort === 'PRICE: HIGH TO LOW') return b.price - a.price;
+                  return 0;
+                });
+                setFilteredProducts(sorted);
+              }}>
                 <option>SORT BY: RELEVANCE</option>
                 <option>PRICE: LOW TO HIGH</option>
                 <option>PRICE: HIGH TO LOW</option>
@@ -254,28 +263,39 @@ const FaceWash = () => {
           </div>
 
           <div className="grid container-grid lips-grid">
-            {faceWashProducts.map(product => (
-              <div key={product.id} className="lip-card">
-                <div className="lip-card-img">
-                  {product.tag && <span className="tag-bestseller">{product.tag}</span>}
-                  <img src={product.image} alt={product.name} className="primary-img" />
-                  {product.hoverImage && <img src={product.hoverImage} alt={product.name} className="hover-img" />}
-                </div>
-                <div className="lip-card-info">
-                  <h3 className="lip-card-title">{product.name}</h3>
-                  <div className="lip-card-rating">
-                    <Star size={14} />
-                    <span>{product.rating} ({product.reviews})</span>
+            {loading ? (
+              <div style={{ textAlign: 'center', gridColumn: '1/-1', padding: '100px', color: '#64748b', fontWeight: 600 }}>Loading Face Washes...</div>
+            ) : filteredProducts.length === 0 ? (
+              <div style={{ textAlign: 'center', gridColumn: '1/-1', padding: '100px', color: '#64748b' }}>No products found matching your filters.</div>
+            ) : (
+              filteredProducts.map(product => (
+
+                <div key={product.id} className="lip-card">
+                  <div className="lip-card-img">
+                    {product.status === 'Out of Stock' && <span className="tag-bestseller" style={{ background: '#f43f5e' }}>OUT OF STOCK</span>}
+                    <img src={product.image_url || "/facewash_product.png"} alt={product.name} className="primary-img" />
+                    {product.hover_image_url && <img src={product.hover_image_url} alt={product.name} className="hover-img" />}
                   </div>
-                  <div className="lip-card-price">
-                    <span className="current-price">Rs. {product.price}.00</span>
-                    {product.oldPrice && <span className="old-price">Rs. {product.oldPrice}</span>}
-                    {product.discount && <span className="discount">{product.discount}</span>}
+                  <div className="lip-card-info">
+                    <h3 className="lip-card-title">{product.name}</h3>
+                    <div className="lip-card-rating">
+                      <Star size={14} />
+                      <span>4.8 (120)</span>
+                    </div>
+                    <div className="lip-card-price">
+                      <span className="current-price">Rs. {parseFloat(product.price).toFixed(0)}.00</span>
+                    </div>
+                    <button 
+                      className="add-btn" 
+                      onClick={() => handleAddToCart(product)}
+                      disabled={product.status === 'Out of Stock'}
+                    >
+                      {product.status === 'Out of Stock' ? 'OUT OF STOCK' : 'ADD TO CART'}
+                    </button>
                   </div>
-                  <button className="add-btn" onClick={() => handleAddToCart(product)}>ADD TO CART</button>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </main>
       </div>

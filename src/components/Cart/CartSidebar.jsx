@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { X, ShoppingBag, Plus, Minus, Trash2, Tag, ArrowRight, Sparkles } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import './CartSidebar.css';
 
 const CartSidebar = () => {
+  const navigate = useNavigate();
+
   const { 
     cartItems, 
     isCartOpen, 
@@ -51,20 +55,29 @@ const CartSidebar = () => {
 
         <div className="cart-content">
           {cartItems.length === 0 ? (
-            <div className="empty-cart">
-              <div className="empty-icon-wrap">
-                <ShoppingBag size={48} />
+            <div className="empty-cart-premium">
+              <div className="empty-cart-header">
+                <h1>YOUR BAG</h1>
+                <div className="empty-divider"></div>
               </div>
-              <h3>Your cart is empty</h3>
-              <p>Looks like you haven't added any skincare treasures yet.</p>
-              <button className="cont-btn" onClick={() => setIsCartOpen(false)}>Start Shopping</button>
+              
+              <div className="empty-cart-content">
+                <div className="empty-message-wrap">
+                  <h2>Not even one thing?</h2>
+                  <h2 className="sad-text">That's sad.</h2>
+                </div>
+              </div>
+
+              <button className="start-shopping-btn" onClick={() => setIsCartOpen(false)}>
+                EXPLORE COLLECTIONS <ArrowRight size={18} />
+              </button>
             </div>
           ) : (
             <div className="cart-items-list">
               {cartItems.map((item) => (
                 <div key={item.id} className="cart-item">
                   <div className="item-img">
-                    <img src={item.image} alt={item.name} />
+                    <img src={item.image_url || item.image} alt={item.name} />
                   </div>
                   <div className="item-details">
                     <div className="item-name-row">
@@ -138,9 +151,16 @@ const CartSidebar = () => {
               </div>
             </div>
 
-            <button className="checkout-btn">
+            <button 
+              className="checkout-btn" 
+              onClick={() => {
+                setIsCartOpen(false);
+                navigate('/checkout');
+              }}
+            >
               PROCEED TO CHECKOUT <ArrowRight size={20} />
             </button>
+
             <div className="purity-badge">
               <Sparkles size={14} /> 100% Secure & Pure Ingredients Guaranteed
             </div>

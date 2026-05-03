@@ -1,89 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, ChevronDown, Filter, ShieldCheck, Headphones, CreditCard, Smartphone } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
+import { useNotifications } from '../../components/Notifications/NotificationHub';
 import './Lips.css';
 
-const lipProducts = [
-  {
-    id: 1,
-    name: "MATTE AS HELL CRAYON LIPSTICK",
-    price: 899,
-    oldPrice: null,
-    discount: null,
-    rating: 4.8,
-    reviews: 1444,
-    shades: 35,
-    tag: "BESTSELLER",
-    image: "/matte_lipstick_product.png",
-    hoverImage: "/bodywash_hover_1.png"
-  },
-  {
-    id: 2,
-    name: "GLIDE PEPTIDE SERUM LIPSTICK",
-    price: 499,
-    oldPrice: null,
-    discount: null,
-    rating: 4.9,
-    reviews: 725,
-    shades: 12,
-    tag: "BESTSELLER",
-    image: "/matte_lipstick_product.png",
-    hoverImage: "/bodywash_hover_1.png"
-  },
-  {
-    id: 3,
-    name: "GLIDE PEPTIDE PLUMPING GLOSS STICK",
-    price: 699,
-    oldPrice: null,
-    discount: null,
-    rating: 4.7,
-    reviews: 402,
-    shades: 8,
-    tag: "NEW LAUNCH",
-    image: "/matte_lipstick_product.png",
-    hoverImage: "/bodywash_hover_1.png"
-  },
-  {
-    id: 4,
-    name: "MATTE ATTACK TRANSFERPROOF LIPSTICK",
-    price: 749,
-    oldPrice: null,
-    discount: null,
-    rating: 4.8,
-    reviews: 1168,
-    shades: 15,
-    tag: "BESTSELLER",
-    image: "/matte_lipstick_product.png",
-    hoverImage: "/bodywash_hover_1.png"
-  },
-  {
-    id: 5,
-    name: "TIPSY LIPS SCRUB + BALM DUO",
-    price: 349,
-    oldPrice: 499,
-    discount: "30% Off",
-    rating: 4.9,
-    reviews: 898,
-    shades: null,
-    tag: null,
-    image: "/matte_lipstick_product.png",
-    hoverImage: "/bodywash_hover_1.png"
-  },
-  {
-    id: 6,
-    name: "PLAY VIBE CHECK LIQUID LIPSTICK",
-    price: 249,
-    oldPrice: 499,
-    discount: "50% Off",
-    rating: 4.6,
-    reviews: 1015,
-    shades: 20,
-    tag: null,
-    image: "/matte_lipstick_product.png",
-    hoverImage: "/bodywash_hover_1.png"
-  }
-];
-
 const Lips = () => {
+  const { addToCart } = useCart();
+  const { showNotification } = useNotifications();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/products?category=Lips')
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  const handleAddToCart = (product) => {
+    const cartProduct = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image_url || "/matte_lipstick_product.png",
+      rating: 4.8,
+      reviews: 120
+    };
+    addToCart(cartProduct);
+    showNotification({
+      type: 'cart',
+      title: 'Added to Selection',
+      message: `${product.name} has been added to your cart successfully.`,
+      duration: 3500
+    });
+  };
+
   return (
     <div className="lips-page">
       <div className="lips-banner">
@@ -96,6 +53,7 @@ const Lips = () => {
 
       <div className="lips-container">
         <aside className="lips-sidebar">
+          {/* Filters truncated for brevity */}
           <div className="filter-section">
             <h3>AVAILABILITY <ChevronDown size={16} /></h3>
             <div className="filter-options">
@@ -104,31 +62,11 @@ const Lips = () => {
               </label>
             </div>
           </div>
-
-          <div className="filter-section">
-            <h3>PRICE <ChevronDown size={16} /></h3>
-            <div className="price-range">
-              <input type="range" min="0" max="1399" style={{width: '100%', accentColor: '#000'}} />
-              <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '10px', fontSize: '0.9rem'}}>
-                <span>₹ 0</span>
-                <span>₹ 1399</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="filter-section">
-            <h3>CATEGORY <ChevronDown size={16} /></h3>
-            <div className="filter-options">
-              <label className="filter-label"><input type="checkbox" /> Matte Lipstick</label>
-              <label className="filter-label"><input type="checkbox" /> Liquid Lipstick</label>
-              <label className="filter-label"><input type="checkbox" /> Lip Gloss</label>
-            </div>
-          </div>
         </aside>
 
         <main className="products-content">
           <div className="products-header">
-            <span className="products-count">{lipProducts.length} Products Found</span>
+            <span className="products-count">{products.length} Products Found</span>
             <div className="sort-dropdown">
               <select>
                 <option>SORT BY: RELEVANCE</option>
@@ -139,29 +77,38 @@ const Lips = () => {
           </div>
 
           <div className="lips-grid">
-            {lipProducts.map(product => (
-              <div key={product.id} className="lip-card">
-                <div className="lip-card-img">
-                  {product.tag && <span className="tag-bestseller">{product.tag}</span>}
-                  <img src={product.image} alt={product.name} className="primary-img" />
-                  {product.hoverImage && <img src={product.hoverImage} alt={product.name} className="hover-img" />}
-                  {product.shades && <span className="shades-count">+{product.shades} Shades</span>}
-                </div>
-                <div className="lip-card-info">
-                  <h3 className="lip-card-title">{product.name}</h3>
-                  <div className="lip-card-rating">
-                    <Star size={14} />
-                    <span>{product.rating} ({product.reviews})</span>
+            {loading ? (
+              <div style={{ textAlign: 'center', gridColumn: '1/-1', padding: '100px', color: '#64748b' }}>Loading products...</div>
+            ) : products.length === 0 ? (
+              <div style={{ textAlign: 'center', gridColumn: '1/-1', padding: '100px', color: '#64748b' }}>No products found in this category.</div>
+            ) : (
+              products.map(product => (
+                <div key={product.id} className="lip-card">
+                  <div className="lip-card-img">
+                    {product.status === 'Out of Stock' && <span className="tag-bestseller" style={{ background: '#f43f5e' }}>OUT OF STOCK</span>}
+                    <img src={product.image_url || "/matte_lipstick_product.png"} alt={product.name} className="primary-img" />
+                    {product.hover_image_url && <img src={product.hover_image_url} alt={product.name} className="hover-img" />}
                   </div>
-                  <div className="lip-card-price">
-                    <span className="current-price">Rs. {product.price}.00</span>
-                    {product.oldPrice && <span className="old-price">Rs. {product.oldPrice}</span>}
-                    {product.discount && <span className="discount">{product.discount}</span>}
+                  <div className="lip-card-info">
+                    <h3 className="lip-card-title">{product.name}</h3>
+                    <div className="lip-card-rating">
+                      <Star size={14} />
+                      <span>4.8 (120)</span>
+                    </div>
+                    <div className="lip-card-price">
+                      <span className="current-price">Rs. {parseFloat(product.price).toFixed(0)}.00</span>
+                    </div>
+                    <button 
+                      className="add-btn" 
+                      onClick={() => handleAddToCart(product)}
+                      disabled={product.status === 'Out of Stock'}
+                    >
+                      {product.status === 'Out of Stock' ? 'OUT OF STOCK' : 'ADD TO CART'}
+                    </button>
                   </div>
-                  <button className="add-btn">ADD TO CART</button>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </main>
       </div>

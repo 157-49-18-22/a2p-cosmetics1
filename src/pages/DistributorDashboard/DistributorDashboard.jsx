@@ -123,7 +123,7 @@ const DistributorDashboard = () => {
 
         {/* Module Content */}
         <main className="dd-content">
-          <ActiveComponent />
+          <ActiveComponent setActiveModule={setActiveModule} />
         </main>
       </div>
     </div>

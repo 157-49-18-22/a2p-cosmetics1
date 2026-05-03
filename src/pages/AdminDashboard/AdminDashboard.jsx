@@ -24,28 +24,27 @@ import ProductManager from './modules/ProductManager';
 import InventoryManager from './modules/InventoryManager';
 import AgentCRM from './modules/AgentCRM';
 import DistributorCRM from './modules/DistributorCRM';
+import CustomerCRM from './modules/CustomerCRM';
 import SupportManager from './modules/SupportManager';
 import './AdminDashboard.css';
 
 const navItems = [
   { id: 'home', label: 'Admin Hub', icon: LayoutDashboard },
-  { id: 'categories', label: 'Categories', icon: Layers },
   { id: 'cms', label: 'CMS Manager', icon: FileCode },
-  { id: 'products', label: 'Products', icon: Package },
   { id: 'inventory', label: 'Master Inventory', icon: Boxes },
   { id: 'agents', label: 'Agent CRM', icon: Users2 },
   { id: 'distributors', label: 'Distributor CRM', icon: Building2 },
+  { id: 'customers', label: 'Customer CRM', icon: Users2 },
   { id: 'support', label: 'Support System', icon: Headphones },
 ];
 
 const moduleMap = {
   home: AdminHome,
-  categories: CategoryManager,
   cms: CMSManager,
-  products: ProductManager,
   inventory: InventoryManager,
   agents: AgentCRM,
   distributors: DistributorCRM,
+  customers: CustomerCRM,
   support: SupportManager,
 };
 
@@ -108,6 +107,7 @@ const AdminDashboard = () => {
             <div className="adm-search">
               <Search size={16} />
               <input type="text" placeholder="Global search..." />
+              <kbd className="adm-search-kbd">⌘K</kbd>
             </div>
 
             <div className="adm-actions">

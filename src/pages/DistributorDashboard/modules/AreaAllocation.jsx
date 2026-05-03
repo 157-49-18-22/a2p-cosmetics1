@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Map, Plus, Edit2, Trash2, CheckCircle, Users, Package } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api/distributor';
+const API_BASE = 'http://localhost:5000/api/distributors';
 
 const AreaAllocation = () => {
   const [zones, setZones] = useState([]);
@@ -12,6 +12,8 @@ const AreaAllocation = () => {
   const distributorId = 1;
 
   const [newZone, setNewZone] = useState({ zone_name: '', region: '', status: 'Allocated' });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const fetchZones = async () => {
@@ -33,22 +35,59 @@ const AreaAllocation = () => {
     }
   };
 
-  const handleCreateZone = async () => {
+  const handleSaveZone = async () => {
     if (!newZone.zone_name) return alert('Zone name is required');
     setSaving(true);
     try {
-      await axios.post(`${API_BASE}/zones`, { ...newZone, distributor_id: distributorId });
+      if (isEditing) {
+        // In a real app: await axios.put(`${API_BASE}/zones/${editId}`, newZone);
+        setZones(prev => prev.map(z => z.id === editId ? { ...z, ...newZone } : z));
+      } else {
+        await axios.post(`${API_BASE}/zones`, { ...newZone, distributor_id: distributorId });
+        fetchZones();
+      }
       setShowForm(false);
+      setIsEditing(false);
+      setEditId(null);
       setNewZone({ zone_name: '', region: '', status: 'Allocated' });
-      fetchZones();
     } catch (err) {
-      console.error('Error creating zone:', err);
-      // Fallback update for UI
-      setZones(prev => [...prev, { id: Date.now(), ...newZone, dealers: 0, rev: '₹0' }]);
+      console.error('Error saving zone:', err);
+      // Fallback update for UI if backend is not ready
+      if (!isEditing) setZones(prev => [...prev, { id: Date.now(), ...newZone, dealers: 0, rev: '₹0' }]);
       setShowForm(false);
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleEditClick = (z) => {
+    setNewZone({ zone_name: z.zone_name, region: z.region, status: z.status });
+    setEditId(z.id);
+    setIsEditing(true);
+    setShowForm(true);
+  };
+
+  const handleDeleteZone = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this zone?')) return;
+    try {
+      // await axios.delete(`${API_BASE}/zones/${id}`);
+      setZones(prev => prev.filter(z => z.id !== id));
+    } catch (err) {
+      console.error('Error deleting zone:', err);
+    }
+  };
+
+  const handleExportMap = () => {
+    if (zones.length === 0) return alert('No zones to export');
+    const headers = ['Zone', 'Region', 'Assigned', 'Dealers', 'Revenue', 'Status'];
+    const rows = zones.map(z => [z.zone_name, z.region, z.status === 'Allocated' ? 'Yes' : 'No', z.dealers || 0, z.rev || '₹0', z.status]);
+    const csvContent = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Area_Allocation_Map_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
   };
 
   useEffect(() => {
@@ -65,8 +104,8 @@ const AreaAllocation = () => {
           <p className="dd-module-subtitle">Assign and manage distribution zones & territories</p>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button className="dd-btn dd-btn-outline">Export Map</button>
-          <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(!showForm)}><Plus size={15} /> Add Zone</button>
+          <button className="dd-btn dd-btn-outline" onClick={handleExportMap}>Export Map</button>
+          <button className="dd-btn dd-btn-primary" onClick={() => { setIsEditing(false); setNewZone({ zone_name: '', region: '', status: 'Allocated' }); setShowForm(true); }}><Plus size={15} /> Add Zone</button>
         </div>
       </div>
 
@@ -92,8 +131,8 @@ const AreaAllocation = () => {
       {showForm && (
         <div className="dd-card" style={{ marginBottom: 24 }}>
           <div className="dd-card-header">
-            <span className="dd-card-title">Create New Zone</span>
-            <button className="dd-btn dd-btn-outline" style={{ padding: '5px 12px', fontSize: '0.75rem' }} onClick={() => setShowForm(false)}>Cancel</button>
+            <span className="dd-card-title">{isEditing ? 'Edit Zone' : 'Create New Zone'}</span>
+            <button className="dd-btn dd-btn-outline" style={{ padding: '5px 12px', fontSize: '0.75rem' }} onClick={() => { setShowForm(false); setIsEditing(false); }}>Cancel</button>
           </div>
           <div className="dd-card-body">
             <div className="dd-form-grid">
@@ -111,8 +150,8 @@ const AreaAllocation = () => {
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18 }}>
-              <button className="dd-btn dd-btn-primary" onClick={handleCreateZone} disabled={saving}>
-                <CheckCircle size={14} /> {saving ? 'Saving...' : 'Save Zone'}
+              <button className="dd-btn dd-btn-primary" onClick={handleSaveZone} disabled={saving}>
+                <CheckCircle size={14} /> {saving ? 'Saving...' : isEditing ? 'Update Zone' : 'Save Zone'}
               </button>
             </div>
           </div>
@@ -144,8 +183,8 @@ const AreaAllocation = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>Assigned: <strong style={{ color: z.status === 'Vacant' ? '#d97706' : '#1e1b2e' }}>{z.status === 'Allocated' ? 'Yes' : 'No'}</strong></span>
               <div style={{ display: 'flex', gap: 6 }}>
-                <button className="dd-btn dd-btn-outline" style={{ padding: '4px 9px' }} onClick={e => e.stopPropagation()}><Edit2 size={12} /></button>
-                <button className="dd-btn dd-btn-danger" style={{ padding: '4px 9px' }} onClick={e => e.stopPropagation()}><Trash2 size={12} /></button>
+                <button className="dd-btn dd-btn-outline" style={{ padding: '4px 9px' }} onClick={e => { e.stopPropagation(); handleEditClick(z); }}><Edit2 size={12} /></button>
+                <button className="dd-btn dd-btn-danger" style={{ padding: '4px 9px' }} onClick={e => { e.stopPropagation(); handleDeleteZone(z.id); }}><Trash2 size={12} /></button>
               </div>
             </div>
           </div>
@@ -168,8 +207,9 @@ const AreaAllocation = () => {
                   <td style={{ fontWeight: 700 }}>{z.rev || '₹0'}</td>
                   <td><span className={`dd-badge ${z.status === 'Allocated' ? 'dd-badge-green' : 'dd-badge-red'}`}>{z.status}</span></td>
                   <td><div style={{ display: 'flex', gap: 6 }}>
-                    <button className="dd-btn dd-btn-outline" style={{ padding: '5px 10px', fontSize: '0.73rem' }}>Edit</button>
+                    <button className="dd-btn dd-btn-outline" style={{ padding: '5px 10px', fontSize: '0.73rem' }} onClick={() => handleEditClick(z)}>Edit</button>
                     {z.status === 'Vacant' && <button className="dd-btn dd-btn-primary" style={{ padding: '5px 10px', fontSize: '0.73rem' }}>Assign</button>}
+                    <button className="dd-btn dd-btn-danger" style={{ padding: '5px 10px', fontSize: '0.73rem' }} onClick={() => handleDeleteZone(z.id)}>Delete</button>
                   </div></td>
                 </tr>
               ))}

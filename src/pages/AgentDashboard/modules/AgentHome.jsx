@@ -14,7 +14,7 @@ import {
 
 const API_BASE = 'http://localhost:5000/api/agent';
 
-const AgentHome = () => {
+const AgentHome = ({ onNavigate }) => {
   const [stats, setStats] = useState([
     { label: 'Total Agents', value: '0', change: '+0%', up: true, icon: Users, color: '#0ea5e9' },
     { label: 'Active Referrals', value: '0', change: '+0%', up: true, icon: TrendingUp, color: '#6366f1' },
@@ -73,7 +73,10 @@ const AgentHome = () => {
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="ag-btn ag-btn-outline">Export Stats</button>
-          <button className="ag-btn ag-btn-primary">Add New Agent</button>
+          <button 
+            className="ag-btn ag-btn-primary"
+            onClick={() => onNavigate('onboarding')}
+          >Add New Agent</button>
         </div>
       </div>
 
@@ -97,7 +100,11 @@ const AgentHome = () => {
         <div className="ag-card">
           <div className="ag-card-header">
             <h3 className="ag-card-title">Recent Requests</h3>
-            <button className="ag-btn ag-btn-outline" style={{ padding: '6px 12px', fontSize: '0.75rem' }}>View All</button>
+            <button 
+              className="ag-btn ag-btn-outline" 
+              style={{ padding: '6px 12px', fontSize: '0.75rem' }}
+              onClick={() => onNavigate('logs')}
+            >View All</button>
           </div>
           <div className="ag-table-wrap">
             <table className="ag-table">
