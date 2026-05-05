@@ -41,6 +41,11 @@ const AgentDashboard = () => {
   const ActiveModule = moduleMap[active];
   const activeNav = navItems.find(n => n.id === active);
 
+  const handleLogout = () => {
+    localStorage.removeItem('active_agent');
+    window.location.href = '/agent/login';
+  };
+
   const notifications = [
     { text: 'Agent Pooja Mehta onboarded successfully', time: '5 min ago' },
     { text: 'Payout of ₹12,400 processed for Level-2 agents', time: '1 hr ago' },
@@ -87,7 +92,7 @@ const AgentDashboard = () => {
               </div>
             </div>
           )}
-          <button className="ag-nav-item ag-logout">
+          <button className="ag-nav-item ag-logout" onClick={handleLogout}>
             <span className="ag-nav-icon"><LogOut size={17} /></span>
             {sidebarOpen && <span className="ag-nav-label">Logout</span>}
           </button>

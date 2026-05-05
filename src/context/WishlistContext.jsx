@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from './AuthContext';
 
 const WishlistContext = createContext();
 const API_URL = 'http://localhost:5000/api/wishlist';
@@ -9,6 +10,7 @@ export const useWishlist = () => useContext(WishlistContext);
 export const WishlistProvider = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+  const { user, setShowLoginModal } = useAuth();
 
   useEffect(() => {
     fetchWishlist();
@@ -24,6 +26,10 @@ export const WishlistProvider = ({ children }) => {
   };
 
   const addToWishlist = async (product) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
     try {
       const productData = {
         name: product.name,

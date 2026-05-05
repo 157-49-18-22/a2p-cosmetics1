@@ -18,6 +18,7 @@ const AgentCRM = () => {
   const [agentNotes, setAgentNotes] = useState('');
   const [toast, setToast] = useState(null);
   const [processing, setProcessing] = useState(null);
+  const [approvalFields, setApprovalFields] = useState({}); // { id: { email, password } }
 
   const fetchData = async () => {
     try {
@@ -57,10 +58,15 @@ const AgentCRM = () => {
   const handleStatusUpdate = async (id, newStatus) => {
     setProcessing(id);
     try {
+      const creds = approvalFields[id] || {};
       const res = await fetch(`${API}/agent/applicants/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ 
+          status: newStatus, 
+          email: creds.email, 
+          password: creds.password 
+        })
       });
       if (!res.ok) throw new Error('Update failed');
       showToast(`Agent ${newStatus === 'Active' ? 'Approved' : 'Rejected'}!`);
@@ -374,18 +380,53 @@ const AgentCRM = () => {
             <div style={{ padding: '24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {pendingAgents.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>No pending applications.</div>
-              ) : pendingAgents.map(ag => (
-                <div key={ag.id} style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontWeight: 700 }}>{ag.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{ag.city} • {ag.email}</div>
+              ) : pendingAgents.map(ag => {
+                const creds = approvalFields[ag.id] || { email: ag.email, password: '' };
+                return (
+                  <div key={ag.id} style={{ background: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{ag.name}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{ag.city} • {ag.phone}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="adm-btn adm-btn-outline" style={{ color: '#ef4444' }} onClick={() => handleStatusUpdate(ag.id, 'Rejected')}>Reject</button>
+                        <button 
+                          className="adm-btn adm-btn-primary" 
+                          style={{ background: '#10b981' }} 
+                          disabled={!creds.email || !creds.password}
+                          onClick={() => handleStatusUpdate(ag.id, 'Active')}
+                        >
+                          Approve & Set Access
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: '#fff', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                      <div>
+                        <label style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px', display: 'block' }}>Login Email</label>
+                        <input 
+                          type="email" 
+                          placeholder="Email" 
+                          style={{ width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 12px', fontSize: '0.85rem' }} 
+                          value={creds.email} 
+                          onChange={e => setApprovalFields({ ...approvalFields, [ag.id]: { ...creds, email: e.target.value } })} 
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px', display: 'block' }}>Login Password</label>
+                        <input 
+                          type="text" 
+                          placeholder="Password" 
+                          style={{ width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 12px', fontSize: '0.85rem' }} 
+                          value={creds.password} 
+                          onChange={e => setApprovalFields({ ...approvalFields, [ag.id]: { ...creds, password: e.target.value } })} 
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button className="adm-btn adm-btn-outline" style={{ color: '#ef4444' }} onClick={() => handleStatusUpdate(ag.id, 'Rejected')}>Reject</button>
-                    <button className="adm-btn adm-btn-primary" style={{ background: '#10b981' }} onClick={() => handleStatusUpdate(ag.id, 'Active')}>Approve</button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div style={{ padding: '20px', borderTop: '1px solid #f1f5f9', background: '#f8fafc', borderRadius: '0 0 24px 24px', textAlign: 'right' }}>
               <button className="adm-btn adm-btn-outline" onClick={() => setShowApproveModal(false)}>Close</button>

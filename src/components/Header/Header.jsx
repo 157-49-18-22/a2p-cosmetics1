@@ -9,6 +9,7 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchOverlay from './SearchOverlay';
+import { useAuth } from '../../context/AuthContext';
 import './Header.css';
 
 
@@ -20,6 +21,7 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const { user, logout } = useAuth();
   const dropdownRef = useRef(null);
 
 
@@ -120,51 +122,70 @@ const Header = () => {
                   transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
                 >
                   <div className="dropdown-header">
-                    <div className="user-avatar-large">
-                      <User size={22} />
-                    </div>
-                    <div className="user-info">
-                      <span className="welcome-text">Welcome, admin</span>
-                      <span className="user-email">admin@maydiv.com</span>
-                      <div className="admin-badge">ADMIN</div>
-                    </div>
+                    {user ? (
+                      <>
+                        <div className="user-avatar-large">
+                          <User size={22} />
+                        </div>
+                        <div className="user-info">
+                          <span className="welcome-text">Welcome, {user.name}</span>
+                          <span className="user-email">{user.email}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="user-info" style={{ width: '100%' }}>
+                        <span className="welcome-text">Welcome to A2P</span>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Log in to track orders and more</p>
+                        <Link to="/login" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setIsUserDropdownOpen(false)}>
+                          Login / Join
+                        </Link>
+                      </div>
+                    )}
                   </div>
 
                   <div className="dropdown-divider"></div>
 
-                  <div className="dropdown-links">
-                    {[
-                      { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard" },
-                      { to: "/skin-profile", icon: Sparkles, label: "Skin Profile" },
-                      { to: "/my-orders", icon: Package, label: "My Orders" },
-                      { to: "/my-addresses", icon: MapPin, label: "My Addresses" },
-                      { to: "/saved-items", icon: Bookmark, label: "Saved Items" },
-                      { to: "/wishlist", icon: Heart, label: "Wishlist" },
-                    ].map((item, index) => (
+                  {user && (
+                    <div className="dropdown-links">
+                      {[
+                        { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard" },
+                        { to: "/skin-profile", icon: Sparkles, label: "Skin Profile" },
+                        { to: "/my-orders", icon: Package, label: "My Orders" },
+                        { to: "/my-addresses", icon: MapPin, label: "My Addresses" },
+                        { to: "/saved-items", icon: Bookmark, label: "Saved Items" },
+                        { to: "/wishlist", icon: Heart, label: "Wishlist" },
+                      ].map((item, index) => (
+                        <motion.div
+                          key={item.label}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.05 + index * 0.03, duration: 0.3 }}
+                        >
+                          <Link to={item.to} className="dropdown-item" onClick={() => { setIsUserDropdownOpen(false); setIsLocked(false); }}>
+                            <item.icon size={18} className="item-icon" />
+                            <span>{item.label}</span>
+                          </Link>
+                        </motion.div>
+                      ))}
+                      
                       <motion.div
-                        key={item.label}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.05 + index * 0.03, duration: 0.3 }}
+                        transition={{ delay: 0.25, duration: 0.3 }}
                       >
-                        <Link to={item.to} className="dropdown-item" onClick={() => { setIsUserDropdownOpen(false); setIsLocked(false); }}>
-                          <item.icon size={18} className="item-icon" />
-                          <span>{item.label}</span>
-                        </Link>
+                        <button 
+                          className="dropdown-item logout-btn"
+                          onClick={() => {
+                            logout();
+                            setIsUserDropdownOpen(false);
+                          }}
+                        >
+                          <LogOut size={18} className="item-icon" />
+                          <span>Logout</span>
+                        </button>
                       </motion.div>
-                    ))}
-                    
-                    <motion.div
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.25, duration: 0.3 }}
-                    >
-                      <button className="dropdown-item logout-btn">
-                        <LogOut size={18} className="item-icon" />
-                        <span>Logout</span>
-                      </button>
-                    </motion.div>
-                  </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

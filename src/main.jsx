@@ -6,16 +6,19 @@ import { BrowserRouter } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import { WishlistProvider } from './context/WishlistContext'
 import { NotificationProvider } from './components/Notifications/NotificationHub'
+import { AuthProvider } from './context/AuthContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <NotificationProvider>
-        <WishlistProvider>
-          <CartProvider>
-            <App />
-          </CartProvider>
-        </WishlistProvider>
+        <AuthProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <App />
+            </CartProvider>
+          </WishlistProvider>
+        </AuthProvider>
       </NotificationProvider>
     </BrowserRouter>
   </StrictMode>,

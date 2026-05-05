@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 const API_URL = 'http://localhost:5000/api/cart';
@@ -10,6 +11,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [coupon, setCoupon] = useState(null);
+  const { user, setShowLoginModal } = useAuth();
 
   // Fetch cart items on load
   useEffect(() => {
@@ -26,6 +28,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = async (product) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
     try {
       // Prepare product data for backend
       const productData = {

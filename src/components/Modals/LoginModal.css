@@ -1,0 +1,100 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1.5rem;
+}
+
+.login-modal {
+  background: white;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.modal-close:hover {
+  color: var(--text-main);
+  transform: rotate(90deg);
+}
+
+.modal-icon {
+  width: 64px;
+  height: 64px;
+  background: #fdf2f8;
+  color: var(--primary-pink);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+.login-modal h2 {
+  font-size: 1.75rem;
+  color: var(--text-main);
+  margin-bottom: 0.75rem;
+}
+
+.login-modal p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 2rem;
+}
+
+.modal-login-btn {
+  width: 100%;
+  padding: 1rem;
+  background: black;
+  color: white;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.modal-login-btn:hover {
+  background: #1f2937;
+  transform: translateY(-2px);
+}
+
+.modal-footer {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.modal-link {
+  color: var(--text-main);
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 4px;
+}
+
+.modal-link:hover {
+  text-decoration: underline;
+}

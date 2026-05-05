@@ -1,0 +1,465 @@
+/* ─── Fonts ─────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Manrope:wght@300;400;500;600;700&display=swap');
+
+/* ─── Page Layout ────────────────────────────────────────────────── */
+.al-page {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2000;
+  background: #fff8f4;
+  font-family: 'Manrope', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ─── Left: Image Panel ──────────────────────────────────────────── */
+.al-image-panel {
+  position: relative;
+  width: 58%;
+  min-height: 100vh;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.al-bg-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.al-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+}
+
+.al-image-quote {
+  font-family: 'Noto Serif', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(2rem, 3.5vw, 3.5rem);
+  color: #ffffff;
+  text-align: center;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.15);
+  margin: 0;
+}
+
+.al-image-divider {
+  width: 3rem;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.6);
+  margin-top: 1.5rem;
+}
+
+/* ─── Right: Form Panel ──────────────────────────────────────────── */
+.al-form-panel {
+  width: 42%;
+  min-height: 100vh;
+  background: #fff8f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  overflow-y: auto;
+}
+
+.al-form-inner {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ─── Logo ───────────────────────────────────────────────────────── */
+.al-logo-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  width: 100%;
+}
+
+.al-logo {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* ─── Toggle ─────────────────────────────────────────────────────── */
+.al-toggle {
+  display: flex;
+  align-items: center;
+  background: #ede8e3;
+  border-radius: 50px;
+  padding: 4px;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.al-toggle-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.6rem 1rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #747878;
+  cursor: pointer;
+  border-radius: 50px;
+  transition: all 0.25s ease;
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.al-toggle-btn.active {
+  background: #ff4d6d;
+  color: #ffffff;
+  box-shadow: 0 2px 12px rgba(255, 77, 109, 0.3);
+}
+
+.al-toggle-btn:not(.active):hover {
+  color: #1f1b17;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────── */
+.al-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.al-title {
+  font-family: 'Noto Serif', serif;
+  font-size: 1.875rem;
+  font-weight: 400;
+  color: #1f1b17;
+  line-height: 1.4;
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.al-subtitle {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;
+  color: rgba(68, 71, 72, 0.7);
+  line-height: 1.6;
+  font-weight: 400;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Alerts ─────────────────────────────────────────────────────── */
+.al-alert {
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 2px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+.al-alert--success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.al-alert--error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* ─── Form ───────────────────────────────────────────────────────── */
+.al-form {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2.5rem;
+}
+
+/* ─── Field ──────────────────────────────────────────────────────── */
+.al-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.75rem;
+}
+
+.al-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #444748;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.al-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.al-label-row .al-label {
+  margin-bottom: 0;
+}
+
+.al-forgot {
+  font-family: 'Noto Serif', serif;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: #444748;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: #c4c7c7;
+  transition: color 0.2s;
+}
+
+.al-forgot:hover {
+  color: #1f1b17;
+}
+
+/* ─── Input ──────────────────────────────────────────────────────── */
+.al-input-wrap {
+  position: relative;
+}
+
+.al-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #c4c7c7;
+  border-radius: 0;
+  padding: 0.75rem 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #1f1b17;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+}
+
+.al-input-wrap .al-input {
+  padding-right: 2rem;
+}
+
+.al-input::placeholder {
+  color: #9ca3af;
+}
+
+.al-input:focus {
+  border-bottom-color: #1f1b17;
+  box-shadow: 0 4px 12px -8px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Eye Toggle ─────────────────────────────────────────────────── */
+.al-eye {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #747878;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.al-eye:hover {
+  color: #1f1b17;
+}
+
+/* ─── Remember Me ────────────────────────────────────────────────── */
+.al-remember {
+  margin-bottom: 2rem;
+}
+
+.al-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #444748;
+  font-weight: 400;
+  transition: color 0.2s;
+}
+
+.al-checkbox-label:hover {
+  color: #1f1b17;
+}
+
+.al-checkbox {
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid #c4c7c7;
+  border-radius: 0;
+  cursor: pointer;
+  accent-color: #1f1b17;
+}
+
+/* ─── Submit Button ──────────────────────────────────────────────── */
+.al-submit {
+  width: 100%;
+  background: #ff4d6d;
+  color: #ffffff;
+  border: none;
+  padding: 1.15rem 2rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  box-shadow: 0 8px 32px rgba(255, 77, 109, 0.2);
+}
+
+.al-submit:hover:not(:disabled) {
+  background: #ff3355;
+}
+
+.al-submit:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.al-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ─── Loading Spinner ────────────────────────────────────────────── */
+.al-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: al-spin 0.7s linear infinite;
+}
+
+@keyframes al-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Social Auth ────────────────────────────────────────────────── */
+.al-social {
+  margin-bottom: 2rem;
+}
+
+.al-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.al-divider::before,
+.al-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #c4c7c7;
+}
+
+.al-divider span {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #444748;
+  white-space: nowrap;
+}
+
+.al-social-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.al-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid #c4c7c7;
+  background: transparent;
+  padding: 0.9rem 1rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1f1b17;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.al-social-btn:hover {
+  background: #f5ece5;
+}
+
+.al-social-btn:active {
+  transform: scale(0.98);
+}
+
+.al-social-btn svg {
+  flex-shrink: 0;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .al-page {
+    flex-direction: column;
+    position: relative;
+    overflow-y: auto;
+  }
+
+  .al-image-panel {
+    width: 100%;
+    min-height: 42vh;
+    flex-shrink: 0;
+  }
+
+  .al-form-panel {
+    width: 100%;
+    min-height: auto;
+    padding: 3rem 1.5rem;
+  }
+
+  .al-image-quote {
+    font-size: 2rem;
+  }
+}

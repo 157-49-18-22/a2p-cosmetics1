@@ -16,7 +16,7 @@ const DistributorCRM = () => {
   const [loadingZones, setLoadingZones] = useState(false);
   const [toast, setToast] = useState(null);
   const [formData, setFormData] = useState({ 
-    name: '', email: '', phone: '', role: 'Senior Distributor', 
+    name: '', email: '', password: '', phone: '', role: 'Senior Distributor', 
     tier: 'Bronze', region: '', credit_limit: 0, balance: 0, status: 'Active' 
   });
 
@@ -76,7 +76,7 @@ const DistributorCRM = () => {
       if (!res.ok) throw new Error('Failed to create');
       showToast('Distributor onboarding complete!');
       setShowModal(false);
-      setFormData({ name: '', email: '', phone: '', role: 'Senior Distributor', tier: 'Bronze', region: '', credit_limit: 0, balance: 0, status: 'Active' });
+      setFormData({ name: '', email: '', password: '', phone: '', role: 'Senior Distributor', tier: 'Bronze', region: '', credit_limit: 0, balance: 0, status: 'Active' });
       fetchData();
     } catch (e) {
       showToast('Error onboarding partner', 'danger');
@@ -269,6 +269,10 @@ const DistributorCRM = () => {
                 <div>
                   <label className="adm-form-label" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase' }}>Contact Number</label>
                   <input type="text" required className="adm-btn adm-btn-outline" style={{ width: '100%', textAlign: 'left', cursor: 'text', height: '48px', padding: '0 16px' }} value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                </div>
+                <div>
+                  <label className="adm-form-label" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase' }}>Login Password</label>
+                  <input type="password" required className="adm-btn adm-btn-outline" style={{ width: '100%', textAlign: 'left', cursor: 'text', height: '48px', padding: '0 16px' }} value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
                 </div>
 
                 <div>

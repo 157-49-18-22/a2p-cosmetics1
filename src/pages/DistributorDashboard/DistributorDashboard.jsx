@@ -42,6 +42,11 @@ const DistributorDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notifOpen, setNotifOpen] = useState(false);
 
+  const handleLogout = () => {
+    localStorage.removeItem('active_distributor');
+    window.location.href = '/distributor/login';
+  };
+
   const ActiveComponent = moduleComponents[activeModule];
   const activeNav = navItems.find(n => n.id === activeModule);
 
@@ -70,7 +75,7 @@ const DistributorDashboard = () => {
         </nav>
 
         <div className="dd-sidebar-footer">
-          <button className="dd-nav-item dd-logout">
+          <button className="dd-nav-item dd-logout" onClick={handleLogout}>
             <span className="dd-nav-icon"><LogOut size={18} /></span>
             {sidebarOpen && <span className="dd-nav-label">Logout</span>}
           </button>

@@ -326,6 +326,17 @@
   font-weight: 400;
 }
 
+.user-info p {
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.user-info .btn-primary {
+  margin-top: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 .admin-badge {
   display: inline-flex;
   align-items: center;
