@@ -67,7 +67,7 @@ const MyAddresses = () => {
     
     const url = isEditing 
       ? `${API_BASE_URL}/customers/addresses/${editId}`
-      : `API_BASE_URL/customers/addresses`;
+      : `${API_BASE_URL}/customers/addresses`;
     
     try {
       const response = await fetch(url, {
@@ -99,7 +99,7 @@ const MyAddresses = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to remove this address?")) return;
     try {
-      await fetch(`${API_BASE_URL}/customers/addresses/${id}`, { method: `DELETE' });
+      await fetch(`${API_BASE_URL}/customers/addresses/${id}`, { method: 'DELETE' });
       fetchAddresses();
     } catch (err) {
       console.error("Error deleting address:", err);
