@@ -44,7 +44,7 @@ const moduleComponents = {
 const AnnouncementTicker = () => {
   const [news, setNews] = useState([]);
   useEffect(() => {
-    fetch(`API_BASE_URL_PLACEHOLDER/announcements')
+    fetch(`${API_BASE_URL}/announcements`)
       .then(r => r.json())
       .then(d => setNews(d.filter(n => n.status === 'Active')));
   }, []);

@@ -90,7 +90,7 @@ const FaceWash = () => {
   const [priceRange, setPriceRange] = React.useState([0, 1000]);
 
   React.useEffect(() => {
-    fetch(`API_BASE_URL_PLACEHOLDER/products?category=Face Wash')
+    fetch(`${API_BASE_URL}/products?category=Face Wash`)
       .then(res => res.json())
       .then(data => {
         setAllProducts(data);

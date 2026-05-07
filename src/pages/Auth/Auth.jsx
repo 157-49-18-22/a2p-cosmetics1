@@ -35,7 +35,7 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        const res = await fetch(`API_BASE_URL_PLACEHOLDER/customers/login', {
+        const res = await fetch(`${API_BASE_URL}/customers/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: formData.email, password: formData.password })
@@ -53,7 +53,7 @@ const Auth = () => {
           setLoading(false);
           return;
         }
-        const res = await fetch(`API_BASE_URL_PLACEHOLDER/customers/signup', {
+        const res = await fetch(`${API_BASE_URL}/customers/signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password })

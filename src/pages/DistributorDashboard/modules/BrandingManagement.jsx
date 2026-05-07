@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Megaphone, Plus, Search, Image, FileText, Video, Edit2, Trash2, Eye, CheckCircle, Clock, Upload, Tag, X, Download } from 'lucide-react';
 
-const API_BASE = `API_BASE_URL_PLACEHOLDER/distributors';
+const API_BASE = `${API_BASE_URL}/distributors`;
 const distributorId = 1;
 
 const assetIcon = (type) => ({

@@ -13,7 +13,7 @@ const Bestsellers = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist, wishlistItems } = useWishlist();
 
   useEffect(() => {
-    fetch(`API_BASE_URL_PLACEHOLDER/products')
+    fetch(`${API_BASE_URL}/products`)
       .then(res => res.json())
       .then(data => {
         setProducts(data);

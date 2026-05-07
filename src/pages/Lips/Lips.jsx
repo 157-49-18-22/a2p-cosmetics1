@@ -12,7 +12,7 @@ const Lips = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`API_BASE_URL_PLACEHOLDER/products?category=Lips')
+    fetch(`${API_BASE_URL}/products?category=Lips`)
       .then(res => res.json())
       .then(data => {
         setProducts(data);

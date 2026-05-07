@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Star, Plus, Search, Phone, Mail, MapPin, Edit2, Trash2, CheckCircle, TrendingUp, Package, Users } from 'lucide-react';
 
-const API_BASE = `API_BASE_URL_PLACEHOLDER/distributors';
+const API_BASE = `${API_BASE_URL}/distributors`;
 
 const SuperStockist = () => {
   const [stockists, setStockists] = useState([]);

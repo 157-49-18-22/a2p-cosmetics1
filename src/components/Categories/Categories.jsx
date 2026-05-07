@@ -9,7 +9,7 @@ const Categories = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`API_BASE_URL_PLACEHOLDER/categories')
+    fetch(`${API_BASE_URL}/categories`)
       .then(res => res.json())
       .then(data => {
         setCategories(data);

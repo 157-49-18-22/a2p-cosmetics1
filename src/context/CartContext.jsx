@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
-const API_URL = `API_BASE_URL_PLACEHOLDER/cart';
+const API_URL = `${API_BASE_URL}/cart`;
 
 export const useCart = () => useContext(CartContext);
 

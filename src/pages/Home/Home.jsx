@@ -21,7 +21,7 @@ const Home = () => {
     let timers = [];
     const fetchBroadcasts = async () => {
       try {
-        const res = await fetch(`API_BASE_URL_PLACEHOLDER/announcements');
+        const res = await fetch(`${API_BASE_URL}/announcements`);
         const data = await res.json();
         const active = data.filter(n => n.status === 'Active');
         

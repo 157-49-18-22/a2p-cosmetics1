@@ -10,7 +10,7 @@ const MyOrders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch(`API_BASE_URL_PLACEHOLDER/orders/all');
+        const response = await fetch(`${API_BASE_URL}/orders/all`);
         const data = await response.json();
         setOrders(data);
       } catch (err) {

@@ -2,7 +2,7 @@ import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Search, Filter, Clock, X, CheckCircle, AlertCircle, Send, Trash2, Plus, RefreshCcw, Mail, Tag, AlertTriangle, Check } from 'lucide-react';
 
-const API = `API_BASE_URL_PLACEHOLDER/support';
+const API = `${API_BASE_URL}/support`;
 const MACROS = ['Thank you for contacting us. We will resolve your issue shortly.', 'Your refund has been initiated and will reflect in 5-7 business days.', 'Your order is delayed due to high demand. We apologize for the inconvenience.', 'We have updated your delivery address as requested.'];
 
 const SupportManager = () => {

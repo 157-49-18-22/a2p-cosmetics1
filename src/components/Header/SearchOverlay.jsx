@@ -29,7 +29,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(`API_BASE_URL_PLACEHOLDER/products');
+      const res = await fetch(`${API_BASE_URL}/products`);
       const data = await res.json();
       setProducts(data);
     } catch (err) {

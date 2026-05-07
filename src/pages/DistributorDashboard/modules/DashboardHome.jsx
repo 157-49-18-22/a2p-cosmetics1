@@ -7,8 +7,8 @@ import {
   Calendar, CreditCard, Building2, Sparkles, ShoppingBag, Trash2, Search, Minus, RefreshCcw
 } from 'lucide-react';
 
-const API_BASE = `API_BASE_URL_PLACEHOLDER/distributors';
-const PRODUCTS_API = `API_BASE_URL_PLACEHOLDER/products';
+const API_BASE = `${API_BASE_URL}/distributors`;
+const PRODUCTS_API = `${API_BASE_URL}/products`;
 
 const DashboardHome = ({ setActiveModule }) => {
   const [stats, setStats] = useState([]);

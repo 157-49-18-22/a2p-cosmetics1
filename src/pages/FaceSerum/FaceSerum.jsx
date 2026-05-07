@@ -17,7 +17,7 @@ const FaceSerum = () => {
 
 
   useEffect(() => {
-    fetch(`API_BASE_URL_PLACEHOLDER/products?category=Face Serum')
+    fetch(`${API_BASE_URL}/products?category=Face Serum`)
       .then(res => res.json())
       .then(data => {
         setAllProducts(data);

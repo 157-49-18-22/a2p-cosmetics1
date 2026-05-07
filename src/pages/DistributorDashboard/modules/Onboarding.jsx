@@ -4,7 +4,7 @@ import axios from 'axios';
 import { UserCheck, Plus, Search, CheckCircle, Clock, XCircle, ChevronRight, Upload, X, Phone, Mail, MapPin, Briefcase, FileText, ShieldCheck } from 'lucide-react';
 
 const steps = ['Basic Info', 'Documents', 'Area & Role', 'Review'];
-const API_BASE = `API_BASE_URL_PLACEHOLDER/distributors';
+const API_BASE = `${API_BASE_URL}/distributors`;
 
 const statusBadge = (s) => ({
   Active: <span className="dd-badge dd-badge-green"><CheckCircle size={11} style={{ marginRight: 4 }} />{s}</span>,

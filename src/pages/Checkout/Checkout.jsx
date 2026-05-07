@@ -29,7 +29,7 @@ const Checkout = () => {
   useEffect(() => {
     const fetchSavedAddresses = async () => {
       try {
-        const response = await fetch(`API_BASE_URL_PLACEHOLDER/customers/addresses');
+        const response = await fetch(`${API_BASE_URL}/customers/addresses`);
         const data = await response.json();
         setSavedAddresses(data);
         
@@ -93,7 +93,7 @@ const Checkout = () => {
       }
 
       // 2. Create Razorpay Order in Backend
-      const orderRes = await fetch(`API_BASE_URL_PLACEHOLDER/orders/razorpay', {
+      const orderRes = await fetch(`${API_BASE_URL}/orders/razorpay`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: total })
@@ -118,7 +118,7 @@ const Checkout = () => {
         handler: async function (response) {
           // 4. On Payment Success, Save Order in DB
           try {
-            const saveOrderRes = await fetch(`API_BASE_URL_PLACEHOLDER/orders/create', {
+            const saveOrderRes = await fetch(`${API_BASE_URL}/orders/create`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useAuth } from './AuthContext';
 
 const WishlistContext = createContext();
-const API_URL = `API_BASE_URL_PLACEHOLDER/wishlist';
+const API_URL = `${API_BASE_URL}/wishlist`;
 
 export const useWishlist = () => useContext(WishlistContext);
 

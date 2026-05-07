@@ -13,7 +13,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-const API_BASE = `API_BASE_URL_PLACEHOLDER/agent';
+const API_BASE = `${API_BASE_URL}/agent`;
 
 const AgentHome = ({ onNavigate }) => {
   const [stats, setStats] = useState([

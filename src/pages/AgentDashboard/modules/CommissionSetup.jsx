@@ -15,7 +15,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-const API_BASE = `API_BASE_URL_PLACEHOLDER/agent';
+const API_BASE = `${API_BASE_URL}/agent`;
 
 const CommissionSetup = () => {
   const [categories, setCategories] = useState([]);

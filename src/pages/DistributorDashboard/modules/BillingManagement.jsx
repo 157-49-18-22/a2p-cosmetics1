@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FileText, Plus, Search, Download, Send, CheckCircle, Clock, XCircle, Eye, Printer } from 'lucide-react';
 
-const API_BASE = `API_BASE_URL_PLACEHOLDER/distributors';
+const API_BASE = `${API_BASE_URL}/distributors`;
 
 const statusBadge = (s) => ({
   Paid: <span className="dd-badge dd-badge-green"><CheckCircle size={10} style={{ marginRight: 4 }} />{s}</span>,

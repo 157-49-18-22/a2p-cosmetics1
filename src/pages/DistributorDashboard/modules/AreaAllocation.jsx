@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Map, Plus, Edit2, Trash2, CheckCircle, Users, Package } from 'lucide-react';
 
-const API_BASE = `API_BASE_URL_PLACEHOLDER/distributors';
+const API_BASE = `${API_BASE_URL}/distributors`;
 
 const AreaAllocation = () => {
   const [zones, setZones] = useState([]);

@@ -16,7 +16,7 @@ const FaceCream = () => {
   const [priceRange, setPriceRange] = useState([0, 2000]);
 
   useEffect(() => {
-    fetch(`API_BASE_URL_PLACEHOLDER/products?category=Face Cream')
+    fetch(`${API_BASE_URL}/products?category=Face Cream`)
       .then(res => res.json())
       .then(data => {
         setAllProducts(data);
