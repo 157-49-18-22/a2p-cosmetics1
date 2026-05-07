@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { 
   MessageSquareQuote, Layers, Package, ChevronRight, 
@@ -7,7 +8,7 @@ import CategoryManager from './CategoryManager';
 import ProductManager from './ProductManager';
 import TestimonialManager from './TestimonialManager';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 const siteSections = [
   { id: 'testimonials', name: 'Testimonials', desc: 'Customer reviews', icon: MessageSquareQuote },

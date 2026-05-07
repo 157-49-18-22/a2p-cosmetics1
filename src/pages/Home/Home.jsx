@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../apiConfig.js';
 import React, { useEffect, useRef } from 'react';
 import { useNotifications } from '../../components/Notifications/NotificationHub';
 import Hero from '../../components/Hero/Hero';
@@ -20,7 +21,7 @@ const Home = () => {
     let timers = [];
     const fetchBroadcasts = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/announcements');
+        const res = await fetch(`API_BASE_URL_PLACEHOLDER/announcements');
         const data = await res.json();
         const active = data.filter(n => n.status === 'Active');
         

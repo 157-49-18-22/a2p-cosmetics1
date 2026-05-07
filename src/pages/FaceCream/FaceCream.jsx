@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { Star, ChevronDown, Sparkles, Droplets } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
@@ -15,7 +16,7 @@ const FaceCream = () => {
   const [priceRange, setPriceRange] = useState([0, 2000]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products?category=Face Cream')
+    fetch(`API_BASE_URL_PLACEHOLDER/products?category=Face Cream')
       .then(res => res.json())
       .then(data => {
         setAllProducts(data);

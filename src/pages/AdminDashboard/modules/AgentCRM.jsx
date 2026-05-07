@@ -1,7 +1,8 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, UserCheck, Star, Shield, ExternalLink, Mail, Phone, X, Check, Trash2, AlertCircle, RefreshCcw, TrendingUp, Users, Wallet, Clock, Filter, Trophy, ChevronRight } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 const AgentCRM = () => {
   const [agents, setAgents] = useState([]);

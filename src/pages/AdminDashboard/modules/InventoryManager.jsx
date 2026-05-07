@@ -1,7 +1,8 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, ArrowDown, ArrowUp, Boxes, Package, RefreshCw, Truck, Edit2, Save, X } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 const InventoryManager = () => {
   const [products, setProducts] = useState([]);

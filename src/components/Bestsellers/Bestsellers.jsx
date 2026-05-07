@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Star, ShoppingCart, Heart, Package } from 'lucide-react';
@@ -12,7 +13,7 @@ const Bestsellers = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist, wishlistItems } = useWishlist();
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products')
+    fetch(`API_BASE_URL_PLACEHOLDER/products')
       .then(res => res.json())
       .then(data => {
         setProducts(data);

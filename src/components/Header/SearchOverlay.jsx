@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
@@ -28,7 +29,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/products');
+      const res = await fetch(`API_BASE_URL_PLACEHOLDER/products');
       const data = await res.json();
       setProducts(data);
     } catch (err) {

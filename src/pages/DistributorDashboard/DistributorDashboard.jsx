@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../apiConfig.js';
 import React, { useState } from 'react';
 import {
   LayoutDashboard, UserCheck, Package, FileText,
@@ -43,7 +44,7 @@ const moduleComponents = {
 const AnnouncementTicker = () => {
   const [news, setNews] = useState([]);
   useEffect(() => {
-    fetch('http://localhost:5000/api/announcements')
+    fetch(`API_BASE_URL_PLACEHOLDER/announcements')
       .then(r => r.json())
       .then(d => setNews(d.filter(n => n.status === 'Active')));
   }, []);

@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { 
@@ -12,7 +13,7 @@ import {
   XCircle
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api/agent';
+const API_BASE = `API_BASE_URL_PLACEHOLDER/agent';
 
 const AgentOnboarding = () => {
   const [showForm, setShowForm] = useState(false);
@@ -91,7 +92,7 @@ const AgentOnboarding = () => {
       if (aadharFile) {
         const aadharFormData = new FormData();
         aadharFormData.append('image', aadharFile);
-        const res = await axios.post('http://localhost:5000/api/upload', aadharFormData);
+        const res = await axios.post(`API_BASE_URL_PLACEHOLDER/upload', aadharFormData);
         document_url = res.data.imageUrl;
       }
 
@@ -99,7 +100,7 @@ const AgentOnboarding = () => {
       if (photoFile) {
         const photoFormData = new FormData();
         photoFormData.append('image', photoFile);
-        const res = await axios.post('http://localhost:5000/api/upload', photoFormData);
+        const res = await axios.post(`API_BASE_URL_PLACEHOLDER/upload', photoFormData);
         profile_pic = res.data.imageUrl;
       }
 

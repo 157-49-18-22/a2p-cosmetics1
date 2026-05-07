@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -6,8 +7,8 @@ import {
   Calendar, CreditCard, Building2, Sparkles, ShoppingBag, Trash2, Search, Minus, RefreshCcw
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api/distributors';
-const PRODUCTS_API = 'http://localhost:5000/api/products';
+const API_BASE = `API_BASE_URL_PLACEHOLDER/distributors';
+const PRODUCTS_API = `API_BASE_URL_PLACEHOLDER/products';
 
 const DashboardHome = ({ setActiveModule }) => {
   const [stats, setStats] = useState([]);

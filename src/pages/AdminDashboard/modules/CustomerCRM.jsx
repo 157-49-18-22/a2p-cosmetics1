@@ -1,7 +1,8 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { Users, ShoppingCart, Heart, Search, Filter, X, Trash2, MapPin, Mail, Phone, ArrowUpRight, TrendingUp, Clock, Plus, Eye, Sparkles, Brain, Zap } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 const CustomerCRM = () => {
   const [customers, setCustomers] = useState([]);

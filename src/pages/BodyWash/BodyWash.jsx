@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { Star, ChevronDown } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
@@ -15,7 +16,7 @@ const BodyWash = () => {
   const [priceRange, setPriceRange] = useState([0, 2000]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products?category=Body Wash')
+    fetch(`API_BASE_URL_PLACEHOLDER/products?category=Body Wash')
       .then(res => res.json())
       .then(data => {
         setAllProducts(data);

@@ -1,7 +1,8 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Filter, Mail, Phone, Calendar, User, UserCheck, X, Trash2, MoreVertical, RefreshCcw } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 const UserManager = () => {
   const [users, setUsers] = useState([]);

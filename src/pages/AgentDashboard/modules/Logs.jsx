@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -15,7 +16,7 @@ import {
   Clock
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api/agent';
+const API_BASE = `API_BASE_URL_PLACEHOLDER/agent';
 
 const Logs = () => {
   const [activityLogs, setActivityLogs] = useState([]);

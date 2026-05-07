@@ -1,7 +1,8 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, Users, ShoppingCart, Package, ArrowUpRight, ArrowDownRight, Activity, Heart, Layers, AlertTriangle, Briefcase, Globe } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 const AdminHome = () => {
   const [stats, setStats] = useState(null);

@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../apiConfig.js';
 import React, { useEffect, useState } from 'react';
 import './Profile.css';
 import { Package, Clock, ChevronRight, Loader2 } from 'lucide-react';
@@ -9,7 +10,7 @@ const MyOrders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/orders/all');
+        const response = await fetch(`API_BASE_URL_PLACEHOLDER/orders/all');
         const data = await response.json();
         setOrders(data);
       } catch (err) {

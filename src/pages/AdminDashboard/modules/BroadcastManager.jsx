@@ -1,7 +1,8 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { Megaphone, Plus, Trash2, CheckCircle, AlertCircle, Info, Tag, X, Send } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 const BroadcastManager = () => {
   const [broadcasts, setBroadcasts] = useState([]);

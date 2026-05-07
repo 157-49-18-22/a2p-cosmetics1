@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Droplet, Sparkles, Waves, Flower, ArrowRight, Layers } from 'lucide-react';
@@ -8,7 +9,7 @@ const Categories = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/categories')
+    fetch(`API_BASE_URL_PLACEHOLDER/categories')
       .then(res => res.json())
       .then(data => {
         setCategories(data);

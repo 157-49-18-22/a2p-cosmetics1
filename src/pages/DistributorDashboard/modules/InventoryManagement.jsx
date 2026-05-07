@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
@@ -5,7 +6,7 @@ import {
   Edit2, Trash2, CheckCircle, X, ShoppingBag, CreditCard, Tag, Layers
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = API_BASE_URL;
 
 const statusBadge = (stock, minStock = 50) => {
   if (stock === 0) return <span className="dd-badge dd-badge-red">Out of Stock</span>;

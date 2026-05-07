@@ -1,8 +1,9 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ShoppingCart, Package, Plus, Search, Trash2, CheckCircle, Clock, AlertCircle, RefreshCcw } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = API_BASE_URL;
 
 const StockRequest = () => {
   const [products, setProducts] = useState([]);

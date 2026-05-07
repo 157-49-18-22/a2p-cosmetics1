@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { Star, ChevronDown, Filter, ShieldCheck, Headphones, CreditCard, Smartphone } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
@@ -11,7 +12,7 @@ const Lips = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products?category=Lips')
+    fetch(`API_BASE_URL_PLACEHOLDER/products?category=Lips')
       .then(res => res.json())
       .then(data => {
         setProducts(data);

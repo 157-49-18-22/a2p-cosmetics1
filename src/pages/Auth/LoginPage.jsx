@@ -1,9 +1,10 @@
+import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Hyperspeed from './Hyperspeed';
 import './LoginPage.css';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 const LoginPage = ({ type: initialType }) => {
   const navigate = useNavigate();

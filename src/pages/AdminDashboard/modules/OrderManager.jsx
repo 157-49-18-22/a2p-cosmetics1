@@ -1,7 +1,8 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, ShoppingBag, Eye, Trash2, ChevronRight, Package, Truck, CheckCircle, XCircle, RefreshCcw } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 const OrderManager = () => {
   const [orders, setOrders] = useState([]);

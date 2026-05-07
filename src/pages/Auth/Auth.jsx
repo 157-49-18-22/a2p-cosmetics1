@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../apiConfig.js';
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
@@ -34,7 +35,7 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        const res = await fetch('http://localhost:5000/api/customers/login', {
+        const res = await fetch(`API_BASE_URL_PLACEHOLDER/customers/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: formData.email, password: formData.password })
@@ -52,7 +53,7 @@ const Auth = () => {
           setLoading(false);
           return;
         }
-        const res = await fetch('http://localhost:5000/api/customers/signup', {
+        const res = await fetch(`API_BASE_URL_PLACEHOLDER/customers/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password })

@@ -1,7 +1,8 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, X, Save, MessageSquareQuote, Star } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 const EMPTY_FORM = { name: '', rating: 5, content: '', product_name: '', status: 'Active' };
 
 const TestimonialManager = () => {

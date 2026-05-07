@@ -1,8 +1,9 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { Building2, Search, MapPin, Package, LayoutDashboard, MoreVertical, CreditCard, X, Plus, Trash2, Mail, Phone, RefreshCcw, AlertCircle, Check, TrendingUp, Users, Target, Zap, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 const DistributorCRM = () => {
   const navigate = useNavigate();

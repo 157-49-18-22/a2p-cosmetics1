@@ -1,7 +1,8 @@
+import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Filter, Edit2, Trash2, Tag, Star, X, Save, Package, Upload } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 const EMPTY_FORM = { name: '', category: '', price: '', stock: '', image_url: '', hover_image_url: '', description: '', status: 'Active' };
 
