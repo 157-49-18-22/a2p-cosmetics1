@@ -114,14 +114,60 @@ const Auth = () => {
               className={`al-toggle-btn ${isLogin ? 'active' : ''}`}
               onClick={() => switchMode(true)}
             >
-              Sign In
+              <motion.span 
+                className="al-toggle-text"
+                animate={{ 
+                  scale: isLogin ? 1.1 : 1,
+                  fontWeight: isLogin ? 700 : 600
+                }}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.25 }}
+              >
+                Sign In
+              </motion.span>
+              {isLogin && (
+                <motion.div
+                  layoutId="active-pill"
+                  className="al-toggle-active-bg"
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 400, 
+                    damping: 30,
+                    mass: 0.8
+                  }}
+                />
+              )}
             </button>
             <button
               type="button"
               className={`al-toggle-btn ${!isLogin ? 'active' : ''}`}
               onClick={() => switchMode(false)}
             >
-              Create Account
+              <motion.span 
+                className="al-toggle-text"
+                animate={{ 
+                  scale: !isLogin ? 1.1 : 1,
+                  fontWeight: !isLogin ? 700 : 600
+                }}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.25 }}
+              >
+                Create Account
+              </motion.span>
+              {!isLogin && (
+                <motion.div
+                  layoutId="active-pill"
+                  className="al-toggle-active-bg"
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 400, 
+                    damping: 30,
+                    mass: 0.8
+                  }}
+                />
+              )}
             </button>
           </div>
 

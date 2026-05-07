@@ -71,56 +71,111 @@ const Checkout = () => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Simulate Fake Razorpay Flow
-    console.log("Initializing Fake Payment Gateway...");
-    
-    // Simulate Razorpay Modal Popup
-    alert(`Razorpay Payment Gateway (Test Mode)
-Amount: Rs. ${total}
-Order ID: order_fake_${Math.random().toString(36).substr(2, 9)}
-Click OK to simulate successful payment.`);
-
     try {
-      const response = await fetch('http://localhost:5000/api/orders/create', {
+      // 1. Load Razorpay Script
+      const loadScript = (src) => {
+        return new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.onload = () => resolve(true);
+          script.onerror = () => resolve(false);
+          document.body.appendChild(script);
+        });
+      };
+
+      const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+
+      if (!res) {
+        alert("Razorpay SDK failed to load. Are you online?");
+        setIsProcessing(false);
+        return;
+      }
+
+      // 2. Create Razorpay Order in Backend
+      const orderRes = await fetch('http://localhost:5000/api/orders/razorpay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer_name: `${formData.firstName} ${formData.lastName}`,
-          customer_email: formData.email,
-          customer_phone: formData.phone,
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zip_code: formData.zipCode,
-          subtotal: subtotal,
-          discount: discountAmount,
-          total_amount: total,
-          items: cartItems
-        })
+        body: JSON.stringify({ amount: total })
       });
 
-      const data = await response.json();
+      const orderData = await orderRes.json();
 
-      if (data.success) {
-        console.log("Order Saved in DB:", data.orderId);
-        clearCart();
-        navigate('/order-success', { 
-          state: { 
-            orderId: data.orderId,
-            amount: total,
-            customer: `${formData.firstName} ${formData.lastName}`
-          } 
-        });
-      } else {
-        alert("Failed to save order in database.");
+      if (!orderData.success) {
+        alert("Server error. Please try again.");
+        setIsProcessing(false);
+        return;
       }
+
+      // 3. Open Razorpay Modal
+      const options = {
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: "INR",
+        name: "A2P Cosmetics",
+        description: "Test Transaction",
+        order_id: orderData.order_id,
+        handler: async function (response) {
+          // 4. On Payment Success, Save Order in DB
+          try {
+            const saveOrderRes = await fetch('http://localhost:5000/api/orders/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                customer_name: `${formData.firstName} ${formData.lastName}`,
+                customer_email: formData.email,
+                customer_phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                zip_code: formData.zipCode,
+                subtotal: subtotal,
+                discount: discountAmount,
+                total_amount: total,
+                items: cartItems,
+                payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+
+            const data = await saveOrderRes.json();
+
+            if (data.success) {
+              clearCart();
+              navigate('/order-success', { 
+                state: { 
+                  orderId: data.orderId,
+                  amount: total,
+                  customer: `${formData.firstName} ${formData.lastName}`
+                } 
+              });
+            } else {
+              alert("Payment successful but order could not be saved. Please contact support.");
+            }
+          } catch (err) {
+            console.error("Error saving order after payment:", err);
+            alert("Something went wrong while saving your order.");
+          }
+        },
+        prefill: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          contact: formData.phone
+        },
+        theme: {
+          color: "#d4a373"
+        }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+
     } catch (err) {
-      console.error("Error creating order:", err);
+      console.error("Error in checkout flow:", err);
       alert("Something went wrong. Please try again.");
     } finally {
       setIsProcessing(false);
     }
-
   };
 
   if (cartItems.length === 0 && !isProcessing) {

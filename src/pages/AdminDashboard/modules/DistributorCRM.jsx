@@ -14,6 +14,11 @@ const DistributorCRM = () => {
   const [selectedDist, setSelectedDist] = useState(null);
   const [zones, setZones] = useState([]);
   const [loadingZones, setLoadingZones] = useState(false);
+  const [showRequestsModal, setShowRequestsModal] = useState(false);
+  const [requests, setRequests] = useState([]);
+  const [loadingReqs, setLoadingReqs] = useState(false);
+  const [selectedReqItems, setSelectedReqItems] = useState([]);
+  const [showItemsModal, setShowItemsModal] = useState(false);
   const [toast, setToast] = useState(null);
   const [formData, setFormData] = useState({ 
     name: '', email: '', password: '', phone: '', role: 'Senior Distributor', 
@@ -56,6 +61,32 @@ const DistributorCRM = () => {
       showToast('Error loading zones', 'danger');
     } finally {
       setLoadingZones(false);
+    }
+  };
+
+  const handleViewRequests = async (dist) => {
+    setSelectedDist(dist);
+    setShowRequestsModal(true);
+    try {
+      setLoadingReqs(true);
+      const res = await fetch(`${API}/distributors/${dist.id}/stock-requests`);
+      const data = await res.json();
+      setRequests(Array.isArray(data) ? data : []);
+    } catch (e) {
+      showToast('Error loading requests', 'danger');
+    } finally {
+      setLoadingReqs(false);
+    }
+  };
+
+  const handleViewReqItems = async (reqId) => {
+    try {
+      const res = await fetch(`${API}/distributors/stock-requests/${reqId}/items`);
+      const data = await res.json();
+      setSelectedReqItems(data);
+      setShowItemsModal(true);
+    } catch (e) {
+      showToast('Error loading items', 'danger');
     }
   };
 
@@ -200,7 +231,13 @@ const DistributorCRM = () => {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                   <button className="adm-btn adm-btn-outline" style={{ justifyContent: 'center', gap: '8px' }} onClick={() => handleViewZones(d)}><Target size={14} /> View Zones</button>
-                  <button className="adm-btn adm-btn-primary" style={{ justifyContent: 'center', gap: '8px' }} onClick={() => handlePortal(d)}><LayoutDashboard size={14} /> Portal</button>
+                  <button className="adm-btn adm-btn-outline" style={{ justifyContent: 'center', gap: '8px', border: '1.5px solid #a855f7', color: '#a855f7', position: 'relative' }} onClick={() => handleViewRequests(d)}>
+                    <Package size={14} /> Requests
+                    {d.pending_requests > 0 && (
+                      <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#ef4444', color: '#fff', fontSize: '0.65rem', padding: '2px 6px', borderRadius: '10px', fontWeight: 900, boxShadow: '0 4px 10px rgba(239, 68, 68, 0.4)' }}>{d.pending_requests}</span>
+                    )}
+                  </button>
+                  <button className="adm-btn adm-btn-primary" style={{ justifyContent: 'center', gap: '8px', gridColumn: 'span 2' }} onClick={() => handlePortal(d)}><LayoutDashboard size={14} /> Distributor Portal</button>
                 </div>
               </div>
             </div>
@@ -239,6 +276,72 @@ const DistributorCRM = () => {
               </div>
               <button className="adm-btn adm-btn-primary" style={{ width: '100%', marginTop: '24px', justifyContent: 'center' }}>Allocate New Zone</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stock Requests Modal */}
+      {showRequestsModal && selectedDist && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', padding: '20px' }}>
+          <div className="adm-fade-in" style={{ background: '#fff', borderRadius: '28px', width: '600px', overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.35)' }}>
+            <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+              <div>
+                <h3 style={{ fontWeight: 800, fontSize: '1.2rem' }}>Stock Indents</h3>
+                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>Requests from {selectedDist.name}</p>
+              </div>
+              <button className="adm-icon-btn" onClick={() => setShowRequestsModal(false)}><X size={20} /></button>
+            </div>
+            <div style={{ padding: '32px', maxHeight: '500px', overflowY: 'auto' }}>
+              {loadingReqs ? (
+                <p style={{ textAlign: 'center', color: '#94a3b8' }}>Fetching requests...</p>
+              ) : requests.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px', background: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+                  <Package size={32} style={{ opacity: 0.1, marginBottom: '12px' }} />
+                  <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>No stock requests found for this partner.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {requests.map((r) => (
+                    <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: '#f8fafc', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          <span style={{ fontWeight: 800, fontSize: '1rem' }}>{r.request_number}</span>
+                          <span className="adm-badge" style={{ background: '#fef3c7', color: '#d97706', fontSize: '0.6rem' }}>{r.status}</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Date: {new Date(r.created_at).toLocaleDateString()} | Value: ₹{r.total_amount?.toLocaleString()}</p>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="adm-btn adm-btn-outline" style={{ height: '36px', fontSize: '0.75rem' }} onClick={() => handleViewReqItems(r.id)}>View Items</button>
+                        {r.status === 'Pending' && (
+                          <button className="adm-btn adm-btn-primary" style={{ height: '36px', fontSize: '0.75rem', background: '#10b981' }} onClick={() => handleStatusUpdate(r.id, 'Approved')}>Approve</button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Request Items Modal */}
+      {showItemsModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.5)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
+          <div className="adm-fade-in" style={{ background: '#fff', borderRadius: '24px', width: '400px', padding: '24px', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h4 style={{ fontWeight: 900, margin: 0 }}>Item List</h4>
+              <button className="adm-icon-btn" onClick={() => setShowItemsModal(false)}><X size={18} /></button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {selectedReqItems.map((item, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '12px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{item.product_name}</span>
+                  <span style={{ fontWeight: 800, color: '#a855f7' }}>x{item.quantity}</span>
+                </div>
+              ))}
+            </div>
+            <button className="adm-btn adm-btn-primary" style={{ width: '100%', marginTop: '20px', justifyContent: 'center' }} onClick={() => setShowItemsModal(false)}>Close</button>
           </div>
         </div>
       )}

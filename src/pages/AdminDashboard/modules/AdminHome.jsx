@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Users, ShoppingCart, Package, ArrowUpRight, ArrowDownRight, Activity, Heart, Layers, AlertTriangle } from 'lucide-react';
+import { TrendingUp, Users, ShoppingCart, Package, ArrowUpRight, ArrowDownRight, Activity, Heart, Layers, AlertTriangle, Briefcase, Globe } from 'lucide-react';
 
 const API = 'http://localhost:5000/api';
 
@@ -23,10 +23,10 @@ const AdminHome = () => {
   }, []);
 
   const statCards = stats ? [
-    { label: 'Total Products', value: stats.total_products, icon: Package, color: '#3b82f6', sub: `${stats.out_of_stock} out of stock`, isUp: true },
-    { label: 'Total Categories', value: stats.total_categories, icon: Layers, color: '#8b5cf6', sub: 'Active categories', isUp: true },
-    { label: 'Cart Orders', value: stats.cart_orders, icon: ShoppingCart, color: '#10b981', sub: 'Items currently in carts', isUp: true },
-    { label: 'Wishlist Items', value: stats.wishlist_count, icon: Heart, color: '#f43f5e', sub: 'Across all users', isUp: true },
+    { label: 'Total Products', value: stats.total_products, icon: Package, color: '#3b82f6', sub: 'In Inventory', isUp: true },
+    { label: 'Total Orders', value: stats.total_orders, icon: ShoppingCart, color: '#10b981', sub: 'Processed orders', isUp: true },
+    { label: 'Total Customers', value: stats.total_customers, icon: Users, color: '#8b5cf6', sub: 'Registered users', isUp: true },
+    { label: 'Total Agents', value: stats.total_agents, icon: Briefcase, color: '#f59e0b', sub: 'Active agents', isUp: true },
   ] : [];
 
   const alertCards = stats ? [
@@ -130,6 +130,92 @@ const AdminHome = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginTop: '24px' }}>
+        {/* Recent Orders */}
+        <div className="adm-card">
+          <div className="adm-card-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#10b98115', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShoppingCart size={18} />
+              </div>
+              <h3 className="adm-card-title">Recent Orders</h3>
+            </div>
+            <button className="adm-btn adm-btn-outline" style={{ padding: '6px 14px', fontSize: '0.75rem' }}>View Orders</button>
+          </div>
+          <div className="adm-card-body" style={{ padding: '0' }}>
+            <div className="adm-table-wrap">
+              <table className="adm-table">
+                <thead>
+                  <tr>
+                    <th style={{ paddingLeft: '24px' }}>Order ID</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats?.recent_orders?.map((o, i) => (
+                    <tr key={i}>
+                      <td style={{ paddingLeft: '24px' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#3b82f6' }}>#{o.order_number.split('-')[1] || o.order_number}</span>
+                      </td>
+                      <td>
+                        <p style={{ margin: 0, fontWeight: 600, fontSize: '0.85rem' }}>{o.customer_name}</p>
+                        <p style={{ margin: 0, fontSize: '0.7rem', color: '#94a3b8' }}>{o.customer_email}</p>
+                      </td>
+                      <td style={{ fontWeight: 800 }}>₹{o.total_amount}</td>
+                      <td>
+                        <span style={{ 
+                          fontSize: '0.65rem', 
+                          fontWeight: 800, 
+                          padding: '4px 10px', 
+                          borderRadius: '20px',
+                          background: o.order_status === 'Delivered' ? '#dcfce7' : '#fef9c3',
+                          color: o.order_status === 'Delivered' ? '#15803d' : '#a16207'
+                        }}>
+                          {o.order_status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {(!stats?.recent_orders || stats.recent_orders.length === 0) && (
+                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>No orders found</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Registrations */}
+        <div className="adm-card">
+          <div className="adm-card-header">
+            <h3 className="adm-card-title">Recent Joinees</h3>
+          </div>
+          <div className="adm-card-body" style={{ padding: '0' }}>
+            <div style={{ padding: '16px' }}>
+              {stats?.recent_users?.map((u, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', paddingBottom: '16px', borderBottom: i === 4 ? 'none' : '1px solid #f1f5f9' }}>
+                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#64748b' }}>
+                    {u.name[0]}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: '0.85rem' }}>{u.name}</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{u.type}</span>
+                      <span style={{ fontSize: '0.65rem', color: '#cbd5e1' }}>{new Date(u.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {(!stats?.recent_users || stats.recent_users.length === 0) && (
+                <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>No recent users</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

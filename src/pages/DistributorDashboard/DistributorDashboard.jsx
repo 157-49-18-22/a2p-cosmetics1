@@ -3,7 +3,7 @@ import {
   LayoutDashboard, UserCheck, Package, FileText,
   Map, Users, Star, Megaphone, ChevronRight,
   Bell, Search, LogOut, Menu, X, TrendingUp,
-  Settings, ChevronDown
+  Settings, ChevronDown, ShoppingCart
 } from 'lucide-react';
 import Onboarding from './modules/Onboarding';
 import InventoryManagement from './modules/InventoryManagement';
@@ -13,11 +13,13 @@ import DealerSubDealer from './modules/DealerSubDealer';
 import SuperStockist from './modules/SuperStockist';
 import BrandingManagement from './modules/BrandingManagement';
 import DashboardHome from './modules/DashboardHome';
+import StockRequest from './modules/StockRequest';
 import './DistributorDashboard.css';
 
 const navItems = [
   { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'onboarding', label: 'Onboarding', icon: UserCheck },
+  { id: 'stock_request', label: 'Stock Indenting', icon: ShoppingCart },
   { id: 'inventory', label: 'Inventory Management', icon: Package },
   { id: 'billing', label: 'Billing Management', icon: FileText },
   { id: 'area', label: 'Area Allocation', icon: Map },
@@ -29,12 +31,47 @@ const navItems = [
 const moduleComponents = {
   home: DashboardHome,
   onboarding: Onboarding,
+  stock_request: StockRequest,
   inventory: InventoryManagement,
   billing: BillingManagement,
   area: AreaAllocation,
   dealer: DealerSubDealer,
   stockist: SuperStockist,
   branding: BrandingManagement,
+};
+
+const AnnouncementTicker = () => {
+  const [news, setNews] = useState([]);
+  useEffect(() => {
+    fetch('http://localhost:5000/api/announcements')
+      .then(r => r.json())
+      .then(d => setNews(d.filter(n => n.status === 'Active')));
+  }, []);
+
+  if (news.length === 0) return null;
+
+  return (
+    <div style={{ background: '#fff', borderRadius: '16px', padding: '12px 20px', border: '1.5px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '16px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+      <div style={{ background: '#f3eeff', color: '#a855f7', padding: '4px 10px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+        <Megaphone size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} /> Global Broadcast
+      </div>
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', gap: '40px', animation: news.length > 1 ? 'dd-ticker 30s linear infinite' : 'none' }}>
+          {news.map((n, i) => (
+            <span key={i} style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', whiteSpace: 'nowrap' }}>
+              <strong style={{ color: n.type === 'Alert' ? '#ef4444' : n.type === 'Promotion' ? '#f59e0b' : '#3b82f6' }}>[{n.type}]</strong> {n.title}: {n.message}
+            </span>
+          ))}
+        </div>
+      </div>
+      <style>{`
+        @keyframes dd-ticker {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+    </div>
+  );
 };
 
 const DistributorDashboard = () => {
@@ -125,6 +162,11 @@ const DistributorDashboard = () => {
             </div>
           </div>
         </header>
+
+        {/* Announcements Ticker */}
+        <div className="dd-announcements" style={{ padding: '0 32px', marginBottom: '8px' }}>
+           <AnnouncementTicker />
+        </div>
 
         {/* Module Content */}
         <main className="dd-content">

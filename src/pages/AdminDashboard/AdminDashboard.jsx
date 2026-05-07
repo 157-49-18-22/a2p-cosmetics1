@@ -15,7 +15,9 @@ import {
   ChevronRight,
   LogOut,
   ChevronDown,
-  Settings
+  Settings,
+  ShoppingCart,
+  Megaphone
 } from 'lucide-react';
 import AdminHome from './modules/AdminHome';
 import CategoryManager from './modules/CategoryManager';
@@ -26,12 +28,18 @@ import AgentCRM from './modules/AgentCRM';
 import DistributorCRM from './modules/DistributorCRM';
 import CustomerCRM from './modules/CustomerCRM';
 import SupportManager from './modules/SupportManager';
+import UserManager from './modules/UserManager';
+import OrderManager from './modules/OrderManager';
+import BroadcastManager from './modules/BroadcastManager';
 import './AdminDashboard.css';
 
 const navItems = [
   { id: 'home', label: 'Admin Hub', icon: LayoutDashboard },
+  { id: 'broadcasts', label: 'Broadcasts', icon: Megaphone },
   { id: 'cms', label: 'CMS Manager', icon: FileCode },
   { id: 'inventory', label: 'Master Inventory', icon: Boxes },
+  { id: 'orders', label: 'Orders', icon: ShoppingCart },
+  { id: 'users', label: 'Users', icon: Users2 },
   { id: 'agents', label: 'Agent CRM', icon: Users2 },
   { id: 'distributors', label: 'Distributor CRM', icon: Building2 },
   { id: 'customers', label: 'Customer CRM', icon: Users2 },
@@ -40,8 +48,11 @@ const navItems = [
 
 const moduleMap = {
   home: AdminHome,
+  broadcasts: BroadcastManager,
   cms: CMSManager,
   inventory: InventoryManager,
+  orders: OrderManager,
+  users: UserManager,
   agents: AgentCRM,
   distributors: DistributorCRM,
   customers: CustomerCRM,

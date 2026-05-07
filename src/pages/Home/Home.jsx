@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNotifications } from '../../components/Notifications/NotificationHub';
 import Hero from '../../components/Hero/Hero';
 import Categories from '../../components/Categories/Categories';
@@ -11,31 +11,35 @@ import Newsletter from '../../components/Newsletter/Newsletter';
 
 const Home = () => {
   const { showNotification } = useNotifications();
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    // Simulated Push Notifications
-    const timer1 = setTimeout(() => {
-      showNotification({
-        type: 'promo',
-        title: 'FLASH SALE LIVE!',
-        message: 'Use code GLOW50 for 50% OFF on all Face Serums. Limited time only!',
-        duration: 8000
-      });
-    }, 2000);
+    if (hasFetched.current) return;
+    hasFetched.current = true;
 
-    const timer2 = setTimeout(() => {
-      showNotification({
-        type: 'info',
-        title: 'New Journal Post',
-        message: 'Read our latest article: "The Ultimate Guide to Glow: Morning vs Evening Routine".',
-        duration: 6000
-      });
-    }, 5000);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
+    let timers = [];
+    const fetchBroadcasts = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/announcements');
+        const data = await res.json();
+        const active = data.filter(n => n.status === 'Active');
+        
+        active.forEach((n, index) => {
+          const t = setTimeout(() => {
+            showNotification({
+              type: n.type.toLowerCase() === 'promotion' ? 'promo' : 'info',
+              title: n.title,
+              message: n.message,
+              duration: 8000
+            });
+          }, 2000 + (index * 4000));
+          timers.push(t);
+        });
+      } catch (err) { console.error('Broadcast fetch failed:', err); }
     };
+
+    fetchBroadcasts();
+    return () => timers.forEach(t => clearTimeout(t));
   }, []);
 
   return (

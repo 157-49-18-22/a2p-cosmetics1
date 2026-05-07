@@ -40,8 +40,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 3rem;
+  justify-content: flex-end;
+  padding: 3rem 3rem 22vh 3rem; /* Lifted higher from the bottom */
 }
 
 .al-image-quote {
@@ -53,7 +53,7 @@
   text-align: center;
   letter-spacing: -0.01em;
   line-height: 1.2;
-  text-shadow: 0 2px 20px rgba(0,0,0,0.15);
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
   margin: 0;
 }
 
@@ -103,11 +103,16 @@
 .al-toggle {
   display: flex;
   align-items: center;
-  background: #ede8e3;
+  background: rgba(237, 232, 227, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 50px;
-  padding: 4px;
-  margin-bottom: 2rem;
+  padding: 5px;
+  margin-bottom: 2.5rem;
   position: relative;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.05),
+    inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .al-toggle-btn {
@@ -122,16 +127,68 @@
   color: #747878;
   cursor: pointer;
   border-radius: 50px;
-  transition: all 0.25s ease;
+  transition: color 0.25s ease;
   position: relative;
   z-index: 1;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  /* Allow lens to spill out slightly if needed */
+}
+
+.al-toggle-text {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
 }
 
 .al-toggle-btn.active {
-  background: #ff4d6d;
   color: #ffffff;
-  box-shadow: 0 2px 12px rgba(255, 77, 109, 0.3);
+}
+
+.al-toggle-active-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #ff4d6d, #ff758c);
+  border-radius: 50px;
+  z-index: 1;
+  box-shadow:
+    0 10px 25px rgba(255, 77, 109, 0.4),
+    inset 0 0 15px rgba(255, 255, 255, 0.25);
+  transform-origin: center;
+}
+
+/* The lens 'glint' */
+.al-toggle-active-bg::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 15%;
+  width: 70%;
+  height: 40%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), transparent);
+  border-radius: 100px;
+  pointer-events: none;
+}
+
+/* The 'magnifying' glow around the lens */
+.al-toggle-active-bg::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: transparent;
+  border: 2px solid rgba(255, 77, 109, 0.2);
+  border-radius: 50px;
+  pointer-events: none;
+  filter: blur(2px);
 }
 
 .al-toggle-btn:not(.active):hover {
@@ -368,7 +425,9 @@
 }
 
 @keyframes al-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ─── Social Auth ────────────────────────────────────────────────── */
