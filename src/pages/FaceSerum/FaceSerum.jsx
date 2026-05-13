@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Star, ChevronDown, CheckCircle, Sparkles, Droplets, Filter, X } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useNotifications } from '../../components/Notifications/NotificationHub';
-import './FaceSerum.css'; 
+import './FaceSerum.css';
 
 const FaceSerum = () => {
   const { addToCart } = useCart();
@@ -97,7 +97,7 @@ const FaceSerum = () => {
 
       <div className="lips-container" style={{ marginTop: '4rem' }}>
         {/* Mobile Filter Toggle */}
-        <button 
+        <button
           className="mobile-filter-btn"
           onClick={() => setIsFilterOpen(true)}
         >
@@ -135,8 +135,8 @@ const FaceSerum = () => {
                   { name: 'Combination', icon: '🔄' },
                   { name: 'All Skin Types', icon: '🌸' }
                 ].map(type => (
-                  <div 
-                    key={type.name} 
+                  <div
+                    key={type.name}
                     className={`brand-item ${activeSkinType === type.name ? 'selected' : ''}`}
                     onClick={() => setActiveSkinType(type.name)}
                   >
@@ -164,8 +164,8 @@ const FaceSerum = () => {
                   { name: 'Acne Control', icon: '💧' },
                   { name: 'Dark Spots', icon: '⭐' }
                 ].map(concern => (
-                  <div 
-                    key={concern.name} 
+                  <div
+                    key={concern.name}
                     className={`brand-item ${activeConcern === concern.name ? 'selected' : ''}`}
                     onClick={() => setActiveConcern(concern.name)}
                   >
@@ -188,26 +188,26 @@ const FaceSerum = () => {
               <div className="price-range-premium">
                 <div className="price-inputs" style={{ marginBottom: '15px' }}>
                   <div className="price-input-box">
-                    <input 
-                      type="number" 
-                      value={priceRange[0]} 
+                    <input
+                      type="number"
+                      value={priceRange[0]}
                       onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
                     />
                   </div>
                   <span className="price-separator">—</span>
                   <div className="price-input-box">
-                    <input 
-                      type="number" 
-                      value={priceRange[1]} 
+                    <input
+                      type="number"
+                      value={priceRange[1]}
                       onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 0])}
                     />
                   </div>
                 </div>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="3000" 
-                  value={priceRange[1]} 
+                <input
+                  type="range"
+                  min="0"
+                  max="3000"
+                  value={priceRange[1]}
                   onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
                   style={{ width: '100%', accentColor: '#ff6b81' }}
                 />
@@ -258,8 +258,8 @@ const FaceSerum = () => {
                     <div className="lip-card-price">
                       <span className="current-price">Rs. {parseFloat(product.price).toFixed(0)}.00</span>
                     </div>
-                    <button 
-                      className="add-btn" 
+                    <button
+                      className="add-btn"
                       onClick={() => handleAddToCart(product)}
                       disabled={product.status === 'Out of Stock'}
                     >

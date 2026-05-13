@@ -145,23 +145,23 @@ const DistributorCRM = () => {
       )}
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
+      <div className="adm-module-header">
+        <div className="adm-header-title-wrap">
           <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a' }}>Distributor CRM</h2>
           <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Network expansion, credit risk assessment, and regional management.</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="adm-btn adm-btn-outline" onClick={fetchData} disabled={loading}>
+        <div style={{ display: 'flex', gap: '12px', width: window.innerWidth <= 768 ? '100%' : 'auto' }}>
+          <button className="adm-btn adm-btn-outline" onClick={fetchData} disabled={loading} style={{ flex: window.innerWidth <= 768 ? 1 : 'none', justifyContent: 'center' }}>
             <RefreshCcw size={16} className={loading ? 'adm-spin' : ''} />
           </button>
-          <button className="adm-btn adm-btn-primary" onClick={() => setShowModal(true)}>
+          <button className="adm-btn adm-btn-primary" onClick={() => setShowModal(true)} style={{ flex: window.innerWidth <= 768 ? 4 : 'none', justifyContent: 'center' }}>
             <Building2 size={18} /> New Distributor
           </button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+      <div className="adm-stats-grid">
         {[
           { label: 'Active Partners', val: stats.active_partners, icon: Users, color: '#3b82f6' },
           { label: 'Total Credit Limit', val: `₹${(stats.total_credit / 100000).toFixed(1)}L`, icon: CreditCard, color: '#10b981' },
@@ -181,7 +181,7 @@ const DistributorCRM = () => {
       </div>
 
       {/* Distributor Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(350px, 100%), 1fr))', gap: '24px' }}>
         {loading ? (
           <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px', color: '#94a3b8' }}>Loading network data...</div>
         ) : distributors.length === 0 ? (
@@ -248,8 +248,8 @@ const DistributorCRM = () => {
 
       {/* Zones Modal */}
       {showZonesModal && selectedDist && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', padding: '20px' }}>
-          <div className="adm-fade-in" style={{ background: '#fff', borderRadius: '28px', width: '500px', overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.35)' }}>
+        <div className="adm-modal-overlay">
+          <div className="adm-modal adm-fade-in" style={{ width: 'min(500px, 100%)' }}>
             <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
               <div>
                 <h3 style={{ fontWeight: 800, fontSize: '1.2rem' }}>Territory Management</h3>
@@ -283,8 +283,8 @@ const DistributorCRM = () => {
 
       {/* Stock Requests Modal */}
       {showRequestsModal && selectedDist && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', padding: '20px' }}>
-          <div className="adm-fade-in" style={{ background: '#fff', borderRadius: '28px', width: '600px', overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.35)' }}>
+        <div className="adm-modal-overlay">
+          <div className="adm-modal adm-fade-in" style={{ width: 'min(600px, 100%)' }}>
             <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
               <div>
                 <h3 style={{ fontWeight: 800, fontSize: '1.2rem' }}>Stock Indents</h3>
@@ -328,8 +328,8 @@ const DistributorCRM = () => {
 
       {/* Request Items Modal */}
       {showItemsModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.5)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
-          <div className="adm-fade-in" style={{ background: '#fff', borderRadius: '24px', width: '400px', padding: '24px', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}>
+        <div className="adm-modal-overlay" style={{ zIndex: 1200 }}>
+          <div className="adm-modal adm-fade-in" style={{ width: 'min(400px, 100%)', padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h4 style={{ fontWeight: 900, margin: 0 }}>Item List</h4>
               <button className="adm-icon-btn" onClick={() => setShowItemsModal(false)}><X size={18} /></button>
@@ -349,8 +349,8 @@ const DistributorCRM = () => {
 
       {/* Advanced Onboarding Modal */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', padding: '20px' }}>
-          <div className="adm-fade-in" style={{ background: '#fff', borderRadius: '28px', width: '640px', overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.35)' }}>
+        <div className="adm-modal-overlay">
+          <div className="adm-modal adm-fade-in" style={{ width: 'min(640px, 100%)' }}>
             <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
               <div>
                 <h3 style={{ fontWeight: 800, fontSize: '1.25rem', color: '#0f172a' }}>Partner Onboarding</h3>
@@ -360,7 +360,7 @@ const DistributorCRM = () => {
             </div>
             
             <form onSubmit={handleCreate} style={{ padding: '32px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr', gap: '24px' }}>
                 <div style={{ gridColumn: '1 / -1' }}>
                   <label className="adm-form-label" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase' }}>Company Full Name</label>
                   <input type="text" required className="adm-btn adm-btn-outline" style={{ width: '100%', textAlign: 'left', cursor: 'text', height: '48px', padding: '0 16px' }} value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />

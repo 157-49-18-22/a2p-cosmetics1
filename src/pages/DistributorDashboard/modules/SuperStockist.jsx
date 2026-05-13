@@ -110,18 +110,18 @@ const SuperStockist = () => {
   return (
     <div className="dd-module-enter">
       <div className="dd-module-header">
-        <div>
+        <div className="dd-header-info">
           <h1 className="dd-module-title">Super Stockist</h1>
           <p className="dd-module-subtitle">Manage top-tier stockists who supply to your dealer network</p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div className="dd-header-btns">
           <button className="dd-btn dd-btn-outline" onClick={handleExportReport}>Export Report</button>
           <button className="dd-btn dd-btn-primary" onClick={() => { setIsEditing(false); setNewStockist({ name: '', zone: 'Zone A', status: 'Active' }); setShowForm(true); }}><Plus size={15} /> Add Stockist</button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="dd-stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
+      <div className="dd-stats-grid">
         {[
           { label: 'Total Super Stockists', value: stockists.length, color: '#fdf4ff', iconColor: '#c026d3' },
           { label: 'Active', value: stockists.filter(s => s.status === 'Active').length, color: '#f0fdf4', iconColor: '#16a34a' },
@@ -170,15 +170,15 @@ const SuperStockist = () => {
       )}
 
       {/* Stockist Cards */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <p style={{ fontWeight: 700, fontSize: '0.92rem', color: '#1e1b2e' }}>All Super Stockists</p>
-        <div className="dd-search-inline">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 16 }}>
+        <p style={{ fontWeight: 700, fontSize: '0.92rem', color: '#1e1b2e', margin: 0 }}>All Super Stockists</p>
+        <div className="dd-search-inline" style={{ width: window.innerWidth <= 768 ? '100%' : 260 }}>
           <Search size={14} color="#9ca3af" />
           <input placeholder="Search stockist..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 18, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 18, marginBottom: 24 }}>
         {filtered.map(s => (
           <div key={s.id} style={{
             background: '#fff', borderRadius: 18, border: '1.5px solid #ede9f5',
@@ -231,9 +231,9 @@ const SuperStockist = () => {
                 ))}
               </div>
 
-              <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+              <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
                 <button className="dd-btn dd-btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '8px', fontSize: '0.77rem' }} onClick={() => handleEditClick(s)}><Edit2 size={13} /> Edit</button>
-                <button className="dd-btn dd-btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '8px', fontSize: '0.77rem' }} onClick={() => handleViewDetails(s)}>View Details</button>
+                <button className="dd-btn dd-btn-primary" style={{ flex: 1.5, justifyContent: 'center', padding: '8px', fontSize: '0.77rem' }} onClick={() => handleViewDetails(s)}>View Details</button>
               </div>
             </div>
           </div>
@@ -275,7 +275,7 @@ const SuperStockist = () => {
       {/* Detail Modal */}
       {showDetails && selectedStockist && (
         <div className="dd-modal-overlay" onClick={() => setShowDetails(false)}>
-          <div className="dd-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 500 }}>
+          <div className="dd-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 'min(500px, 100%)' }}>
             <div className="dd-modal-header" style={{ background: 'linear-gradient(135deg,#1a0533,#4a0f8a)', color: '#fff', border: 'none' }}>
               <div>
                 <h2 className="dd-modal-title" style={{ color: '#fff' }}>Stockist Profile</h2>
@@ -292,7 +292,7 @@ const SuperStockist = () => {
                   </div>
                </div>
 
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+               <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 480 ? '1fr' : '1fr 1fr', gap: 20 }}>
                   <div className="dd-field"><label>Primary Territory</label><div style={{ fontWeight: 600 }}>{selectedStockist.zone || 'Zone A'}</div></div>
                   <div className="dd-field"><label>Current Status</label><div>{statusBadge(selectedStockist.status)}</div></div>
                   <div className="dd-field"><label>Dealer Network</label><div style={{ fontWeight: 600 }}>{selectedStockist.dealers || 0} Authorized Dealers</div></div>

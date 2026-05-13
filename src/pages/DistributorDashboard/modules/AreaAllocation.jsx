@@ -100,18 +100,18 @@ const AreaAllocation = () => {
   return (
     <div className="dd-module-enter">
       <div className="dd-module-header">
-        <div>
+        <div className="dd-header-info">
           <h1 className="dd-module-title">Area Allocation</h1>
           <p className="dd-module-subtitle">Assign and manage distribution zones & territories</p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div className="dd-header-btns">
           <button className="dd-btn dd-btn-outline" onClick={handleExportMap}>Export Map</button>
           <button className="dd-btn dd-btn-primary" onClick={() => { setIsEditing(false); setNewZone({ zone_name: '', region: '', status: 'Allocated' }); setShowForm(true); }}><Plus size={15} /> Add Zone</button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="dd-stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
+      <div className="dd-stats-grid">
         {[
           { label: 'Total Zones', value: zones.length, color: '#f3eeff', iconColor: '#a855f7' },
           { label: 'Active Zones', value: zones.filter(z => z.status === 'Allocated').length, color: '#f0fdf4', iconColor: '#16a34a' },
@@ -160,7 +160,7 @@ const AreaAllocation = () => {
       )}
 
       {/* Zone Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: 18, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 18, marginBottom: 24 }}>
         {zones.map(z => (
           <div key={z.id} onClick={() => setSelected(selected === z.id ? null : z.id)}
             style={{

@@ -125,30 +125,30 @@ const CommissionSetup = () => {
   return (
     <div className="ag-enter">
       <div className="ag-module-header">
-        <div>
+        <div className="ag-header-info">
           <h1 className="ag-module-title">Commission Setup</h1>
           <p className="ag-module-subtitle">Configure commission percentages, bonuses, and performance tiers.</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="ag-header-btns">
           <button className="ag-btn ag-btn-outline" onClick={() => setShowBulkModal(true)}><Layers size={16} /> Bulk Update</button>
           <button className="ag-btn ag-btn-primary" onClick={() => setShowNewRuleModal(true)}><Plus size={16} /> New Rule</button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div className="ag-stats-grid">
         {tiers.map((tier, i) => (
-          <div key={i} className="ag-stat-card" style={{ borderLeft: `4px solid ${tier.color}` }}>
+          <div key={i} className="ag-stat-card" style={{ borderLeft: `4px solid ${tier.color}`, background: '#fff' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 800, color: tier.color, textTransform: 'uppercase' }}>Tier • {tier.name}</span>
               <Target size={14} color={tier.color} />
             </div>
-            <div className="ag-stat-value" style={{ fontSize: '1.2rem', marginTop: '4px' }}>{tier.multiplier}</div>
-            <div className="ag-stat-label">{tier.range} sale</div>
+            <div className="ag-stat-value" style={{ fontSize: '1.25rem', marginTop: '6px', fontWeight: 800 }}>{tier.multiplier}</div>
+            <div className="ag-stat-label" style={{ fontSize: '0.75rem', marginTop: '2px' }}>{tier.range} sale</div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '24px' }}>
+      <div className="ag-dashboard-grid">
         {/* Category Wise Commission */}
         <div className="ag-card">
           <div className="ag-card-header">
@@ -262,7 +262,7 @@ const CommissionSetup = () => {
       {/* New Rule Modal */}
       {showNewRuleModal && (
         <div className="ag-modal-overlay" onClick={() => setShowNewRuleModal(false)}>
-          <div className="ag-modal-content" onClick={e => e.stopPropagation()}>
+          <div className="ag-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 'min(500px, 95%)' }}>
             <div className="ag-modal-header">
               <h2 className="ag-modal-title">Create New Commission Rule</h2>
               <button className="ag-modal-close" onClick={() => setShowNewRuleModal(false)}><X size={18} /></button>
@@ -296,7 +296,7 @@ const CommissionSetup = () => {
       {/* Bulk Update Modal */}
       {showBulkModal && (
         <div className="ag-modal-overlay" onClick={() => setShowBulkModal(false)}>
-          <div className="ag-modal-content" style={{ maxWidth: 400 }} onClick={e => e.stopPropagation()}>
+          <div className="ag-modal-content" style={{ maxWidth: 'min(400px, 95%)' }} onClick={e => e.stopPropagation()}>
             <div className="ag-modal-header">
               <h2 className="ag-modal-title">Bulk Rate Adjustment</h2>
               <button className="ag-modal-close" onClick={() => setShowBulkModal(false)}><X size={18} /></button>

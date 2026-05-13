@@ -64,8 +64,8 @@ const CMSManager = () => {
       )}
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-        <div>
+      <div className="adm-module-header">
+        <div className="adm-header-title-wrap">
           <h2 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0f172a' }}>
             CMS Manager <Sparkles size={20} color="#3b82f6" style={{ display: 'inline', marginLeft: 8 }} />
           </h2>
@@ -75,7 +75,7 @@ const CMSManager = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '24px' }}>
+      <div className="adm-cms-layout">
 
         {/* Sidebar: Content Selection */}
         <div className="adm-card" style={{ height: 'fit-content', position: 'sticky', top: '100px' }}>

@@ -122,8 +122,8 @@ const ProductManager = ({ initialCategory = null }) => {
       )}
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <div>
+      <div className="adm-module-header">
+        <div className="adm-header-title-wrap">
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>
             {initialCategory ? `${initialCategory.charAt(0).toUpperCase() + initialCategory.slice(1)} Products` : 'Master Product List'}
           </h2>
@@ -135,14 +135,14 @@ const ProductManager = ({ initialCategory = null }) => {
       </div>
 
       <div className="adm-card">
-        <div className="adm-card-header">
-          <div style={{ display: 'flex', gap: '15px', flex: 1 }}>
-            <div className="adm-search" style={{ width: '380px' }}>
+        <div className="adm-card-header adm-card-header-flex">
+          <div className="adm-search-container">
+            <div className="adm-search">
               <Search size={16} />
               <input type="text" placeholder="Search product name or category..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
           </div>
-          <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>{filtered.length} products</span>
+          <span className="adm-count-badge">{filtered.length} products</span>
         </div>
 
         <div className="adm-table-wrap">
@@ -217,8 +217,8 @@ const ProductManager = ({ initialCategory = null }) => {
 
       {/* Modal */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', padding: '20px' }}>
-          <div className="adm-fade-in" style={{ background: '#fff', borderRadius: '24px', width: '640px', maxHeight: '90vh', overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column' }}>
+        <div className="adm-modal-overlay">
+          <div className="adm-modal adm-fade-in">
             
             {/* Modal Header */}
             <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(to right, #f8fafc, #fff)' }}>

@@ -41,6 +41,13 @@ const AgentDashboard = () => {
   const ActiveModule = moduleMap[active];
   const activeNav = navItems.find(n => n.id === active);
 
+  const handleNavClick = (id) => {
+    setActive(id);
+    if (window.innerWidth <= 1024) {
+      setSidebarOpen(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('active_agent');
     window.location.href = '/agent/login';
@@ -54,7 +61,11 @@ const AgentDashboard = () => {
   ];
 
   return (
-    <div className="ag-shell">
+    <div className={`ag-shell ${sidebarOpen ? 'sidebar-active' : ''}`}>
+      {/* Mobile Overlay */}
+      {sidebarOpen && window.innerWidth <= 1024 && (
+        <div className="ag-sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
       {/* ── Sidebar ── */}
       <aside className={`ag-sidebar ${sidebarOpen ? 'open' : 'collapsed'}`}>
         <div className="ag-sidebar-logo">
@@ -72,7 +83,7 @@ const AgentDashboard = () => {
             <button
               key={id}
               className={`ag-nav-item ${active === id ? 'active' : ''}`}
-              onClick={() => setActive(id)}
+              onClick={() => handleNavClick(id)}
               title={!sidebarOpen ? label : ''}
             >
               <span className="ag-nav-icon"><Icon size={18} /></span>

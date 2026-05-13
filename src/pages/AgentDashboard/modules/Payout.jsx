@@ -91,17 +91,17 @@ const Payout = () => {
   return (
     <div className="ag-enter">
       <div className="ag-module-header">
-        <div>
+        <div className="ag-header-info">
           <h1 className="ag-module-title">Payout Management</h1>
           <p className="ag-module-subtitle">Process agent commissions and manage payment histories.</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="ag-header-btns">
           <button className="ag-btn ag-btn-outline" onClick={() => setShowStatementModal(true)}><Download size={16} /> Statement</button>
           <button className="ag-btn ag-btn-primary" onClick={() => setShowBatchModal(true)}><CreditCard size={16} /> Process Batch</button>
         </div>
       </div>
 
-      <div className="ag-stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+      <div className="ag-stats-grid">
         <div className="ag-stat-card">
           <div className="ag-stat-icon" style={{ background: '#0ea5e915' }}><Wallet size={20} color="#0ea5e9" /></div>
           <div className="ag-stat-value">₹{(totalPaid / 1000).toFixed(1)}K</div>
@@ -208,7 +208,7 @@ const Payout = () => {
       {/* Statement Modal */}
       {showStatementModal && (
         <div className="ag-modal-overlay" onClick={() => setShowStatementModal(false)}>
-          <div className="ag-modal-content" onClick={e => e.stopPropagation()}>
+          <div className="ag-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 'min(500px, 95%)' }}>
             <div className="ag-modal-header">
               <h2 className="ag-modal-title">Download Statement</h2>
               <button className="ag-modal-close" onClick={() => setShowStatementModal(false)}><X size={18} /></button>
@@ -240,7 +240,7 @@ const Payout = () => {
       {/* Process Batch Modal */}
       {showBatchModal && (
         <div className="ag-modal-overlay" onClick={() => setShowBatchModal(false)}>
-          <div className="ag-modal-content" style={{ maxWidth: 450 }} onClick={e => e.stopPropagation()}>
+          <div className="ag-modal-content" style={{ maxWidth: 'min(450px, 95%)' }} onClick={e => e.stopPropagation()}>
             <div className="ag-modal-header">
               <h2 className="ag-modal-title">Process Payout Batch</h2>
               <button className="ag-modal-close" onClick={() => setShowBatchModal(false)}><X size={18} /></button>
@@ -267,7 +267,7 @@ const Payout = () => {
       {/* Receipt Modal */}
       {viewingReceipt && (
         <div className="ag-modal-overlay" onClick={() => setViewingReceipt(null)}>
-          <div className="ag-modal-content" style={{ maxWidth: 400 }} onClick={e => e.stopPropagation()}>
+          <div className="ag-modal-content" style={{ maxWidth: 'min(400px, 95%)' }} onClick={e => e.stopPropagation()}>
             <div className="ag-modal-header">
               <h2 className="ag-modal-title">Transaction Receipt</h2>
               <button className="ag-modal-close" onClick={() => setViewingReceipt(null)}><X size={18} /></button>

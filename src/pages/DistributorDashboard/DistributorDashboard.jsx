@@ -1,5 +1,5 @@
 import API_BASE_URL from '../../apiConfig.js';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard, UserCheck, Package, FileText,
   Map, Users, Star, Megaphone, ChevronRight,
@@ -88,8 +88,19 @@ const DistributorDashboard = () => {
   const ActiveComponent = moduleComponents[activeModule];
   const activeNav = navItems.find(n => n.id === activeModule);
 
+  const handleNavClick = (id) => {
+    setActiveModule(id);
+    if (window.innerWidth <= 1024) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
-    <div className="dd-shell">
+    <div className={`dd-shell ${sidebarOpen ? 'sidebar-active' : ''}`}>
+      {/* Mobile Overlay */}
+      {sidebarOpen && window.innerWidth <= 1024 && (
+        <div className="dd-sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
       {/* Sidebar */}
       <aside className={`dd-sidebar ${sidebarOpen ? 'open' : 'collapsed'}`}>
         <div className="dd-sidebar-logo">
@@ -102,7 +113,7 @@ const DistributorDashboard = () => {
             <button
               key={id}
               className={`dd-nav-item ${activeModule === id ? 'active' : ''}`}
-              onClick={() => setActiveModule(id)}
+              onClick={() => handleNavClick(id)}
               title={!sidebarOpen ? label : ''}
             >
               <span className="dd-nav-icon"><Icon size={18} /></span>

@@ -110,14 +110,16 @@ const ReferralCode = () => {
   return (
     <div className="ag-enter">
       <div className="ag-module-header">
-        <div>
+        <div className="ag-header-info">
           <h1 className="ag-module-title">Referral Codes</h1>
           <p className="ag-module-subtitle">Generate and track referral codes for agent marketing campaigns.</p>
         </div>
-         <button className="ag-btn ag-btn-primary" onClick={() => setShowCreateModal(true)}><Plus size={16} /> Create Code</button>
+        <div className="ag-header-btns">
+          <button className="ag-btn ag-btn-primary" onClick={() => setShowCreateModal(true)}><Plus size={16} /> Create Code</button>
+        </div>
       </div>
 
-      <div className="ag-stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+      <div className="ag-stats-grid">
         {[
           { label: 'Active Codes', value: activeCodes, icon: QrCode, color: '#0ea5e9' },
           { label: 'Total Uses', value: totalUses, icon: TrendingUp, color: '#16a34a' },
@@ -128,13 +130,13 @@ const ReferralCode = () => {
             <div className="ag-stat-icon" style={{ background: `${stat.color}15` }}>
               <stat.icon size={18} color={stat.color} />
             </div>
-            <div className="ag-stat-value" style={{ fontSize: '1.4rem' }}>{stat.value}</div>
+            <div className="ag-stat-value" style={{ fontSize: '1.4rem', fontWeight: 800 }}>{stat.value}</div>
             <div className="ag-stat-label">{stat.label}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', marginTop: '24px' }}>
+      <div className="ag-dashboard-grid">
         <div className="ag-card">
           <div className="ag-card-header">
             <h3 className="ag-card-title">Management Console</h3>
@@ -246,7 +248,7 @@ const ReferralCode = () => {
       {/* Create Code Modal */}
       {showCreateModal && (
         <div className="ag-modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="ag-modal-content" style={{ maxWidth: 450 }} onClick={e => e.stopPropagation()}>
+          <div className="ag-modal-content" style={{ maxWidth: 'min(450px, 95%)' }} onClick={e => e.stopPropagation()}>
             <div className="ag-modal-header">
               <h2 className="ag-modal-title">Generate Referral Code</h2>
               <button className="ag-modal-close" onClick={() => setShowCreateModal(false)}><X size={18} /></button>
@@ -287,7 +289,7 @@ const ReferralCode = () => {
       {/* Recognition Modal */}
       {showRecognitionModal && (
         <div className="ag-modal-overlay" onClick={() => setShowRecognitionModal(false)}>
-          <div className="ag-modal-content" style={{ maxWidth: 450 }} onClick={e => e.stopPropagation()}>
+          <div className="ag-modal-content" style={{ maxWidth: 'min(450px, 95%)' }} onClick={e => e.stopPropagation()}>
             <div className="ag-modal-header">
               <h2 className="ag-modal-title">Send Agent Recognition</h2>
               <button className="ag-modal-close" onClick={() => setShowRecognitionModal(false)}><X size={18} /></button>

@@ -143,11 +143,11 @@ const InventoryManagement = () => {
   return (
     <div className="dd-module-enter">
       <div className="dd-module-header">
-        <div>
+        <div className="dd-header-info">
           <h1 className="dd-module-title">Inventory Management</h1>
           <p className="dd-module-subtitle">Control your stock levels and product catalog.</p>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="dd-header-btns">
           <button className="dd-btn dd-btn-outline" onClick={handleExport} style={{ borderRadius: 12 }}>Export Catalog</button>
           <button className="dd-btn dd-btn-primary" onClick={() => { setIsEditing(false); setNewProduct({ name: '', category: 'Face Care', price: '', stock: '', status: 'Active' }); setShowForm(true); }} style={{ borderRadius: 12, background: 'linear-gradient(135deg, #a855f7, #7c3aed)' }}>
             <Plus size={18} /> Add Product
@@ -155,7 +155,7 @@ const InventoryManagement = () => {
         </div>
       </div>
 
-      <div className="dd-stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
+      <div className="dd-stats-grid">
         {[
           { label: 'Total Products', value: products.length, color: '#f3eeff', iconColor: '#a855f7' },
           { label: 'In Stock', value: products.filter(p => p.stock >= 50).length, color: '#f0fdf4', iconColor: '#16a34a' },
@@ -174,13 +174,13 @@ const InventoryManagement = () => {
 
       {/* SEARCH & FILTERS */}
       <div className="dd-card" style={{ borderRadius: 24, marginBottom: 24 }}>
-        <div className="dd-card-header" style={{ flexWrap: 'wrap', gap: 16, padding: '20px 24px' }}>
+        <div className="dd-card-header" style={{ flexWrap: 'wrap', gap: 16, padding: '20px 24px', flexDirection: window.innerWidth <= 768 ? 'column' : 'row', alignItems: window.innerWidth <= 768 ? 'stretch' : 'center' }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {categories.map(c => (
               <button key={c} onClick={() => setFilter(c)} className={`cat-pill ${filter === c ? 'active' : ''}`}>{c}</button>
             ))}
           </div>
-          <div className="dd-search-inline" style={{ width: 300, background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0' }}>
+          <div className="dd-search-inline" style={{ width: window.innerWidth <= 768 ? '100%' : 300, background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0' }}>
             <Search size={14} color="#94a3b8" />
             <input placeholder="Search products..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
@@ -235,7 +235,7 @@ const InventoryManagement = () => {
       {/* ADD PRODUCT MODAL */}
       {showForm && (
         <div className="dd-modal-overlay">
-          <div className="dd-modal-box adm-fade-in" style={{ width: 480 }}>
+          <div className="dd-modal-box adm-fade-in" style={{ width: 'min(480px, 100%)' }}>
              <div className="dd-modal-header-fancy">
                 <div>
                    <h3 className="modal-title">{isEditing ? 'Edit Product' : 'Add New Product'}</h3>
@@ -254,7 +254,7 @@ const InventoryManagement = () => {
                       <option>Face Care</option><option>Body Care</option><option>Hair Care</option><option>Fragrance</option>
                    </select>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 480 ? '1fr' : '1fr 1fr', gap: 16 }}>
                    <div className="dd-input-group">
                       <label><CreditCard size={14} /> Price (₹)</label>
                       <input type="number" placeholder="0.00" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} />
@@ -264,9 +264,9 @@ const InventoryManagement = () => {
                       <input type="number" placeholder="0" value={newProduct.stock} onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })} />
                    </div>
                 </div>
-                <div className="dd-modal-actions-fancy" style={{ marginTop: 10 }}>
-                   <button className="dd-btn-sec" style={{ flex: 1 }} onClick={() => setShowForm(false)}>Cancel</button>
-                   <button className="dd-btn-pri" style={{ flex: 2, background: 'linear-gradient(135deg, #10b981, #059669)' }} onClick={handleSaveProduct} disabled={saving}>
+                <div className="dd-modal-actions-fancy" style={{ marginTop: 10, flexWrap: 'wrap' }}>
+                   <button className="dd-btn-sec" style={{ flex: window.innerWidth <= 480 ? '1 1 100%' : 1, order: window.innerWidth <= 480 ? 2 : 1 }} onClick={() => setShowForm(false)}>Cancel</button>
+                   <button className="dd-btn-pri" style={{ flex: window.innerWidth <= 480 ? '1 1 100%' : 2, order: window.innerWidth <= 480 ? 1 : 2, background: 'linear-gradient(135deg, #10b981, #059669)' }} onClick={handleSaveProduct} disabled={saving}>
                       <CheckCircle size={16} /> {saving ? 'Saving...' : isEditing ? 'Update Product' : 'Save Product'}
                    </button>
                 </div>

@@ -196,18 +196,18 @@ const BrandingManagement = () => {
   return (
     <div className="dd-module-enter">
       <div className="dd-module-header">
-        <div>
+        <div className="dd-header-info">
           <h1 className="dd-module-title">Branding Management</h1>
           <p className="dd-module-subtitle">Manage campaigns, brand assets and promotional materials</p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div className="dd-header-btns">
           <button className="dd-btn dd-btn-outline" onClick={() => setShowAssetModal(true)}><Upload size={14} /> Upload Asset</button>
           <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(!showForm)}><Plus size={15} /> New Campaign</button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="dd-stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
+      <div className="dd-stats-grid">
         {[
           { label: 'Total Campaigns', value: campaigns.length, color: '#fdf4ff', iconColor: '#c026d3' },
           { label: 'Active Now', value: campaigns.filter(c => c.status === 'Active').length, color: '#f0fdf4', iconColor: '#16a34a' },
@@ -288,7 +288,7 @@ const BrandingManagement = () => {
 
       {/* Campaigns Grid */}
       {activeTab === 'campaigns' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 18 }}>
           {filteredCampaigns.map(c => (
             <div key={c.id} style={{ background: '#fff', borderRadius: 16, border: '1.5px solid #ede9f5', overflow: 'hidden', transition: 'all 0.25s' }}
               onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 6px 20px rgba(74,15,138,0.1)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
@@ -362,7 +362,7 @@ const BrandingManagement = () => {
       {/* Upload Asset Modal */}
       {showAssetModal && (
         <div className="dd-modal-overlay" onClick={() => setShowAssetModal(false)}>
-          <div className="dd-modal-content" onClick={e => e.stopPropagation()}>
+          <div className="dd-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 'min(500px, 100%)' }}>
             <div className="dd-modal-header">
               <h2 className="dd-modal-title">Upload Brand Asset</h2>
               <button className="dd-modal-close" onClick={() => setShowAssetModal(false)}><X size={18} /></button>
@@ -409,7 +409,7 @@ const BrandingManagement = () => {
       {/* Edit Campaign Modal */}
       {editingCampaign && (
         <div className="dd-modal-overlay" onClick={() => setEditingCampaign(null)}>
-          <div className="dd-modal-content" onClick={e => e.stopPropagation()}>
+          <div className="dd-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 'min(550px, 100%)' }}>
             <div className="dd-modal-header">
               <h2 className="dd-modal-title">Edit Campaign</h2>
               <button className="dd-modal-close" onClick={() => setEditingCampaign(null)}><X size={18} /></button>
@@ -457,7 +457,7 @@ const BrandingManagement = () => {
       {/* View Campaign Modal */}
       {viewingCampaign && (
         <div className="dd-modal-overlay" onClick={() => setViewingCampaign(null)}>
-          <div className="dd-modal-content" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+          <div className="dd-modal-content" style={{ maxWidth: 'min(500px, 100%)' }} onClick={e => e.stopPropagation()}>
             <div className="dd-modal-header" style={{ background: 'linear-gradient(135deg,#1a0533,#4a0f8a)', color: '#fff' }}>
               <div>
                 <h2 className="dd-modal-title" style={{ color: '#fff' }}>{viewingCampaign.title}</h2>
@@ -466,7 +466,7 @@ const BrandingManagement = () => {
               <button className="dd-modal-close" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff' }} onClick={() => setViewingCampaign(null)}><X size={18} /></button>
             </div>
             <div className="dd-modal-body">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 480 ? '1fr' : '1fr 1fr', gap: 20 }}>
                 <div><label style={{ fontSize: '0.7rem', color: '#9ca3af', textTransform: 'uppercase' }}>Type</label><p style={{ fontWeight: 600 }}>{viewingCampaign.type}</p></div>
                 <div><label style={{ fontSize: '0.7rem', color: '#9ca3af', textTransform: 'uppercase' }}>Status</label><p>{statusBadge(viewingCampaign.status)}</p></div>
                 <div><label style={{ fontSize: '0.7rem', color: '#9ca3af', textTransform: 'uppercase' }}>Budget</label><p style={{ fontWeight: 700, color: '#7c3aed' }}>₹{parseFloat(viewingCampaign.budget || 0).toLocaleString()}</p></div>
@@ -489,7 +489,7 @@ const BrandingManagement = () => {
       {/* View Asset Modal */}
       {viewingAsset && (
         <div className="dd-modal-overlay" onClick={() => setViewingAsset(null)}>
-          <div className="dd-modal-content" style={{ maxWidth: 450 }} onClick={e => e.stopPropagation()}>
+          <div className="dd-modal-content" style={{ maxWidth: 'min(450px, 100%)' }} onClick={e => e.stopPropagation()}>
             <div className="dd-modal-header" style={{ background: '#f3f4f6', borderBottom: '1px solid #e5e7eb' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ width: 40, height: 40, borderRadius: 10, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e5e7eb' }}>
@@ -523,7 +523,7 @@ const BrandingManagement = () => {
       {/* Edit Asset Modal */}
       {editingAsset && (
         <div className="dd-modal-overlay" onClick={() => setEditingAsset(null)}>
-          <div className="dd-modal-content" onClick={e => e.stopPropagation()}>
+          <div className="dd-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 'min(450px, 100%)' }}>
             <div className="dd-modal-header">
               <h2 className="dd-modal-title">Edit Asset Details</h2>
               <button className="dd-modal-close" onClick={() => setEditingAsset(null)}><X size={18} /></button>

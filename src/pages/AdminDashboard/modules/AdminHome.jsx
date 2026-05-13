@@ -81,14 +81,14 @@ const AdminHome = () => {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+      <div className="adm-main-grid">
         {/* Quick Actions */}
         <div className="adm-card">
           <div className="adm-card-header">
             <h3 className="adm-card-title">Admin Hub — Quick Actions</h3>
           </div>
           <div className="adm-card-body">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <div className="adm-quick-actions-grid">
               {[
                 { label: 'Add New Product', desc: 'Create product listing with price & stock', color: '#3b82f6', icon: Package },
                 { label: 'Add Category', desc: 'Create a new product category', color: '#8b5cf6', icon: Layers },
@@ -135,7 +135,7 @@ const AdminHome = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginTop: '24px' }}>
+      <div className="adm-main-grid" style={{ marginTop: '24px' }}>
         {/* Recent Orders */}
         <div className="adm-card">
           <div className="adm-card-header">

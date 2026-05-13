@@ -46,23 +46,23 @@ const OrderManager = () => {
   return (
     <div className="adm-fade-in" style={{ padding: '4px' }}>
       {/* Header Section */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <div>
+      <div className="adm-module-header">
+        <div className="adm-header-title-wrap">
           <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>Orders Management</h2>
           <p style={{ color: '#64748b', fontSize: '0.95rem', marginTop: '4px' }}>Track, manage and fulfill customer orders in real-time.</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="adm-btn adm-btn-outline" onClick={fetchOrders} style={{ background: '#fff' }}>
-            <RefreshCcw size={16} /> Refresh Orders
+        <div style={{ display: 'flex', gap: '12px', width: window.innerWidth <= 768 ? '100%' : 'auto' }}>
+          <button className="adm-btn adm-btn-outline" onClick={fetchOrders} style={{ background: '#fff', flex: window.innerWidth <= 768 ? 1 : 'none', justifyContent: 'center' }}>
+            <RefreshCcw size={16} /> Refresh
           </button>
-          <button className="adm-btn adm-btn-primary" style={{ background: '#3b82f6' }}>
-            <ShoppingBag size={18} /> Export CSV
+          <button className="adm-btn adm-btn-primary" style={{ background: '#3b82f6', flex: window.innerWidth <= 768 ? 1 : 'none', justifyContent: 'center' }}>
+            <ShoppingBag size={18} /> Export
           </button>
         </div>
       </div>
 
       {/* Orders Stats (Mini) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '24px' }}>
+      <div className="adm-stats-grid" style={{ marginBottom: '24px' }}>
         {[
           { label: 'Pending', count: orders.filter(o => o.order_status === 'Processing').length, color: '#f59e0b', icon: Package },
           { label: 'In Transit', count: orders.filter(o => o.order_status === 'Shipped').length, color: '#3b82f6', icon: Truck },
@@ -83,10 +83,12 @@ const OrderManager = () => {
 
       {/* Orders Table Card */}
       <div className="adm-card" style={{ borderRadius: '16px', border: '1px solid #e2e8f0', background: '#fff' }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid #f1f5f9', display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <div className="adm-search" style={{ flex: 1, background: '#f8fafc', border: '1px solid #e2e8f0', maxWidth: '400px' }}>
-            <Search size={16} color="#94a3b8" />
-            <input placeholder="Search by Order ID or Customer..." value={search} onChange={e => setSearch(e.target.value)} />
+        <div className="adm-card-header adm-card-header-flex">
+          <div className="adm-search-container">
+            <div className="adm-search" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <Search size={16} color="#94a3b8" />
+              <input placeholder="Search by Order ID or Customer..." value={search} onChange={e => setSearch(e.target.value)} />
+            </div>
           </div>
           <button className="adm-btn adm-btn-outline" style={{ border: '1px solid #e2e8f0' }}><Filter size={16} /> Filters</button>
         </div>

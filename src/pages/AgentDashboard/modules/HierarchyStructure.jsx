@@ -56,13 +56,14 @@ const HierarchyStructure = () => {
     }, [globalToggle]);
 
     return (
-      <div style={{ marginLeft: depth * 32, marginBottom: '12px' }}>
+      <div style={{ marginLeft: window.innerWidth <= 768 ? depth * 12 : depth * 32, marginBottom: '12px' }}>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: '12px',
+          display: 'flex', alignItems: window.innerWidth <= 600 ? 'stretch' : 'center', gap: '12px',
           padding: '12px 16px', borderRadius: '12px',
           background: depth === 0 ? '#eff6ff' : '#fff',
           border: `1px solid ${depth === 0 ? '#0ea5e950' : '#e2e8f0'}`,
-          transition: 'all 0.2s'
+          transition: 'all 0.2s',
+          flexDirection: window.innerWidth <= 600 ? 'column' : 'row'
         }}>
           {agent.children && agent.children.length > 0 ? (
             <button 
@@ -84,21 +85,21 @@ const HierarchyStructure = () => {
             </div>
             <p style={{ fontSize: '0.72rem', color: '#94a3b8', margin: 0 }}>{agent.role} • {agent.team || 0} members</p>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button 
               className="ag-btn ag-btn-outline" 
-              style={{ padding: '4px 10px', fontSize: '0.7rem' }}
+              style={{ padding: '4px 10px', fontSize: '0.7rem', flex: 1, justifyContent: 'center' }}
               onClick={() => alert(`Agent Statistics:\n\nName: ${agent.name}\nRole: ${agent.role}\nTier: ${agent.tier || 'Silver'}\nDirect Team Size: ${agent.team || 0}`)}
             >
-              View Stats
+              Stats
             </button>
             {agent.children && agent.children.length > 0 && (
               <button 
                 className="ag-btn ag-btn-primary" 
-                style={{ padding: '4px 10px', fontSize: '0.7rem' }}
+                style={{ padding: '4px 10px', fontSize: '0.7rem', flex: 1.5, justifyContent: 'center' }}
                 onClick={() => setExpanded(!expanded)}
               >
-                {expanded ? 'Collapse' : 'Expand'} Structure
+                {expanded ? 'Collapse' : 'Expand'}
               </button>
             )}
           </div>
@@ -111,17 +112,17 @@ const HierarchyStructure = () => {
   return (
     <div className="ag-enter">
       <div className="ag-module-header">
-        <div>
+        <div className="ag-header-info">
           <h1 className="ag-module-title">Hierarchy Structure</h1>
           <p className="ag-module-subtitle">Visualize agent reporting lines and team distribution.</p>
         </div>
-        <div className="ag-search-inline" style={{ width: '280px' }}>
+        <div className="ag-search-inline" style={{ width: window.innerWidth <= 768 ? '100%' : '280px' }}>
           <Search size={14} color="#94a3b8" />
           <input placeholder="Search in tree..." />
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div className="ag-stats-grid">
         {[
           { label: 'Master Agents', count: stats.master, icon: Shield, color: '#0ea5e9' },
           { label: 'Sub Agents', count: stats.sub, icon: Star, color: '#f59e0b' },
@@ -131,7 +132,7 @@ const HierarchyStructure = () => {
             <div className="ag-stat-icon" style={{ background: `${item.color}15` }}>
               <item.icon size={18} color={item.color} />
             </div>
-            <div className="ag-stat-value">{item.count}</div>
+            <div className="ag-stat-value" style={{ fontWeight: 800 }}>{item.count}</div>
             <div className="ag-stat-label">{item.label}</div>
           </div>
         ))}

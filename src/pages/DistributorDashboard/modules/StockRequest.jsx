@@ -87,14 +87,16 @@ const StockRequest = () => {
   return (
     <div className="dd-module-enter">
       <div className="dd-module-header">
-        <div>
+        <div className="dd-header-info">
           <h1 className="dd-module-title">Stock Indenting</h1>
           <p className="dd-module-subtitle">Request new stock directly from A2P Admin.</p>
         </div>
-        <button className="dd-btn dd-btn-outline" onClick={() => { fetchProducts(); fetchRequests(); }}><RefreshCcw size={16} /> Refresh</button>
+        <div className="dd-header-btns">
+          <button className="dd-btn dd-btn-outline" onClick={() => { fetchProducts(); fetchRequests(); }}><RefreshCcw size={16} /> Refresh</button>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 24 }}>
+      <div className="dd-dashboard-grid">
         {/* Product Catalog */}
         <div className="dd-card" style={{ padding: 24, borderRadius: 24 }}>
           <div style={{ marginBottom: 20, display: 'flex', gap: 12 }}>
@@ -104,7 +106,7 @@ const StockRequest = () => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
             {products.filter(p => p.name.toLowerCase().includes(search.toLowerCase())).map(p => (
               <div key={p.id} style={{ padding: 16, border: '1.5px solid #f1f5f9', borderRadius: 16, background: '#fff', textAlign: 'center' }}>
                 <div style={{ width: 48, height: 48, background: '#f1f5f9', borderRadius: 12, margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

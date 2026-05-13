@@ -109,11 +109,11 @@ const DashboardHome = ({ setActiveModule }) => {
   return (
     <div className="dd-module-enter">
       <div className="dd-module-header">
-        <div>
+        <div className="dd-header-info">
           <h1 className="dd-module-title">Welcome back, Rahul 👋</h1>
           <p className="dd-module-subtitle">Here's your distribution network status for today.</p>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="dd-header-btns">
           <button className="dd-btn dd-btn-outline" onClick={fetchData}><RefreshCcw size={15} /> Refresh</button>
           <button className="dd-btn dd-btn-primary" onClick={() => setShowOrderModal(true)} style={{ background: 'linear-gradient(135deg, #a855f7, #7c3aed)' }}><Plus size={18} /> New Order</button>
         </div>
@@ -133,7 +133,7 @@ const DashboardHome = ({ setActiveModule }) => {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24 }}>
+      <div className="dd-dashboard-grid">
         {/* Activity */}
         <div className="dd-card" style={{ borderRadius: 24 }}>
            <div className="dd-card-header" style={{ padding: '24px 28px' }}>
@@ -197,7 +197,7 @@ const DashboardHome = ({ setActiveModule }) => {
       {/* ALL MODALS ARE NOW FULLY VERTICAL & NO HORIZONTAL SCROLL */}
       {(showOrderModal || showInvoiceModal) && (
         <div className="dd-modal-overlay">
-           <div className="dd-modal-box adm-fade-in" style={{ width: showOrderModal ? '550px' : '450px' }}>
+           <div className="dd-modal-box adm-fade-in" style={{ width: 'min(550px, 100%)' }}>
               <div className="dd-modal-header-fancy">
                  <div>
                     <h3 className="modal-title">{showOrderModal ? 'New Bulk Order' : 'Generate Smart Invoice'}</h3>

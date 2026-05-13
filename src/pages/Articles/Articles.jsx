@@ -155,6 +155,7 @@ const Articles = () => {
         {/* Newsletter In-feed */}
         <section className="blog-newsletter">
           <div className="newsletter-content">
+            <span className="newsletter-badge">Stay Updated</span>
             <h3>Subscribe to our Journal</h3>
             <p>Get exclusive skincare tips and early access to new launches directly in your inbox.</p>
             <div className="newsletter-form">

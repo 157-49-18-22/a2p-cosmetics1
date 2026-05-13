@@ -99,11 +99,11 @@ const DealerSubDealer = () => {
   return (
     <div className="dd-module-enter">
       <div className="dd-module-header">
-        <div>
+        <div className="dd-header-info">
           <h1 className="dd-module-title">Dealer / Sub-Dealer</h1>
           <p className="dd-module-subtitle">Manage your entire dealer network and sub-dealer relationships</p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div className="dd-header-btns">
           <button className="dd-btn dd-btn-outline" onClick={handleExportDealers}>Export Network</button>
           <button className="dd-btn dd-btn-outline" onClick={() => setView(view === 'table' ? 'cards' : 'table')}>
             {view === 'table' ? '⊞ Card View' : '≡ Table View'}
@@ -112,7 +112,7 @@ const DealerSubDealer = () => {
         </div>
       </div>
 
-      <div className="dd-stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
+      <div className="dd-stats-grid">
         {[
           { label: 'Total Dealers', value: dealers.filter(d => d.type === 'Dealer').length, color: '#f3eeff', iconColor: '#a855f7' },
           { label: 'Total Sub-Dealers', value: dealers.filter(d => d.type === 'Sub-Dealer').length, color: '#fff0f9', iconColor: '#ec4899' },
@@ -159,17 +159,18 @@ const DealerSubDealer = () => {
 
       {/* Filters */}
       <div className="dd-card">
-        <div className="dd-card-header" style={{ flexWrap: 'wrap', gap: 10 }}>
-          <div style={{ display: 'flex', gap: 8 }}>
+        <div className="dd-card-header" style={{ flexWrap: 'wrap', gap: 16, padding: '20px 24px', flexDirection: window.innerWidth <= 768 ? 'column' : 'row', alignItems: window.innerWidth <= 768 ? 'stretch' : 'center' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {['All', 'Dealer', 'Sub-Dealer'].map(t => (
               <button key={t} onClick={() => setFilterType(t)} style={{
                 padding: '6px 14px', borderRadius: 8, fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer',
                 border: '1.5px solid', borderColor: filterType === t ? '#a855f7' : '#ede9f5',
-                background: filterType === t ? '#f3eeff' : '#fff', color: filterType === t ? '#7c3aed' : '#6b7280', transition: 'all 0.2s'
+                background: filterType === t ? '#f3eeff' : '#fff', color: filterType === t ? '#7c3aed' : '#6b7280', transition: 'all 0.2s',
+                flex: window.innerWidth <= 480 ? 1 : 'none'
               }}>{t}</button>
             ))}
           </div>
-          <div className="dd-search-inline">
+          <div className="dd-search-inline" style={{ width: window.innerWidth <= 768 ? '100%' : 260 }}>
             <Search size={14} color="#9ca3af" />
             <input placeholder="Search dealer..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>

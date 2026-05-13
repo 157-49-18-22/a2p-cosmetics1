@@ -77,8 +77,8 @@ const TestimonialManager = () => {
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <div>
+      <div className="adm-module-header">
+        <div className="adm-header-title-wrap">
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Testimonials Management</h2>
           <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Manage customer reviews and feedback shown on the website.</p>
         </div>
@@ -86,12 +86,14 @@ const TestimonialManager = () => {
       </div>
 
       <div className="adm-card">
-        <div className="adm-card-header">
-          <div className="adm-search">
-            <Search size={16} />
-            <input type="text" placeholder="Search reviews..." value={search} onChange={e => setSearch(e.target.value)} />
+        <div className="adm-card-header adm-card-header-flex">
+          <div className="adm-search-container">
+            <div className="adm-search">
+              <Search size={16} />
+              <input type="text" placeholder="Search reviews..." value={search} onChange={e => setSearch(e.target.value)} />
+            </div>
           </div>
-          <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>{filtered.length} reviews</span>
+          <span className="adm-count-badge">{filtered.length} reviews</span>
         </div>
         <div className="adm-table-wrap">
           {loading ? (
@@ -156,8 +158,8 @@ const TestimonialManager = () => {
 
       {/* Modal */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
-          <div style={{ background: '#fff', borderRadius: '20px', width: '500px', boxShadow: '0 32px 64px rgba(0,0,0,0.2)' }}>
+        <div className="adm-modal-overlay">
+          <div className="adm-modal adm-fade-in" style={{ width: '500px' }}>
             <div style={{ padding: '22px 26px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ fontWeight: 800, fontSize: '1.1rem' }}>{editingTest ? 'Edit Testimonial' : 'Add Testimonial'}</h3>
               <button className="adm-icon-btn" onClick={() => setShowModal(false)}><X size={18} /></button>

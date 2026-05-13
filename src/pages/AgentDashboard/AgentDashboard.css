@@ -213,8 +213,46 @@
 
 /* ─── Shared Module Styles ───────────────────────────────── */
 .ag-module-header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  margin-bottom: 26px; flex-wrap: wrap; gap: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+  gap: 16px;
+}
+
+.ag-header-info {
+  flex: 1;
+}
+
+.ag-header-btns {
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .ag-module-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ag-header-btns {
+    width: 100%;
+  }
+  .ag-header-btns .ag-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+.ag-dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 1200px) {
+  .ag-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 }
 .ag-module-title { font-family: 'Playfair Display', serif; font-size: 1.55rem; color: #0f172a; }
 .ag-module-subtitle { font-size: 0.81rem; color: #94a3b8; margin-top: 3px; }
@@ -414,10 +452,81 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* ─── Responsive Queries ────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .ag-sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    bottom: 0;
+    width: 260px;
+    z-index: 1000;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.2);
+  }
+
+  .ag-sidebar.open {
+    left: 0;
+  }
+
+  .ag-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+  }
+
+  .ag-main {
+    width: 100%;
+  }
+
+  .ag-topbar {
+    padding: 0 16px;
+  }
+
+  .ag-search-bar {
+    display: none;
+  }
+
+  .ag-avatar-info {
+    display: none;
+  }
+
+  .ag-breadcrumb {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
-  .ag-sidebar { position: fixed; }
-  .ag-content { padding: 16px 12px; }
-  .ag-avatar-info { display: none; }
-  .ag-search-bar { display: none; }
-  .ag-modal-content { max-height: 100vh; border-radius: 0; }
+  .ag-content {
+    padding: 20px 14px;
+  }
+
+  .ag-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ag-module-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ag-module-header .ag-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .ag-topbar-right {
+    gap: 8px;
+  }
+  
+  .ag-icon-btn {
+    padding: 6px;
+  }
+  
+  .ag-avatar {
+    padding: 4px;
+  }
 }

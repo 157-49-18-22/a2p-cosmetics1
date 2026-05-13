@@ -119,24 +119,24 @@ const Logs = () => {
   return (
     <div className="ag-enter">
       <div className="ag-module-header">
-        <div>
+        <div className="ag-header-info">
           <h1 className="ag-module-title">System Logs</h1>
           <p className="ag-module-subtitle">Audit trail of all agent and administrative activities.</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="ag-header-btns">
           <button className="ag-btn ag-btn-danger" onClick={handleClearLogs} disabled={clearing}><Trash2 size={16} /> {clearing ? 'Clearing...' : 'Clear Logs'}</button>
           <button className="ag-btn ag-btn-primary" onClick={handleExportCSV}><Download size={16} /> Export CSV</button>
         </div>
       </div>
 
       <div className="ag-card">
-        <div className="ag-card-header">
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <div className="ag-search-inline" style={{ width: '280px' }}>
+        <div className="ag-card-header" style={{ flexDirection: window.innerWidth <= 768 ? 'column' : 'row', alignItems: window.innerWidth <= 768 ? 'stretch' : 'center', gap: 16 }}>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', flex: 1 }}>
+            <div className="ag-search-inline" style={{ flex: window.innerWidth <= 480 ? '1 1 100%' : '1 1 200px' }}>
               <Search size={14} color="#94a3b8" />
-              <input placeholder="Search logs..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+              <input placeholder="Search logs..." style={{ width: '100%' }} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
             </div>
-            <div className="ag-search-inline" style={{ width: '180px' }}>
+            <div className="ag-search-inline" style={{ flex: window.innerWidth <= 480 ? '1 1 100%' : '1 1 150px' }}>
               <Filter size={14} color="#94a3b8" />
               <select
                 style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: '0.8rem' }}
@@ -151,7 +151,7 @@ const Logs = () => {
               </select>
             </div>
           </div>
-          <button className="ag-btn ag-btn-outline" style={{ fontSize: '0.75rem', padding: '6px 14px' }}>Real-time Feed</button>
+          <button className="ag-btn ag-btn-outline" style={{ fontSize: '0.75rem', padding: '6px 14px', whiteSpace: 'nowrap' }}>Real-time Feed</button>
         </div>
         <div className="ag-table-wrap">
           <table className="ag-table">

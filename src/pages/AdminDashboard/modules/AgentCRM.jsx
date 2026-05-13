@@ -142,23 +142,23 @@ const AgentCRM = () => {
       )}
 
       {/* Header & Main Actions */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
+      <div className="adm-module-header">
+        <div className="adm-header-title-wrap">
           <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a' }}>Agent CRM</h2>
           <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Manage your field network, verify applicants, and track performance.</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="adm-btn adm-btn-outline" onClick={fetchData} disabled={loading}>
+        <div style={{ display: 'flex', gap: '12px', width: window.innerWidth <= 768 ? '100%' : 'auto' }}>
+          <button className="adm-btn adm-btn-outline" onClick={fetchData} disabled={loading} style={{ flex: window.innerWidth <= 768 ? 1 : 'none', justifyContent: 'center' }}>
             <RefreshCcw size={16} className={loading ? 'adm-spin' : ''} />
           </button>
-          <button className="adm-btn adm-btn-primary" onClick={() => setShowApproveModal(true)}>
-            <UserCheck size={18} /> Pending Approvals {pendingAgents.length > 0 && <span style={{ background: '#fff', color: '#3b82f6', padding: '2px 8px', borderRadius: '8px', marginLeft: '8px', fontSize: '0.8rem', fontWeight: 800 }}>{pendingAgents.length}</span>}
+          <button className="adm-btn adm-btn-primary" onClick={() => setShowApproveModal(true)} style={{ flex: window.innerWidth <= 768 ? 4 : 'none', justifyContent: 'center' }}>
+            <UserCheck size={18} /> Approvals {pendingAgents.length > 0 && <span style={{ background: '#fff', color: '#3b82f6', padding: '2px 8px', borderRadius: '8px', marginLeft: '8px', fontSize: '0.8rem', fontWeight: 800 }}>{pendingAgents.length}</span>}
           </button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+      <div className="adm-stats-grid">
         {[
           { label: 'Total Agents', val: stats.total_agents, icon: Users, color: '#3b82f6' },
           { label: 'Active Referrals', val: stats.active_referrals, icon: TrendingUp, color: '#10b981' },
@@ -177,14 +177,16 @@ const AgentCRM = () => {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px' }}>
+      <div className="adm-main-grid">
         {/* Main Content: Table & Filters */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div className="adm-card">
-            <div className="adm-card-header" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-              <div className="adm-search" style={{ width: '320px' }}>
-                <Search size={16} />
-                <input type="text" placeholder="Search agents..." value={search} onChange={e => setSearch(e.target.value)} />
+            <div className="adm-card-header adm-card-header-flex">
+              <div className="adm-search-container">
+                <div className="adm-search">
+                  <Search size={16} />
+                  <input type="text" placeholder="Search agents..." value={search} onChange={e => setSearch(e.target.value)} />
+                </div>
               </div>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
@@ -305,9 +307,9 @@ const AgentCRM = () => {
 
       {/* Profile Modal */}
       {showProfileModal && selectedAgent && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', padding: '20px' }}>
-          <div className="adm-fade-in" style={{ background: '#fff', borderRadius: '28px', width: '800px', height: '600px', overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.35)', display: 'grid', gridTemplateColumns: '280px 1fr' }}>
-            <div style={{ background: '#f8fafc', borderRight: '1px solid #f1f5f9', padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+        <div className="adm-modal-overlay">
+          <div className="adm-modal adm-fade-in" style={{ width: '800px', height: 'auto', display: 'flex', flexDirection: window.innerWidth <= 768 ? 'column' : 'row' }}>
+            <div style={{ background: '#f8fafc', borderRight: window.innerWidth <= 768 ? 'none' : '1px solid #f1f5f9', borderBottom: window.innerWidth <= 768 ? '1px solid #f1f5f9' : 'none', padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
               <div style={{ width: '100px', height: '100px', borderRadius: '30px', background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', fontWeight: 800 }}>
                 {selectedAgent.name[0]}
               </div>
@@ -372,8 +374,8 @@ const AgentCRM = () => {
 
       {/* Approval Modal */}
       {showApproveModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(6px)' }}>
-          <div style={{ background: '#fff', borderRadius: '24px', width: '600px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="adm-modal-overlay">
+          <div className="adm-modal adm-fade-in" style={{ width: '600px' }}>
             <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ fontWeight: 800, fontSize: '1.2rem' }}>Pending Applicants</h3>
               <button className="adm-icon-btn" onClick={() => setShowApproveModal(false)}><X size={20} /></button>

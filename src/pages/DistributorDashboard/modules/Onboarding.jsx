@@ -105,16 +105,18 @@ const Onboarding = () => {
   return (
     <div className="dd-module-enter">
       <div className="dd-module-header">
-        <div>
+        <div className="dd-header-info">
           <h1 className="dd-module-title">Onboarding</h1>
           <p className="dd-module-subtitle">Manage new dealer & sub-dealer onboarding applications</p>
         </div>
-        <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(!showForm)}>
-          <Plus size={15} /> New Application
-        </button>
+        <div className="dd-header-btns">
+          <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(!showForm)}>
+            <Plus size={15} /> New Application
+          </button>
+        </div>
       </div>
 
-      <div className="dd-stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 24 }}>
+      <div className="dd-stats-grid">
         {[
           { label: 'Total Applications', value: applicants.length, color: '#f3eeff', iconColor: '#a855f7' },
           { label: 'Active Dealers', value: applicants.filter(a => a.status === 'Active').length, color: '#f0fdf4', iconColor: '#16a34a' },
@@ -137,7 +139,7 @@ const Onboarding = () => {
             <button className="dd-btn dd-btn-outline" style={{ padding: '5px 12px', fontSize: '0.75rem' }} onClick={() => setShowForm(false)}>Cancel</button>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 0, padding: '18px 22px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 0, padding: '18px 22px 0', flexWrap: 'wrap', justifyContent: 'center' }}>
             {steps.map((s, i) => (
               <React.Fragment key={i}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
@@ -149,7 +151,7 @@ const Onboarding = () => {
                   <span style={{ fontSize: '0.72rem', color: i === step ? '#7c3aed' : '#9ca3af', fontWeight: i === step ? 700 : 400, whiteSpace: 'nowrap' }}>{s}</span>
                 </div>
                 {i < steps.length - 1 && (
-                  <div style={{ flex: 1, height: 2, background: i < step ? 'linear-gradient(90deg,#ec4899,#a855f7)' : '#ede9f5', margin: '0 6px', marginBottom: 22 }} />
+                  <div style={{ flex: window.innerWidth <= 480 ? 'none' : 1, width: window.innerWidth <= 480 ? '20px' : 'auto', height: 2, background: i < step ? 'linear-gradient(90deg,#ec4899,#a855f7)' : '#ede9f5', margin: '0 6px', marginBottom: 22 }} />
                 )}
               </React.Fragment>
             ))}
@@ -203,11 +205,11 @@ const Onboarding = () => {
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-              {step > 0 && <button className="dd-btn dd-btn-outline" onClick={() => setStep(s => s - 1)}>← Back</button>}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
+              {step > 0 && <button className="dd-btn dd-btn-outline" style={{ flex: window.innerWidth <= 768 ? 1 : 'none', justifyContent: 'center' }} onClick={() => setStep(s => s - 1)}>← Back</button>}
               {step < steps.length - 1
-                ? <button className="dd-btn dd-btn-primary" onClick={() => setStep(s => s + 1)}>Next <ChevronRight size={14} /></button>
-                : <button className="dd-btn dd-btn-primary" onClick={handleSubmit}><CheckCircle size={14} /> Submit Application</button>
+                ? <button className="dd-btn dd-btn-primary" style={{ flex: window.innerWidth <= 768 ? 2 : 'none', justifyContent: 'center' }} onClick={() => setStep(s => s + 1)}>Next <ChevronRight size={14} /></button>
+                : <button className="dd-btn dd-btn-primary" style={{ flex: window.innerWidth <= 768 ? 2 : 'none', justifyContent: 'center' }} onClick={handleSubmit}><CheckCircle size={14} /> Submit Application</button>
               }
             </div>
           </div>
@@ -260,7 +262,7 @@ const Onboarding = () => {
       {/* Details Modal */}
       {showDetails && selectedApplicant && (
         <div className="dd-modal-overlay" onClick={() => setShowDetails(false)}>
-          <div className="dd-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 700 }}>
+          <div className="dd-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 'min(700px, 100%)' }}>
             <div className="dd-modal-header">
               <div>
                 <h2 className="dd-modal-title">Application Details</h2>
@@ -270,7 +272,7 @@ const Onboarding = () => {
             </div>
 
             <div className="dd-modal-body">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr', gap: 32 }}>
                 {/* Left Column: Info */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                   <section>
@@ -301,7 +303,7 @@ const Onboarding = () => {
                     <h4 style={{ fontSize: '0.75rem', color: '#a855f7', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <MapPin size={14} /> Territory & Role
                     </h4>
-                    <div style={{ background: '#f9f7ff', borderRadius: 12, padding: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div style={{ background: '#f9f7ff', borderRadius: 12, padding: 14, display: 'grid', gridTemplateColumns: window.innerWidth <= 480 ? '1fr' : '1fr 1fr', gap: 12 }}>
                       <div><p style={{ fontSize: '0.7rem', color: '#9ca3af' }}>Zone</p><p style={{ fontSize: '0.82rem', fontWeight: 600 }}>{selectedApplicant.zone}</p></div>
                       <div><p style={{ fontSize: '0.7rem', color: '#9ca3af' }}>Type</p><span className="dd-badge dd-badge-purple" style={{ marginTop: 2 }}>{selectedApplicant.type}</span></div>
                     </div>
@@ -344,12 +346,12 @@ const Onboarding = () => {
               </div>
             </div>
 
-            <div className="dd-modal-footer">
-              <button className="dd-btn dd-btn-outline" onClick={() => setShowDetails(false)}>Close</button>
+            <div className="dd-modal-footer" style={{ flexWrap: 'wrap' }}>
+              <button className="dd-btn dd-btn-outline" style={{ flex: window.innerWidth <= 768 ? '1 1 100%' : 'none', justifyContent: 'center' }} onClick={() => setShowDetails(false)}>Close</button>
               {selectedApplicant.status === 'Pending' && (
                 <>
-                  <button className="dd-btn dd-btn-danger" onClick={() => handleStatusUpdate(selectedApplicant.id, 'Inactive')}>Reject Application</button>
-                  <button className="dd-btn dd-btn-primary" onClick={() => handleStatusUpdate(selectedApplicant.id, 'Active')}>Approve Dealer</button>
+                  <button className="dd-btn dd-btn-danger" style={{ flex: window.innerWidth <= 768 ? 1 : 'none', justifyContent: 'center' }} onClick={() => handleStatusUpdate(selectedApplicant.id, 'Inactive')}>Reject</button>
+                  <button className="dd-btn dd-btn-primary" style={{ flex: window.innerWidth <= 768 ? 1 : 'none', justifyContent: 'center' }} onClick={() => handleStatusUpdate(selectedApplicant.id, 'Active')}>Approve</button>
                 </>
               )}
             </div>

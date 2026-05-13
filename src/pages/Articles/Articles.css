@@ -3,6 +3,7 @@
   color: #1a1a1a;
   font-family: 'Inter', sans-serif;
   position: relative;
+  overflow-x: hidden;
 }
 
 /* Background Blobs */
@@ -540,6 +541,19 @@
   z-index: 1;
 }
 
+.newsletter-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
 .newsletter-content h3 {
   font-family: 'Playfair Display', serif;
   font-size: 3.5rem;
@@ -626,12 +640,169 @@
 }
 
 @media (max-width: 768px) {
+  .articles-hero {
+    padding: 120px 20px 140px;
+    background-attachment: scroll; /* Performance on mobile */
+  }
+
   .articles-hero h1 {
-    font-size: 2.8rem;
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+
+  .articles-hero p {
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+  }
+
+  .articles-search-bar {
+    padding: 5px 5px 5px 20px;
+    border-radius: 20px;
+  }
+
+  .articles-search-bar input {
+    font-size: 1rem;
+    padding: 12px 10px;
+  }
+
+  .search-btn {
+    padding: 12px 25px;
+    font-size: 0.9rem;
+  }
+
+  .main-content-wrapper {
+    margin-top: -50px;
+    padding: 0 20px 80px;
+  }
+
+  .section-title {
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  .featured-section {
+    margin-bottom: 80px;
+  }
+
+  .featured-card {
+    border-radius: 30px;
+  }
+
+  .featured-img-wrap {
+    height: 300px;
+  }
+
+  .featured-content {
+    padding: 35px 25px;
+  }
+
+  .featured-content h3 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  .featured-content p {
+    font-size: 1rem;
+    margin-bottom: 30px;
+  }
+
+  .article-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding-top: 25px;
+  }
+
+  .read-more-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .grid-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  .filter-chips {
+    width: calc(100% + 40px);
+    margin-left: -20px;
+    padding: 0 20px 15px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    gap: 15px;
+    scrollbar-width: none;
+  }
+
+  .filter-chips::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
+  }
+
+  .chip {
+    white-space: nowrap;
+    font-size: 0.9rem;
+    padding: 8px 20px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 50px;
+    color: #666;
+  }
+
+  .chip::after {
+    display: none;
+  }
+
+  .chip.active {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
   }
 
   .articles-grid {
     grid-template-columns: 1fr;
+    gap: 35px;
+  }
+
+  .article-card {
+    background: #fff;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+    border-radius: 25px;
+    padding-bottom: 25px;
+  }
+
+  .article-img {
+    height: 250px;
+    border-radius: 25px 25px 0 0;
+    margin-bottom: 20px;
+  }
+
+  .article-card-content {
+    padding: 0 20px;
+  }
+
+  .article-card-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
+
+  .blog-newsletter {
+    padding: 60px 30px;
+    border-radius: 35px;
+  }
+
+  .newsletter-content h3 {
+    font-size: 2.2rem;
+    line-height: 1.1;
+  }
+
+  .newsletter-content p {
+    font-size: 1.1rem;
+    margin-bottom: 40px;
   }
 
   .newsletter-form {
@@ -639,35 +810,19 @@
     background: transparent;
     border: none;
     padding: 0;
+    gap: 15px;
   }
 
   .newsletter-form input {
     background: rgba(255, 255, 255, 0.1);
-    margin-bottom: 15px;
+    width: 100%;
+    padding: 18px 25px;
+    border: 1px solid rgba(255,255,255,0.2);
   }
 
   .newsletter-form button {
-    padding: 20px;
-  }
-
-  .grid-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 30px;
-  }
-
-  .filter-chips {
     width: 100%;
-    overflow-x: auto;
-    padding-bottom: 15px;
-    gap: 20px;
-  }
-
-  .featured-content {
-    padding: 40px 20px;
-  }
-
-  .featured-content h3 {
-    font-size: 2.2rem;
+    padding: 18px;
+    font-size: 1rem;
   }
 }

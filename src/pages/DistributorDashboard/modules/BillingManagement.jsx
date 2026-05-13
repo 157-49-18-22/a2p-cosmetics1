@@ -96,17 +96,17 @@ const BillingManagement = () => {
   return (
     <div className="dd-module-enter">
       <div className="dd-module-header">
-        <div>
+        <div className="dd-header-info">
           <h1 className="dd-module-title">Billing Management</h1>
           <p className="dd-module-subtitle">Create and manage invoices, payments & dues</p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div className="dd-header-btns">
           <button className="dd-btn dd-btn-outline" onClick={handleExportBills}><Download size={14} /> Export</button>
           <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(!showForm)}><Plus size={15} /> New Invoice</button>
         </div>
       </div>
 
-      <div className="dd-stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 24 }}>
+      <div className="dd-stats-grid">
         {[
           { label: 'Total Billed', value: `₹${(totalBilled / 1000).toFixed(1)}K`, color: '#f3eeff', iconColor: '#a855f7' },
           { label: 'Total Collected', value: `₹${(totalPaid / 1000).toFixed(1)}K`, color: '#f0fdf4', iconColor: '#16a34a' },
@@ -148,17 +148,18 @@ const BillingManagement = () => {
 
       {/* Invoice Table */}
       <div className="dd-card">
-        <div className="dd-card-header" style={{ flexWrap: 'wrap', gap: 10 }}>
-          <div style={{ display: 'flex', gap: 8 }}>
+        <div className="dd-card-header" style={{ flexWrap: 'wrap', gap: 16, padding: '20px 24px', flexDirection: window.innerWidth <= 768 ? 'column' : 'row', alignItems: window.innerWidth <= 768 ? 'stretch' : 'center' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {['All', 'Paid', 'Unpaid', 'Overdue'].map(s => (
               <button key={s} onClick={() => setFilterStatus(s)} style={{
                 padding: '6px 14px', borderRadius: 8, fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer',
                 border: '1.5px solid', borderColor: filterStatus === s ? '#a855f7' : '#ede9f5',
-                background: filterStatus === s ? '#f3eeff' : '#fff', color: filterStatus === s ? '#7c3aed' : '#6b7280', transition: 'all 0.2s'
+                background: filterStatus === s ? '#f3eeff' : '#fff', color: filterStatus === s ? '#7c3aed' : '#6b7280', transition: 'all 0.2s',
+                flex: window.innerWidth <= 480 ? 1 : 'none'
               }}>{s}</button>
             ))}
           </div>
-          <div className="dd-search-inline">
+          <div className="dd-search-inline" style={{ width: window.innerWidth <= 768 ? '100%' : 260 }}>
             <Search size={14} color="#9ca3af" />
             <input placeholder="Search invoice..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
@@ -193,14 +194,14 @@ const BillingManagement = () => {
       {/* View Modal */}
       {showViewModal && selectedBill && (
         <div className="dd-modal-overlay" onClick={() => setShowViewModal(false)}>
-          <div className="dd-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 450, padding: 0, overflow: 'hidden' }}>
+          <div className="dd-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 'min(450px, 100%)', padding: 0, overflow: 'hidden' }}>
             <div style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', padding: '30px 24px', color: '#fff' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
                 <div>
                   <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Invoice</h2>
                   <p style={{ opacity: 0.8, fontSize: '0.8rem', marginTop: 4 }}>{selectedBill.bill_number}</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
+                <div style={{ textAlign: window.innerWidth <= 480 ? 'left' : 'right', width: window.innerWidth <= 480 ? '100%' : 'auto' }}>
                   <div style={{ fontWeight: 800, fontSize: '1.2rem' }}>₹{parseFloat(selectedBill.amount).toLocaleString()}</div>
                   <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.05em' }}>Total Amount</span>
                 </div>
@@ -208,7 +209,7 @@ const BillingManagement = () => {
             </div>
             
             <div style={{ padding: 24 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 480 ? '1fr' : '1fr 1fr', gap: 20, marginBottom: 24 }}>
                 <div>
                   <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 700, display: 'block', marginBottom: 4 }}>Issue Date</label>
                   <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{new Date(selectedBill.created_at).toLocaleDateString()}</div>

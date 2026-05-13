@@ -77,12 +77,14 @@ const InventoryManager = () => {
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <div>
+      <div className="adm-module-header">
+        <div className="adm-header-title-wrap">
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Master Inventory Control</h2>
           <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Real-time warehouse synchronization and stock adjustment.</p>
         </div>
-        <button className="adm-btn adm-btn-outline" onClick={fetchInventory}><RefreshCw size={18} /> Refresh</button>
+        <button className="adm-btn adm-btn-outline" onClick={fetchInventory} style={{ width: window.innerWidth <= 768 ? '100%' : 'auto', justifyContent: 'center' }}>
+          <RefreshCw size={18} /> Refresh
+        </button>
       </div>
 
       {/* Stats */}
@@ -100,7 +102,7 @@ const InventoryManager = () => {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '24px' }}>
+      <div className="adm-main-grid">
         {/* Stock Levels Table */}
         <div className="adm-card">
           <div className="adm-card-header">

@@ -76,20 +76,20 @@ const CustomerCRM = () => {
   return (
     <div className="adm-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
+      <div className="adm-module-header">
+        <div className="adm-header-title-wrap">
           <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
-            Customer CRM <span style={{ fontSize: '0.8rem', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', color: '#fff', padding: '4px 12px', borderRadius: '20px', marginLeft: '12px', verticalAlign: 'middle' }}>PRO</span>
+            Customer CRM <span className="adm-badge-pro" style={{ fontSize: '0.8rem', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', color: '#fff', padding: '4px 12px', borderRadius: '20px', marginLeft: '12px', verticalAlign: 'middle' }}>PRO</span>
           </h2>
           <p style={{ color: '#64748b', fontSize: '0.95rem', marginTop: '4px' }}>Manage customers, track behavior, and boost retention.</p>
         </div>
-        <button className="adm-btn adm-btn-primary" onClick={() => setShowAddModal(true)}>
-          <Plus size={18} /> Add New Customer
+        <button className="adm-btn adm-btn-primary" onClick={() => setShowAddModal(true)} style={{ width: window.innerWidth <= 768 ? '100%' : 'auto', justifyContent: 'center' }}>
+          <Plus size={18} /> New Customer
         </button>
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+      <div className="adm-stats-grid">
         {stats.map((s, i) => (
           <div key={i} className="adm-card" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', right: '-8px', bottom: '-8px', opacity: 0.04 }}><s.icon size={70} /></div>
@@ -104,10 +104,12 @@ const CustomerCRM = () => {
 
       {/* Table */}
       <div className="adm-card" style={{ borderRadius: '24px' }}>
-        <div style={{ padding: '20px 28px', display: 'flex', gap: '16px' }}>
-          <div className="adm-search" style={{ flex: 1, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-            <Search size={16} color="#94a3b8" />
-            <input placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)} />
+        <div className="adm-card-header adm-card-header-flex">
+          <div className="adm-search-container">
+            <div className="adm-search" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <Search size={16} color="#94a3b8" />
+              <input placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)} />
+            </div>
           </div>
           <button className="adm-btn adm-btn-outline"><Filter size={16} /> Filters</button>
         </div>
@@ -167,8 +169,8 @@ const CustomerCRM = () => {
 
       {/* View Customer Modal */}
       {showModal && selectedCustomer && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.75)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', padding: '20px' }} onClick={() => setShowModal(false)}>
-          <div className="adm-fade-in" style={{ background: '#fff', borderRadius: '28px', width: '680px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,0.35)' }} onClick={e => e.stopPropagation()}>
+        <div className="adm-modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="adm-modal adm-fade-in" style={{ width: 'min(680px, 100%)', height: 'auto', maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
             
             {/* Modal Header */}
             <div style={{ padding: '28px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(135deg, #f8fafc, #eff6ff)', borderRadius: '28px 28px 0 0' }}>
@@ -189,7 +191,7 @@ const CustomerCRM = () => {
 
             <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {/* Contact Info */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr 1fr', gap: '16px' }}>
                 {[{ icon: Mail, label: 'Email', val: selectedCustomer.email }, { icon: Phone, label: 'Phone', val: selectedCustomer.phone || '—' }, { icon: MapPin, label: 'Location', val: selectedCustomer.location || '—' }].map((item, i) => (
                   <div key={i} style={{ padding: '14px', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', color: '#94a3b8' }}><item.icon size={13} /><span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase' }}>{item.label}</span></div>
@@ -275,8 +277,8 @@ const CustomerCRM = () => {
 
       {/* Add Customer Modal */}
       {showAddModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', padding: '20px' }}>
-          <div className="adm-fade-in" style={{ background: '#fff', borderRadius: '28px', width: '480px', overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.3)' }}>
+        <div className="adm-modal-overlay">
+          <div className="adm-modal adm-fade-in" style={{ width: 'min(480px, 100%)' }}>
             <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
               <div>
                 <h3 style={{ fontWeight: 800, fontSize: '1.2rem' }}>Add Customer</h3>

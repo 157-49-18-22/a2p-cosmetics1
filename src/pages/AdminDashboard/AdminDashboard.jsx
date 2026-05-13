@@ -61,8 +61,23 @@ const moduleMap = {
 
 const AdminDashboard = () => {
   const [active, setActive] = useState('home');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
   const [notifOpen, setNotifOpen] = useState(false);
+
+  const handleExit = () => {
+    // Clear admin session
+    localStorage.removeItem('active_admin');
+    // Clear other potential sessions if needed
+    // localStorage.clear(); 
+    window.location.href = '/login';
+  };
+
+  const handleNavClick = (id) => {
+    setActive(id);
+    if (window.innerWidth <= 1024) {
+      setSidebarOpen(false);
+    }
+  };
 
   const ActiveComponent = moduleMap[active];
   const activeLabel = navItems.find(n => n.id === active)?.label;
@@ -81,20 +96,20 @@ const AdminDashboard = () => {
             <button
               key={id}
               className={`adm-nav-item ${active === id ? 'active' : ''}`}
-              onClick={() => setActive(id)}
+              onClick={() => handleNavClick(id)}
               title={!sidebarOpen ? label : ''}
             >
               <span className="adm-nav-icon"><Icon size={19} /></span>
-              {sidebarOpen && <span className="adm-nav-label">{label}</span>}
-              {sidebarOpen && active === id && <div className="adm-active-dot" />}
+              <span className="adm-nav-label">{label}</span>
+              {active === id && <div className="adm-active-dot" />}
             </button>
           ))}
         </nav>
 
         <div className="adm-sidebar-footer">
-          <button className="adm-nav-item adm-logout">
+          <button className="adm-nav-item adm-logout" onClick={handleExit}>
             <span className="adm-nav-icon"><LogOut size={18} /></span>
-            {sidebarOpen && <span className="adm-nav-label">Exit Panel</span>}
+            <span className="adm-nav-label">Exit Panel</span>
           </button>
         </div>
       </aside>
@@ -156,6 +171,11 @@ const AdminDashboard = () => {
             </div>
           </div>
         </header>
+
+        {/* Mobile Sidebar Overlay */}
+        {sidebarOpen && window.innerWidth <= 1024 && (
+          <div className="adm-sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+        )}
 
         {/* Viewport */}
         <main className="adm-content">

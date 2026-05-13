@@ -68,11 +68,11 @@ const AgentHome = ({ onNavigate }) => {
   return (
     <div className="ag-enter">
       <div className="ag-module-header">
-        <div>
+        <div className="ag-header-info">
           <h1 className="ag-module-title">Agent Overview</h1>
           <p className="ag-module-subtitle">Monitor agent performance, commissions, and payouts at a glance.</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="ag-header-btns">
           <button className="ag-btn ag-btn-outline">Export Stats</button>
           <button 
             className="ag-btn ag-btn-primary"
@@ -87,7 +87,7 @@ const AgentHome = ({ onNavigate }) => {
             <div className="ag-stat-icon" style={{ background: `${stat.color}15` }}>
               <stat.icon size={20} color={stat.color} />
             </div>
-            <div className="ag-stat-value">{stat.value}</div>
+            <div className="ag-stat-value" style={{ fontWeight: 800 }}>{stat.value}</div>
             <div className="ag-stat-label">{stat.label}</div>
             <div className={`ag-stat-change ${stat.up ? 'up' : 'down'}`}>
               {stat.up ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
@@ -97,7 +97,7 @@ const AgentHome = ({ onNavigate }) => {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginTop: '12px' }}>
+      <div className="ag-dashboard-grid">
         <div className="ag-card">
           <div className="ag-card-header">
             <h3 className="ag-card-title">Recent Requests</h3>

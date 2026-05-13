@@ -349,6 +349,25 @@
   margin-bottom: 24px;
 }
 
+.adm-main-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.adm-quick-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 1024px) {
+  .adm-main-grid,
+  .adm-quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .adm-stat-box {
   background: #fff;
   padding: 24px;
@@ -358,6 +377,22 @@
   gap: 16px;
 }
 
+.adm-cms-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .adm-cms-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .adm-cms-layout .adm-card {
+    position: static !important;
+  }
+}
+
 .adm-stat-icon-wrap {
   width: 48px;
   height: 48px;
@@ -365,6 +400,113 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Responsive Module Header */
+.adm-module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.adm-header-title-wrap {
+  flex: 1;
+}
+
+.adm-card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.adm-search-container {
+  flex: 1;
+  max-width: 400px;
+}
+
+.adm-count-badge {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Modal Styles */
+.adm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  padding: 20px;
+}
+
+.adm-modal {
+  background: #fff;
+  border-radius: 24px;
+  width: 640px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .adm-module-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .adm-module-header .adm-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .adm-card-header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .adm-search-container {
+    width: 100%;
+    max-width: none;
+  }
+
+  .adm-search-container .adm-search {
+    width: 100% !important;
+  }
+
+  .adm-modal {
+    width: 100%;
+    max-height: 95vh;
+    border-radius: 20px;
+  }
+}
+
+.adm-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1200px) {
+  .adm-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .adm-stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .adm-stat-details span {
@@ -529,4 +671,110 @@
 
 .adm-table tr.active-row td:first-child {
   border-left: 3px solid #3b82f6;
+}
+
+/* ─── Responsive Upgrades ─────────────────────────────────── */
+@media (max-width: 1024px) {
+  .adm-sidebar {
+    position: fixed;
+    left: -270px;
+    height: 100vh;
+    width: 270px;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 20px 0 50px rgba(0,0,0,0.2);
+  }
+
+  .adm-sidebar.open {
+    left: 0;
+  }
+
+  .adm-sidebar.collapsed {
+    left: -270px;
+  }
+
+  .adm-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 95;
+    animation: admFadeOverlay 0.3s ease-out;
+  }
+
+  @keyframes admFadeOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .adm-header {
+    padding: 0 16px;
+  }
+
+  .adm-breadcrumb {
+    display: none; /* Hide breadcrumbs on mobile */
+  }
+
+  .adm-search {
+    display: none; /* Hide full search bar on mobile */
+  }
+
+  .adm-profile-info {
+    display: none; /* Hide profile text on mobile */
+  }
+
+  .adm-header-right {
+    gap: 8px;
+  }
+
+  .adm-content {
+    padding: 16px;
+  }
+
+  .adm-stats-grid {
+    grid-template-columns: 1fr; /* Single column stats on mobile */
+  }
+}
+
+@media (max-width: 640px) {
+  .adm-header-right {
+    gap: 5px;
+  }
+
+  .adm-icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .adm-profile {
+    padding: 4px;
+    border: none;
+    background: transparent;
+  }
+
+  .adm-profile img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .adm-profile svg {
+    display: none;
+  }
+}
+
+.adm-nav-label {
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.collapsed .adm-nav-label {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.collapsed .adm-logo-text {
+  display: none;
 }

@@ -131,13 +131,15 @@ const AgentOnboarding = () => {
   return (
     <div className="ag-enter">
       <div className="ag-module-header">
-        <div>
+        <div className="ag-header-info">
           <h1 className="ag-module-title">Agent Onboarding</h1>
           <p className="ag-module-subtitle">Register new agents and track their verification status.</p>
         </div>
-        <button className="ag-btn ag-btn-primary" onClick={() => setShowForm(!showForm)}>
-          <UserPlus size={16} /> New Application
-        </button>
+        <div className="ag-header-btns">
+          <button className="ag-btn ag-btn-primary" onClick={() => setShowForm(!showForm)}>
+            <UserPlus size={16} /> New Application
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -148,9 +150,9 @@ const AgentOnboarding = () => {
           </div>
           <div className="ag-card-body">
             {/* Step Indicator */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px', flexWrap: 'nowrap', gap: '5px', overflowX: 'auto', paddingBottom: '10px' }}>
               {[1, 2, 3].map((s) => (
-                <div key={s} style={{ display: 'flex', alignItems: 'center' }}>
+                <div key={s} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                   <div style={{
                     width: '32px', height: '32px', borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -158,7 +160,7 @@ const AgentOnboarding = () => {
                     color: step >= s ? '#fff' : '#94a3b8',
                     fontWeight: 700, fontSize: '0.85rem'
                   }}>{step > s ? <CheckCircle2 size={16} /> : s}</div>
-                  {s < 3 && <div style={{ width: '60px', height: '2px', background: step > s ? '#0ea5e9' : '#e2e8f0', margin: '0 8px' }} />}
+                  {s < 3 && <div style={{ width: window.innerWidth <= 480 ? '30px' : '60px', height: '2px', background: step > s ? '#0ea5e9' : '#e2e8f0', margin: '0 8px' }} />}
                 </div>
               ))}
             </div>
@@ -169,7 +171,7 @@ const AgentOnboarding = () => {
                 <div className="ag-field"><label>Email Address</label><input name="email" value={formData.email} onChange={handleInputChange} placeholder="rahul@example.com" /></div>
                 <div className="ag-field"><label>Phone Number</label><input name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+91 9876543210" /></div>
                 <div className="ag-field"><label>City</label><input name="city" value={formData.city} onChange={handleInputChange} placeholder="Mumbai" /></div>
-                <div className="ag-field" style={{ gridColumn: 'span 2' }}>
+                <div className="ag-field" style={{ gridColumn: window.innerWidth <= 768 ? 'auto' : 'span 2' }}>
                   <label>Full Address</label>
                   <textarea name="address" value={formData.address} onChange={handleInputChange} placeholder="Line 1, Line 2, Pincode" />
                 </div>
@@ -177,7 +179,7 @@ const AgentOnboarding = () => {
             )}
 
             {step === 2 && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr', gap: '20px' }}>
                 <div 
                   style={{ border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '32px', textAlign: 'center', cursor: 'pointer' }}
                   onClick={() => aadharInputRef.current.click()}
@@ -229,14 +231,14 @@ const AgentOnboarding = () => {
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px' }}>
-              {step > 1 && <button className="ag-btn ag-btn-outline" onClick={() => setStep(step - 1)}>Back</button>}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', flexWrap: 'wrap' }}>
+              {step > 1 && <button className="ag-btn ag-btn-outline" style={{ flex: window.innerWidth <= 768 ? 1 : 'none', justifyContent: 'center' }} onClick={() => setStep(step - 1)}>Back</button>}
               {step < 3 ? (
-                <button className="ag-btn ag-btn-primary" onClick={() => setStep(step + 1)}>
+                <button className="ag-btn ag-btn-primary" style={{ flex: window.innerWidth <= 768 ? 2 : 'none', justifyContent: 'center' }} onClick={() => setStep(step + 1)}>
                   Continue <ChevronRight size={16} />
                 </button>
               ) : (
-                <button className="ag-btn ag-btn-primary" onClick={handleSubmit}>
+                <button className="ag-btn ag-btn-primary" style={{ flex: window.innerWidth <= 768 ? 2 : 'none', justifyContent: 'center' }} onClick={handleSubmit}>
                   Submit Application
                 </button>
               )}
@@ -246,11 +248,11 @@ const AgentOnboarding = () => {
       )}
 
       <div className="ag-card">
-        <div className="ag-card-header">
+        <div className="ag-card-header" style={{ flexDirection: window.innerWidth <= 600 ? 'column' : 'row', alignItems: window.innerWidth <= 600 ? 'stretch' : 'center', gap: 12 }}>
           <h3 className="ag-card-title">Recent Applications</h3>
-          <div className="ag-search-inline">
+          <div className="ag-search-inline" style={{ width: window.innerWidth <= 600 ? '100%' : '240px' }}>
             <Search size={14} color="#94a3b8" />
-            <input placeholder="Search applicant..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <input placeholder="Search applicant..." style={{ width: '100%' }} value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </div>
         <div className="ag-table-wrap">
