@@ -1,6 +1,6 @@
 import API_BASE_URL from '../../apiConfig.js';
 import React from 'react';
-import { Star, ChevronDown, ShieldCheck, Headphones, CreditCard } from 'lucide-react';
+import { Star, ChevronDown, ShieldCheck, Headphones, CreditCard, Filter, X } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useNotifications } from '../../components/Notifications/NotificationHub';
 import './FaceWash.css'; // Dedicated FaceWash styles
@@ -88,6 +88,7 @@ const FaceWash = () => {
   const [loading, setLoading] = React.useState(true);
   const [activeSkinType, setActiveSkinType] = React.useState('All Skin Types');
   const [priceRange, setPriceRange] = React.useState([0, 1000]);
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
 
   React.useEffect(() => {
     fetch(`${API_BASE_URL}/products?category=Face Wash`)
@@ -151,14 +152,28 @@ const FaceWash = () => {
       </div>
 
       <div className="lips-container">
-        <aside className="lips-sidebar filters-sidebar">
+        {/* Mobile Filter Toggle */}
+        <button 
+          className="mobile-filter-btn"
+          onClick={() => setIsFilterOpen(true)}
+        >
+          <Filter size={18} />
+          <span>Filters</span>
+        </button>
+
+        <aside className={`lips-sidebar filters-sidebar ${isFilterOpen ? 'mobile-open' : ''}`}>
           <div className="filters-card">
             <div className="filters-header">
               <h2>Filter</h2>
-              <button className="advanced-btn" onClick={() => {
-                setActiveSkinType('All Skin Types');
-                setPriceRange([0, 1000]);
-              }}>Clear All</button>
+              <div className="filter-header-actions">
+                <button className="advanced-btn" onClick={() => {
+                  setActiveSkinType('All Skin Types');
+                  setPriceRange([0, 1000]);
+                }}>Clear All</button>
+                <button className="mobile-close-filters" onClick={() => setIsFilterOpen(false)}>
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Skin Type Section */}

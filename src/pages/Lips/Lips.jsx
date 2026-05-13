@@ -1,6 +1,6 @@
 import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
-import { Star, ChevronDown, Filter, ShieldCheck, Headphones, CreditCard, Smartphone } from 'lucide-react';
+import { Star, ChevronDown, Filter, ShieldCheck, Headphones, CreditCard, Smartphone, X } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useNotifications } from '../../components/Notifications/NotificationHub';
 import './Lips.css';
@@ -10,6 +10,7 @@ const Lips = () => {
   const { showNotification } = useNotifications();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/products?category=Lips`)
@@ -53,14 +54,31 @@ const Lips = () => {
       </div>
 
       <div className="lips-container">
-        <aside className="lips-sidebar">
-          {/* Filters truncated for brevity */}
-          <div className="filter-section">
-            <h3>AVAILABILITY <ChevronDown size={16} /></h3>
-            <div className="filter-options">
-              <label className="filter-label">
-                <input type="checkbox" /> In stock only
-              </label>
+        {/* Mobile Filter Toggle */}
+        <button 
+          className="mobile-filter-btn"
+          onClick={() => setIsFilterOpen(true)}
+        >
+          <Filter size={18} />
+          <span>Filters</span>
+        </button>
+
+        <aside className={`lips-sidebar filters-sidebar ${isFilterOpen ? 'mobile-open' : ''}`}>
+          <div className="filters-card">
+            <div className="filters-header">
+              <h2>Filter</h2>
+              <button className="mobile-close-filters" onClick={() => setIsFilterOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            {/* Filters truncated for brevity */}
+            <div className="filter-section">
+              <h3>AVAILABILITY <ChevronDown size={16} /></h3>
+              <div className="filter-options">
+                <label className="filter-label">
+                  <input type="checkbox" /> In stock only
+                </label>
+              </div>
             </div>
           </div>
         </aside>

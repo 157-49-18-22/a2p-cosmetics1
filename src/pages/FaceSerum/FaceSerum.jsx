@@ -1,6 +1,6 @@
 import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
-import { Star, ChevronDown, CheckCircle, Sparkles, Droplets } from 'lucide-react';
+import { Star, ChevronDown, CheckCircle, Sparkles, Droplets, Filter, X } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useNotifications } from '../../components/Notifications/NotificationHub';
 import './FaceSerum.css'; 
@@ -14,6 +14,7 @@ const FaceSerum = () => {
   const [activeSkinType, setActiveSkinType] = useState('All Skin Types');
   const [activeConcern, setActiveConcern] = useState('All');
   const [priceRange, setPriceRange] = useState([0, 2000]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
 
   useEffect(() => {
@@ -76,35 +77,48 @@ const FaceSerum = () => {
       </div>
 
       {/* Science Highlights */}
-      <section style={{ background: '#000', color: '#fff', padding: '3rem 5%', display: 'flex', justifyContent: 'space-around', textAlign: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-        <div>
+      <section className="serum-highlights">
+        <div className="highlight-item">
           <Sparkles size={32} color="#f0bada" />
-          <h4 style={{ marginTop: '10px' }}>Targeted Action</h4>
-          <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>Treats specific skin concerns</p>
+          <h4>Targeted Action</h4>
+          <p>Treats specific skin concerns</p>
         </div>
-        <div>
+        <div className="highlight-item">
           <Droplets size={32} color="#f0bada" />
-          <h4 style={{ marginTop: '10px' }}>High Potency</h4>
-          <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>Concentrated active ingredients</p>
+          <h4>High Potency</h4>
+          <p>Concentrated active ingredients</p>
         </div>
-        <div>
+        <div className="highlight-item">
           <CheckCircle size={32} color="#f0bada" />
-          <h4 style={{ marginTop: '10px' }}>Derm Approved</h4>
-          <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>Clinically tested formulas</p>
+          <h4>Derm Approved</h4>
+          <p>Clinically tested formulas</p>
         </div>
       </section>
 
       <div className="lips-container" style={{ marginTop: '4rem' }}>
-        <aside className="lips-sidebar filters-sidebar">
+        {/* Mobile Filter Toggle */}
+        <button 
+          className="mobile-filter-btn"
+          onClick={() => setIsFilterOpen(true)}
+        >
+          <Filter size={18} />
+          <span>Filters</span>
+        </button>
+
+        <aside className={`lips-sidebar filters-sidebar ${isFilterOpen ? 'mobile-open' : ''}`}>
           <div className="filters-card">
             <div className="filters-header">
               <h2>Filter</h2>
-              <button className="advanced-btn" onClick={() => {
-                setActiveSkinType('All Skin Types');
-                setActiveConcern('All');
-                setPriceRange([0, 2000]);
-              }}>Clear All</button>
-
+              <div className="filter-header-actions">
+                <button className="advanced-btn" onClick={() => {
+                  setActiveSkinType('All Skin Types');
+                  setActiveConcern('All');
+                  setPriceRange([0, 2000]);
+                }}>Clear All</button>
+                <button className="mobile-close-filters" onClick={() => setIsFilterOpen(false)}>
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Skin Type Section */}
@@ -260,16 +274,18 @@ const FaceSerum = () => {
       </div>
 
       {/* Serum FAQ / Guide Section */}
-      <section style={{ padding: '5rem 5%', background: '#fff1f6' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
-          <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?q=80&w=800&auto=format&fit=crop" alt="Serum Usage" style={{ width: '100%', borderRadius: '20px' }} />
-          <div>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>How to Use Your Serum?</h2>
-            <p style={{ color: '#555', lineHeight: '1.8', fontSize: '1.1rem', marginBottom: '2rem' }}>
+      <section className="serum-how-to">
+        <div className="serum-how-to-container">
+          <div className="serum-how-to-image">
+            <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?q=80&w=800&auto=format&fit=crop" alt="Serum Usage" />
+          </div>
+          <div className="serum-how-to-content">
+            <h2>How to Use Your Serum?</h2>
+            <p>
               Serums are the heavy hitters of your skincare routine. For best results, apply 2-3 drops after cleansing but before moisturizing.
               Gently press into the skin until fully absorbed. Use Vitamin C in the morning for protection and Retinol at night for repair.
             </p>
-            <button className="add-btn" style={{ maxWidth: '200px' }}>FIND MY ROUTINE</button>
+            <button className="add-btn how-to-btn">FIND MY ROUTINE</button>
           </div>
         </div>
       </section>
