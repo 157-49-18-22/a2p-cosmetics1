@@ -32,7 +32,7 @@ const fragmentShader = `
     } else {
       scale = vec2(containerAspect / imgAspect, 1.0);
     }
-    return (uv - 0.5) / scale + 0.5;
+    return (uv - 0.5) * scale + 0.5;
   }
 
   float noise(vec2 p) {
