@@ -3,10 +3,10 @@ const db = require('../db');
 // Stats for Admin View
 exports.getAdminStats = async (req, res) => {
   try {
-    const [[{ active_partners }]] = await db.query('SELECT COUNT(*) as active_partners FROM distributors WHERE status = "Active"');
+    const [[{ active_partners }]] = await db.query("SELECT COUNT(*) as active_partners FROM distributors WHERE status = 'Active'");
     const [[{ total_credit }]] = await db.query('SELECT SUM(credit_limit) as total_credit FROM distributors');
     const [[{ total_outstanding }]] = await db.query('SELECT SUM(balance) as total_outstanding FROM distributors');
-    const [[{ platinum_partners }]] = await db.query('SELECT COUNT(*) as platinum_partners FROM distributors WHERE tier = "Platinum"');
+    const [[{ platinum_partners }]] = await db.query("SELECT COUNT(*) as platinum_partners FROM distributors WHERE tier = 'Platinum'");
     res.json({ active_partners, total_credit: total_credit || 0, total_outstanding: total_outstanding || 0, platinum_partners });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
@@ -77,8 +77,8 @@ exports.getDistributorStats = async (req, res) => {
   const distId = req.params.id;
   try {
     const [[{ total_dealers }]] = await db.query('SELECT COUNT(*) as total_dealers FROM dealers WHERE distributor_id = ?', [distId]);
-    const [[{ active_orders }]] = await db.query('SELECT COUNT(*) as active_orders FROM distributor_orders WHERE distributor_id = ? AND status != "Delivered" AND status != "Cancelled"', [distId]);
-    const [[{ monthly_revenue }]] = await db.query('SELECT SUM(amount) as monthly_revenue FROM distributor_orders WHERE distributor_id = ? AND status = "Delivered" AND MONTH(created_at) = MONTH(CURRENT_DATE())', [distId]);
+    const [[{ active_orders }]] = await db.query("SELECT COUNT(*) as active_orders FROM distributor_orders WHERE distributor_id = ? AND status != 'Delivered' AND status != 'Cancelled'", [distId]);
+    const [[{ monthly_revenue }]] = await db.query("SELECT SUM(amount) as monthly_revenue FROM distributor_orders WHERE distributor_id = ? AND status = 'Delivered' AND MONTH(created_at) = MONTH(CURRENT_DATE())", [distId]);
     res.json({ total_dealers, active_orders, monthly_revenue: monthly_revenue || 0 });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
@@ -110,7 +110,7 @@ exports.createDealer = async (req, res) => {
 
     // Log activity
     await db.query(
-      'INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, "Success")',
+      "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Success')",
       [distributor_id, `New application submitted for "${name}" (${type})`]
     );
 
@@ -138,7 +138,7 @@ exports.createCampaign = async (req, res) => {
   const { distributor_id, title, type, zone, budget, start_date, end_date, description } = req.body;
   try {
     const [result] = await db.query(
-      'INSERT INTO branding_campaigns (distributor_id, title, type, zone, budget, start_date, end_date, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, "Upcoming")',
+      "INSERT INTO branding_campaigns (distributor_id, title, type, zone, budget, start_date, end_date, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Upcoming')",
       [distributor_id, title, type, zone, budget || 0, start_date, end_date, description]
     );
     res.json({ id: result.insertId, message: 'Campaign created' });
@@ -209,12 +209,12 @@ exports.createOrder = async (req, res) => {
   const order_number = 'ORD-' + Math.floor(Math.random() * 1000000);
   try {
     const [result] = await db.query(
-      'INSERT INTO distributor_orders (distributor_id, order_number, amount, items_count, status) VALUES (?, ?, ?, ?, "Pending")',
+      "INSERT INTO distributor_orders (distributor_id, order_number, amount, items_count, status) VALUES (?, ?, ?, ?, 'Pending')",
       [distributor_id, order_number, amount, items_count]
     );
     // Log Activity
     await db.query(
-      'INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, "Success")',
+      "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Success')",
       [distributor_id, `New Order ${order_number} created for ₹${amount}`]
     );
     res.json({ id: result.insertId, order_number });
@@ -232,7 +232,7 @@ exports.createInvoice = async (req, res) => {
     );
     // Log Activity
     await db.query(
-      'INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, "Invoice")',
+      "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Invoice')",
       [distributor_id, `Invoice ${final_bill_number} generated for ₹${amount}`]
     );
     res.json({ id: result.insertId, bill_number: final_bill_number });
@@ -313,8 +313,8 @@ exports.updateStockRequestStatus = async (req, res) => {
     const [[reqRow]] = await db.query('SELECT distributor_id, request_number FROM stock_requests WHERE id = ?', [req.params.id]);
     if (reqRow) {
       await db.query(
-        'INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, "Info")',
-        [reqRow.distributor_id, `Stock Request ${reqRow.request_number} marked as ${status} by Admin`, 'Info']
+        "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Info')",
+        [reqRow.distributor_id, `Stock Request ${reqRow.request_number} marked as ${status} by Admin`]
       );
     }
     
@@ -327,7 +327,7 @@ exports.createStockRequest = async (req, res) => {
   const request_number = 'REQ-' + Math.floor(Math.random() * 1000000);
   try {
     const [result] = await db.query(
-      'INSERT INTO stock_requests (distributor_id, request_number, total_amount, status) VALUES (?, ?, ?, "Pending")',
+      "INSERT INTO stock_requests (distributor_id, request_number, total_amount, status) VALUES (?, ?, ?, 'Pending')",
       [distributor_id, request_number, total_amount]
     );
     const requestId = result.insertId;
@@ -341,7 +341,7 @@ exports.createStockRequest = async (req, res) => {
 
     // Log Activity
     await db.query(
-      'INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, "Success")',
+      "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Success')",
       [distributor_id, `Stock Request ${request_number} sent to Admin for ₹${total_amount}`]
     );
 

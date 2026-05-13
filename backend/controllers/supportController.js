@@ -9,10 +9,10 @@ exports.getTickets = async (req, res) => {
 
 exports.getStats = async (req, res) => {
   try {
-    const [[{ open }]] = await db.query('SELECT COUNT(*) as open FROM support_tickets WHERE status = "Open"');
-    const [[{ in_progress }]] = await db.query('SELECT COUNT(*) as in_progress FROM support_tickets WHERE status = "In Progress"');
-    const [[{ resolved }]] = await db.query('SELECT COUNT(*) as resolved FROM support_tickets WHERE status = "Resolved"');
-    const [[{ high }]] = await db.query('SELECT COUNT(*) as high FROM support_tickets WHERE priority = "High" AND status != "Resolved"');
+    const [[{ open }]] = await db.query("SELECT COUNT(*) as open FROM support_tickets WHERE status = 'Open'");
+    const [[{ in_progress }]] = await db.query("SELECT COUNT(*) as in_progress FROM support_tickets WHERE status = 'In Progress'");
+    const [[{ resolved }]] = await db.query("SELECT COUNT(*) as resolved FROM support_tickets WHERE status = 'Resolved'");
+    const [[{ high }]] = await db.query("SELECT COUNT(*) as high FROM support_tickets WHERE priority = 'High' AND status != 'Resolved'");
     res.json({ open, in_progress, resolved, high });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
@@ -44,7 +44,7 @@ exports.replyTicket = async (req, res) => {
       'INSERT INTO ticket_replies (ticket_id, agent, message) VALUES (?,?,?)',
       [req.params.id, agent || 'Admin', reply]
     );
-    await db.query('UPDATE support_tickets SET status = "In Progress" WHERE id = ? AND status = "Open"', [req.params.id]);
+    await db.query("UPDATE support_tickets SET status = 'In Progress' WHERE id = ? AND status = 'Open'", [req.params.id]);
     res.json({ message: 'Reply sent' });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
