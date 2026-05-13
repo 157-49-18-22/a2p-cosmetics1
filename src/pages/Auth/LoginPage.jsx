@@ -173,7 +173,7 @@ const LoginPage = ({ type: initialType }) => {
                 <div className="auth-input-wrapper">
                   <span className="material-symbols-outlined input-icon">mail</span>
                   <input 
-                    type="text" 
+                    type="email" 
                     id="email"
                     placeholder="name@distributor.com"
                     value={email}

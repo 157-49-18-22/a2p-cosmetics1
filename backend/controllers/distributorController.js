@@ -3,10 +3,10 @@ const db = require('../db');
 // Stats for Admin View
 exports.getAdminStats = async (req, res) => {
   try {
-    const [[{ active_partners }]] = await db.query("SELECT COUNT(*) as active_partners FROM distributors WHERE status = 'Active'");
+    const [[{ active_partners }]] = await db.query('SELECT COUNT(*) as active_partners FROM distributors WHERE status = "Active"');
     const [[{ total_credit }]] = await db.query('SELECT SUM(credit_limit) as total_credit FROM distributors');
     const [[{ total_outstanding }]] = await db.query('SELECT SUM(balance) as total_outstanding FROM distributors');
-    const [[{ platinum_partners }]] = await db.query("SELECT COUNT(*) as platinum_partners FROM distributors WHERE tier = 'Platinum'");
+    const [[{ platinum_partners }]] = await db.query('SELECT COUNT(*) as platinum_partners FROM distributors WHERE tier = "Platinum"');
     res.json({ active_partners, total_credit: total_credit || 0, total_outstanding: total_outstanding || 0, platinum_partners });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
@@ -16,25 +16,9 @@ exports.loginDistributor = async (req, res) => {
   const { email, password } = req.body;
   try {
     const [rows] = await db.query('SELECT * FROM distributors WHERE email = ? AND password = ?', [email, password]);
-    
-    // TEMPORARY BYPASS: Allow any login for testing
     if (rows.length === 0) {
-      const [fallback] = await db.query("SELECT * FROM distributors WHERE status = 'Active' LIMIT 1");
-      if (fallback.length > 0) {
-        return res.json(fallback[0]);
-      }
-      return res.json({ 
-        id: 999, 
-        name: 'Demo Distributor', 
-        email: email || 'distributor@example.com', 
-        role: 'Senior Distributor', 
-        tier: 'Platinum', 
-        status: 'Active',
-        balance: 0,
-        credit_limit: 100000
-      });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
-
     const distributor = rows[0];
     if (distributor.status !== 'Active') {
       return res.status(403).json({ error: 'Your account is not active' });
@@ -93,8 +77,8 @@ exports.getDistributorStats = async (req, res) => {
   const distId = req.params.id;
   try {
     const [[{ total_dealers }]] = await db.query('SELECT COUNT(*) as total_dealers FROM dealers WHERE distributor_id = ?', [distId]);
-    const [[{ active_orders }]] = await db.query("SELECT COUNT(*) as active_orders FROM distributor_orders WHERE distributor_id = ? AND status != 'Delivered' AND status != 'Cancelled'", [distId]);
-    const [[{ monthly_revenue }]] = await db.query("SELECT SUM(amount) as monthly_revenue FROM distributor_orders WHERE distributor_id = ? AND status = 'Delivered' AND MONTH(created_at) = MONTH(CURRENT_DATE())", [distId]);
+    const [[{ active_orders }]] = await db.query('SELECT COUNT(*) as active_orders FROM distributor_orders WHERE distributor_id = ? AND status != "Delivered" AND status != "Cancelled"', [distId]);
+    const [[{ monthly_revenue }]] = await db.query('SELECT SUM(amount) as monthly_revenue FROM distributor_orders WHERE distributor_id = ? AND status = "Delivered" AND MONTH(created_at) = MONTH(CURRENT_DATE())', [distId]);
     res.json({ total_dealers, active_orders, monthly_revenue: monthly_revenue || 0 });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };

@@ -4,9 +4,9 @@ const db = require('../db');
 exports.getStats = async (req, res) => {
   try {
     const [[{ total_agents }]] = await db.query('SELECT COUNT(*) as total_agents FROM agents');
-    const [[{ active_referrals }]] = await db.query("SELECT COUNT(*) as active_referrals FROM agent_referrals WHERE status = 'Converted'");
-    const [[{ total_commission }]] = await db.query("SELECT SUM(amount) as total_commission FROM agent_commissions WHERE status = 'Earned'");
-    const [[{ pending_payouts }]] = await db.query("SELECT SUM(amount) as pending_payouts FROM agent_payouts WHERE status = 'Pending'");
+    const [[{ active_referrals }]] = await db.query('SELECT COUNT(*) as active_referrals FROM agent_referrals WHERE status = "Converted"');
+    const [[{ total_commission }]] = await db.query('SELECT SUM(amount) as total_commission FROM agent_commissions WHERE status = "Earned"');
+    const [[{ pending_payouts }]] = await db.query('SELECT SUM(amount) as pending_payouts FROM agent_payouts WHERE status = "Pending"');
     res.json({ total_agents, active_referrals: active_referrals || 0, total_commission: total_commission || 0, pending_payouts: pending_payouts || 0 });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
@@ -16,23 +16,9 @@ exports.loginAgent = async (req, res) => {
   const { email, password } = req.body;
   try {
     const [rows] = await db.query('SELECT * FROM agents WHERE email = ? AND password = ?', [email, password]);
-    
-    // TEMPORARY BYPASS: Allow any login for testing
     if (rows.length === 0) {
-      const [fallback] = await db.query("SELECT * FROM agents WHERE status = 'Active' LIMIT 1");
-      if (fallback.length > 0) {
-        return res.json(fallback[0]);
-      }
-      return res.json({ 
-        id: 999, 
-        name: 'Demo Agent', 
-        email: email || 'agent@example.com', 
-        role: 'Agent', 
-        tier: 'Gold', 
-        status: 'Active' 
-      });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
-
     const agent = rows[0];
     if (agent.status !== 'Active') {
       return res.status(403).json({ error: 'Your account is not active' });
@@ -44,7 +30,7 @@ exports.loginAgent = async (req, res) => {
 // Top Agents
 exports.getTopAgents = async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT name, tier, id FROM agents WHERE status = 'Active' LIMIT 5");
+    const [rows] = await db.query('SELECT name, tier, id FROM agents WHERE status = "Active" LIMIT 5');
     const topAgents = rows.map(a => ({
       ...a,
       rev: `₹${(Math.random() * 2 + 1).toFixed(1)}L`,
@@ -65,7 +51,7 @@ exports.getApplicants = async (req, res) => {
 // Hierarchy
 exports.getHierarchy = async (req, res) => {
   try {
-    const [agents] = await db.query("SELECT id, name, role, tier, parent_id FROM agents WHERE status != 'Rejected'");
+    const [agents] = await db.query('SELECT id, name, role, tier, parent_id FROM agents WHERE status != "Rejected"');
     
     // Build tree
     const map = {};
@@ -192,7 +178,7 @@ exports.updatePayoutStatus = async (req, res) => {
 exports.processPayoutBatch = async (req, res) => {
   const { status } = req.body;
   try {
-    await db.query("UPDATE agent_payouts SET status = ?, processed_time = NOW() WHERE status = 'Pending'", [status]);
+    await db.query('UPDATE agent_payouts SET status = ?, processed_time = NOW() WHERE status = "Pending"', [status]);
     res.json({ message: 'All pending payouts processed' });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
