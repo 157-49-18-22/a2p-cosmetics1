@@ -4,9 +4,9 @@ const db = require('../db');
 exports.getStats = async (req, res) => {
   try {
     const [[{ total_agents }]] = await db.query('SELECT COUNT(*) as total_agents FROM agents');
-    const [[{ active_referrals }]] = await db.query('SELECT COUNT(*) as active_referrals FROM agent_referrals WHERE status = "Converted"');
-    const [[{ total_commission }]] = await db.query('SELECT SUM(amount) as total_commission FROM agent_commissions WHERE status = "Earned"');
-    const [[{ pending_payouts }]] = await db.query('SELECT SUM(amount) as pending_payouts FROM agent_payouts WHERE status = "Pending"');
+    const [[{ active_referrals }]] = await db.query("SELECT COUNT(*) as active_referrals FROM agent_referrals WHERE status = 'Converted'");
+    const [[{ total_commission }]] = await db.query("SELECT SUM(amount) as total_commission FROM agent_commissions WHERE status = 'Earned'");
+    const [[{ pending_payouts }]] = await db.query("SELECT SUM(amount) as pending_payouts FROM agent_payouts WHERE status = 'Pending'");
     res.json({ total_agents, active_referrals: active_referrals || 0, total_commission: total_commission || 0, pending_payouts: pending_payouts || 0 });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
@@ -30,7 +30,7 @@ exports.loginAgent = async (req, res) => {
 // Top Agents
 exports.getTopAgents = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT name, tier, id FROM agents WHERE status = "Active" LIMIT 5');
+    const [rows] = await db.query("SELECT name, tier, id FROM agents WHERE status = 'Active' LIMIT 5");
     const topAgents = rows.map(a => ({
       ...a,
       rev: `₹${(Math.random() * 2 + 1).toFixed(1)}L`,
@@ -51,7 +51,7 @@ exports.getApplicants = async (req, res) => {
 // Hierarchy
 exports.getHierarchy = async (req, res) => {
   try {
-    const [agents] = await db.query('SELECT id, name, role, tier, parent_id FROM agents WHERE status != "Rejected"');
+    const [agents] = await db.query("SELECT id, name, role, tier, parent_id FROM agents WHERE status != 'Rejected'");
     
     // Build tree
     const map = {};
@@ -80,11 +80,11 @@ exports.onboard = async (req, res) => {
   const { name, email, phone, city, address, profile_pic, document_url } = req.body;
   try {
     const [result] = await db.query(
-      'INSERT INTO agents (name, email, phone, city, address, profile_pic, document_url, status) VALUES (?, ?, ?, ?, ?, ?, ?, "Pending")',
+      "INSERT INTO agents (name, email, phone, city, address, profile_pic, document_url, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')",
       [name, email, phone, city, address, profile_pic, document_url]
     );
     await db.query(
-      'INSERT INTO agent_logs (agent_id, activity_text, activity_type, status) VALUES (?, ?, "Onboarding", "Pending")',
+      "INSERT INTO agent_logs (agent_id, activity_text, activity_type, status) VALUES (?, ?, 'Onboarding', 'Pending')",
       [result.insertId, `New registration request from ${name}`]
     );
     res.json({ id: result.insertId, message: 'Application submitted successfully' });
@@ -178,7 +178,7 @@ exports.updatePayoutStatus = async (req, res) => {
 exports.processPayoutBatch = async (req, res) => {
   const { status } = req.body;
   try {
-    await db.query('UPDATE agent_payouts SET status = ?, processed_time = NOW() WHERE status = "Pending"', [status]);
+    await db.query("UPDATE agent_payouts SET status = ?, processed_time = NOW() WHERE status = 'Pending'", [status]);
     res.json({ message: 'All pending payouts processed' });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
@@ -200,7 +200,7 @@ exports.createReferralCode = async (req, res) => {
   const { code, agent_id } = req.body;
   try {
     const [result] = await db.query(
-      'INSERT INTO agent_referral_codes (code, agent_id, status) VALUES (?, ?, "Active")',
+      "INSERT INTO agent_referral_codes (code, agent_id, status) VALUES (?, ?, 'Active')",
       [code, agent_id]
     );
     res.json({ id: result.insertId, message: 'Referral code created' });
