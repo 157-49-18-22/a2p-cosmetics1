@@ -96,10 +96,30 @@ const Bestsellers = () => {
                   />
                 </button>
 
+                {/* Primary product image */}
                 <img 
                   src={product.image_url || 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop'} 
-                  alt={product.name} 
+                  alt={product.name}
+                  className="product-img primary-img"
                   onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop'; }}
+                />
+
+                {/* Hover lifestyle image */}
+                <img
+                  src={
+                    product.hover_image_url ||
+                    (product.category?.toLowerCase().includes('face wash')
+                      ? 'https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=600&auto=format&fit=crop'
+                      : product.category?.toLowerCase().includes('serum')
+                      ? 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?q=80&w=600&auto=format&fit=crop'
+                      : product.category?.toLowerCase().includes('cream')
+                      ? 'https://images.unsplash.com/photo-1612817288484-6f916006741a?q=80&w=600&auto=format&fit=crop'
+                      : product.category?.toLowerCase().includes('body')
+                      ? 'https://images.unsplash.com/photo-1570194065650-d99fb4b38779?q=80&w=600&auto=format&fit=crop'
+                      : 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=600&auto=format&fit=crop')
+                  }
+                  alt={`${product.name} lifestyle`}
+                  className="product-img hover-img"
                 />
 
                 <div className="add-to-cart-wrapper">
