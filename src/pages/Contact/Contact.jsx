@@ -16,7 +16,6 @@ const Contact = () => {
   const [submitted, setSubmitted] = useState(false);
   const [activeFaq, setActiveFaq] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [mapState, setMapState] = useState('global'); // 'global', 'zooming', 'local'
   const pageRef = useRef(null);
 
   useEffect(() => {
@@ -59,14 +58,7 @@ const Contact = () => {
     setFormData({ name: '', email: '', subject: '', message: '' });
   };
 
-  const handleZoomToggle = () => {
-    if (mapState === 'global') {
-      setMapState('zooming');
-      setTimeout(() => setMapState('local'), 1500); // Transition to real map after 1.5s
-    } else {
-      setMapState('global');
-    }
-  };
+
 
   return (
     <div className="contact-page unique-experience" ref={pageRef}>
@@ -233,9 +225,9 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* Google-Maps Styled Earth Section */}
+      {/* Location Map Section */}
       <div className="footer-map-v3 space-section">
-        <div className={`f-map-container ${mapState}`}>
+        <div className="f-map-container local">
           <div className="f-map-info animate-left">
             <span className="map-badge">Visit Us</span>
             <h2>Locate Our <span>Studio</span></h2>
@@ -244,33 +236,17 @@ const Contact = () => {
               <MapPin size={24} className="pin-main" />
               <div>
                 <h4>Main Studio</h4>
-                <p>A2P Cosmetics, Mumbai, India</p>
+                <p>Puri High Street, Faridabad 121002</p>
               </div>
             </div>
-            <button className={`earth-zoom-btn ${mapState !== 'global' ? 'active' : ''}`} onClick={handleZoomToggle}>
-              {mapState === 'global' ? 'Explore Location' : 'Back to Global'}
-              <Globe size={18} />
-            </button>
           </div>
           
           <div className="f-map-visual animate-right">
             <div className="google-style-map">
-              {/* Stage 1: Earth Sphere */}
-              <div className="earth-frame">
-                <div className="earth-sphere">
-                  <div className="earth-map-texture"></div>
-                  <div className="earth-clouds"></div>
-                  <div className="earth-atmosphere"></div>
-                </div>
-
-                <div className="earth-shadow"></div>
-              </div>
-              
-              {/* Stage 2: Real Google Map */}
               <div className="real-map-embed">
                 <iframe 
-                  title="A2P Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d120638.16327092176!2d72.8094625!3d19.102377!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c6306644edc1%3A0x5da4ed8f8d648c69!2sMumbai%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1713636545678!5m2!1sen!2sin" 
+                  title="A2P Faridabad Location"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d112173.23812836275!2d77.25055042617742!3d28.37583723377227!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cdd9514745555%3A0xcfabcbf59eb44f91!2sFaridabad%2C%20Haryana!5e0!3m2!1sen!2sin!4v1713636545678!5m2!1sen!2sin" 
                   width="100%" 
                   height="100%" 
                   style={{ border: 0 }} 
@@ -279,9 +255,6 @@ const Contact = () => {
                   referrerPolicy="no-referrer-when-downgrade"
                 ></iframe>
               </div>
-
-              {/* Transition Layer */}
-              <div className="map-curtain"></div>
             </div>
             
             <div className="space-star s1"></div>
