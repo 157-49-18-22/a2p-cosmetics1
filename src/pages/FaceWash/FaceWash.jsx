@@ -94,8 +94,9 @@ const FaceWash = () => {
     fetch(`${API_BASE_URL}/products?category=Face Wash`)
       .then(res => res.json())
       .then(data => {
-        setAllProducts(data);
-        setFilteredProducts(data);
+        const productsArr = Array.isArray(data) ? data : [];
+        setAllProducts(productsArr);
+        setFilteredProducts(productsArr);
         setLoading(false);
       })
       .catch(err => {

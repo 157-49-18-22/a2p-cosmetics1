@@ -20,7 +20,7 @@ export const WishlistProvider = ({ children }) => {
   const fetchWishlist = async () => {
     try {
       const response = await axios.get(API_URL);
-      setWishlistItems(response.data);
+      setWishlistItems(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
     }

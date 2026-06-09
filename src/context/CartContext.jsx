@@ -22,7 +22,7 @@ export const CartProvider = ({ children }) => {
   const fetchCart = async () => {
     try {
       const response = await axios.get(API_URL);
-      setCartItems(response.data);
+      setCartItems(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching cart:', error);
     }
