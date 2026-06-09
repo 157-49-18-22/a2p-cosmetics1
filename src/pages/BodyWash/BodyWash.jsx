@@ -20,9 +20,8 @@ const BodyWash = () => {
     fetch(`${API_BASE_URL}/products?category=Body Wash`)
       .then(res => res.json())
       .then(data => {
-        const arr = Array.isArray(data) ? data : [];
-        setAllProducts(arr);
-        setFilteredProducts(arr);
+        setAllProducts(data);
+        setFilteredProducts(data);
         setLoading(false);
       })
       .catch(err => {

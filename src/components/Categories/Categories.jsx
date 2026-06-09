@@ -12,7 +12,7 @@ const Categories = () => {
     fetch(`${API_BASE_URL}/categories`)
       .then(res => res.json())
       .then(data => {
-        setCategories(Array.isArray(data) ? data : []);
+        setCategories(data);
         setLoading(false);
       })
       .catch(err => {

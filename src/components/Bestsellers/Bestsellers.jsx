@@ -16,7 +16,7 @@ const Bestsellers = () => {
     fetch(`${API_BASE_URL}/products`)
       .then(res => res.json())
       .then(data => {
-        setProducts(Array.isArray(data) ? data : []);
+        setProducts(data);
         setLoading(false);
       })
       .catch(err => {

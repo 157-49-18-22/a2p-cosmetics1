@@ -21,9 +21,8 @@ const FaceSerum = () => {
     fetch(`${API_BASE_URL}/products?category=Face Serum`)
       .then(res => res.json())
       .then(data => {
-        const productsArr = Array.isArray(data) ? data : [];
-        setAllProducts(productsArr);
-        setFilteredProducts(productsArr);
+        setAllProducts(data);
+        setFilteredProducts(data);
         setLoading(false);
       })
       .catch(err => {
