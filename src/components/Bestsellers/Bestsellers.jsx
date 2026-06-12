@@ -4,13 +4,24 @@ import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import './Bestsellers.css';
 
-// Fallback products matching the reference in case API fails
+// Fallback products — always shown when DB image is missing
 const FALLBACK_PRODUCTS = [
   { id: 1, name: 'A2P Turmeric Skin Cream', price: 75.00,  image_url: '/facewash_product.png' },
   { id: 2, name: 'A2P Vajradanti Paste',    price: 25.00,  image_url: '/face_cream_product.png' },
   { id: 3, name: 'WSO Skin Cream',          price: 37.00,  image_url: '/body_wash_product.png' },
   { id: 4, name: 'A2P Vajradanti Powder',   price: 20.00,  image_url: '/luxury_serum_hero.png' },
 ];
+
+// Merge DB product with fallback to always guarantee images
+const mergeProductWithFallback = (product, idx) => {
+  const fallback = FALLBACK_PRODUCTS[idx % FALLBACK_PRODUCTS.length];
+  const img = product.image_url;
+  const isValidImg = img && (img.startsWith('/') || img.startsWith('http'));
+  return {
+    ...product,
+    image_url: isValidImg ? img : fallback.image_url,
+  };
+};
 
 const Bestsellers = () => {
   const [products, setProducts] = useState([]);
@@ -20,7 +31,11 @@ const Bestsellers = () => {
     fetch(`${API_BASE_URL}/products`)
       .then(res => res.json())
       .then(data => {
-        setProducts(data.length > 0 ? data : FALLBACK_PRODUCTS);
+        if (data.length > 0) {
+          setProducts(data.map(mergeProductWithFallback));
+        } else {
+          setProducts(FALLBACK_PRODUCTS);
+        }
         setLoading(false);
       })
       .catch(err => {

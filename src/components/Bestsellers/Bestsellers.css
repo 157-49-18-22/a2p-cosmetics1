@@ -1,15 +1,14 @@
 .vicco-bestsellers {
   width: 100%;
   background-color: var(--primary-pink-light);
-  padding: 6rem 0 4rem 0;
+  padding: 4rem 0 4rem 0;
   font-family: 'Inter', sans-serif;
 }
 
 .vicco-container {
-  /* Changed to essentially full screen width as requested */
   max-width: 100%;
   margin: 0 auto;
-  padding: 0 4rem;
+  padding: 0 3rem;
 }
 
 /* ── Header ── */
@@ -206,13 +205,50 @@
 }
 
 @media (max-width: 600px) {
+  .vicco-container {
+    padding: 0 1rem;
+  }
+
   .vicco-header-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .vicco-title {
+    font-size: 1.4rem;
+  }
+
+  .vicco-view-all-btn {
+    font-size: 0.75rem;
+    padding: 0.6rem 1.2rem;
   }
 
   .vicco-products-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .vicco-image-box {
+    height: 200px;
+  }
+
+  .vicco-details-box {
+    padding: 0.8rem 0.5rem;
+  }
+
+  .vicco-product-name {
+    font-size: 0.85rem;
+    margin: 0 0 0.4rem 0;
+  }
+
+  .vicco-product-price {
+    font-size: 0.85rem;
+  }
+
+  .vicco-bestseller-badge {
+    font-size: 0.55rem;
+    padding: 0.2rem 0.5rem;
   }
 }

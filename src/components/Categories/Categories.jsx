@@ -24,6 +24,19 @@ const MARQUEE_ITEMS = [
   { label: 'Make Up',      image: '/makeup.png'             },
 ];
 
+// Helper: merge DB cat with fallback to always guarantee images
+const mergeCatWithFallback = (cat, idx) => {
+  const fallback = FALLBACK_CATEGORIES[idx % FALLBACK_CATEGORIES.length];
+  const img = cat.image_url;
+  const isValidImg = img && (img.startsWith('/') || img.startsWith('http'));
+  return {
+    ...cat,
+    image_url: isValidImg ? img : fallback.image_url,
+    hover_image_url: cat.hover_image_url || fallback.hover_image_url,
+    slug: cat.slug || fallback.slug,
+  };
+};
+
 const Categories = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -33,7 +46,11 @@ const Categories = () => {
     fetch(`${API_BASE_URL}/categories`)
       .then(res => res.json())
       .then(data => {
-        setCategories(data.length > 0 ? data : FALLBACK_CATEGORIES);
+        if (data.length > 0) {
+          setCategories(data.map(mergeCatWithFallback));
+        } else {
+          setCategories(FALLBACK_CATEGORIES);
+        }
         setLoading(false);
       })
       .catch(() => {
@@ -42,9 +59,11 @@ const Categories = () => {
       });
   }, []);
 
+  // Always show something — use FALLBACK if still empty
   const displayCats = categories.length > 0 ? categories : FALLBACK_CATEGORIES;
 
   if (loading) {
+    // Show fallback immediately while loading
     return (
       <section className="cat-wrapper">
         <div className="cat-loading">Loading…</div>
