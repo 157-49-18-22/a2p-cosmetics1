@@ -1,236 +1,218 @@
-.bestsellers {
-  padding: 6rem 0 8rem 0;
-  background-color: #fff;
+.vicco-bestsellers {
+  width: 100%;
+  background-color: var(--primary-pink-light);
+  padding: 6rem 0 4rem 0;
+  font-family: 'Inter', sans-serif;
 }
 
-.bestsellers .section-header.text-center {
-  margin-bottom: 4rem;
-  text-align: center;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+.vicco-container {
+  /* Changed to essentially full screen width as requested */
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 4rem;
 }
 
-.bestsellers .section-desc {
-  color: #666;
-  font-size: 1.15rem;
-  line-height: 1.6;
-  margin-top: 1rem;
+/* ── Header ── */
+.vicco-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
 }
 
-.bestsellers h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 3.5rem;
-  font-weight: 600;
+.vicco-title {
+  font-size: 2.2rem;
+  font-weight: 800;
   color: #1a1a1a;
+  text-transform: uppercase;
+  margin: 0;
 }
 
-.bestsellers .highlight-text {
-  color: var(--primary-pink);
+.vicco-view-all-btn {
+  background-color: #cc0000;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.9rem 2.2rem;
+  letter-spacing: 0.05em;
+  transition: background-color 0.3s ease;
 }
 
-.products-grid {
+.vicco-view-all-btn:hover {
+  background-color: #aa0000;
+}
+
+/* ── Grid ── */
+.vicco-products-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
-.product-card {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+/* ── Product Card ── */
+.vicco-product-card {
   display: flex;
   flex-direction: column;
-}
-
-.product-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-}
-
-.product-image-container {
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: transform 0.3s ease;
   position: relative;
-  width: 100%;
-  aspect-ratio: 4/5;
+  /* Context for children */
+}
+
+.vicco-image-box {
+  background-color: #faf2f4;
+  /* Light warm pinkish gray fallback */
+  position: relative;
+  height: 380px;
+  /* Slightly taller to accommodate full screen */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Removed padding so image goes edge-to-edge within the box */
   overflow: hidden;
-  background-color: #f8f8f8;
+  /* Important for sliding elements */
 }
 
-.product-image-container img,
-.product-image-container .product-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* Hover logic for image box */
+.vicco-product-card:hover .vicco-product-img {
+  transform: scale(1.05);
+  /* Slight pop on hover */
+}
+
+/* ── Hover Elements ── */
+.vicco-wishlist-btn {
   position: absolute;
-  top: 0;
-  left: 0;
-  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-.primary-img {
-  opacity: 1;
-  transform: scale(1);
-  z-index: 1;
-}
-
-.hover-img {
-  opacity: 0;
-  transform: scale(1.07);
-  z-index: 2;
-}
-
-.product-card:hover .primary-img {
-  opacity: 0;
-  transform: scale(1.07);
-}
-
-.product-card:hover .hover-img {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.product-category-tag {
-  position: absolute;
-  top: 15px;
-  left: 15px;
+  top: 1rem;
+  right: 1.2rem;
   background: white;
-  color: #ff4d6d;
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 50px;
-  z-index: 2;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.wishlist-btn {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 36px;
-  height: 36px;
-  background: white;
-  color: #1a1a1a;
+  border: none;
   border-radius: 50%;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2;
-  border: none;
+  color: #666;
   cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   opacity: 0;
-  transform: scale(0.8);
+  /* Hidden by default */
+  transform: translateY(-10px);
   transition: all 0.3s ease;
+  z-index: 5;
 }
 
-.product-card:hover .wishlist-btn {
+.vicco-wishlist-btn:hover {
+  color: #cc0000;
+  transform: scale(1.1);
+}
+
+.vicco-product-card:hover .vicco-wishlist-btn {
   opacity: 1;
-  transform: scale(1);
+  transform: translateY(0);
 }
 
-.wishlist-btn:hover {
-  background: #ff4d6d;
-  color: white;
-}
-
-.add-to-cart-wrapper {
+/* Sliding Quick Add Button */
+.vicco-quick-add-btn {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  padding: 15px;
+  background: #cc0000;
+  color: white;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  padding: 1.2rem 0;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   transform: translateY(100%);
-  transition: transform 0.3s ease;
+  /* Hidden initially */
+  transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+  z-index: 5;
+}
+
+.vicco-quick-add-btn:hover {
+  background: #aa0000;
+}
+
+.vicco-product-card:hover .vicco-quick-add-btn {
+  transform: translateY(0);
+  /* Slides up nicely */
+}
+
+/* ── Existing Badges & Image ── */
+.vicco-bestseller-badge {
+  position: absolute;
+  top: 1.2rem;
+  left: 1.2rem;
+  border: 1px solid #cc0000;
+  background-color: white;
+  /* Added white background so it pops off busy images */
+  color: #cc0000;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.3rem 0.8rem;
+  border-radius: 50px;
+  letter-spacing: 0.05em;
   z-index: 2;
 }
 
-.product-card:hover .add-to-cart-wrapper {
-  transform: translateY(0);
-}
-
-.add-to-cart-overlay {
+.vicco-product-img {
   width: 100%;
-  background: white;
-  color: #1a1a1a;
-  border: none;
-  border-radius: 50px;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  height: 100%;
+  object-fit: cover;
+  /* Stretches and crops image to fill the entire square */
+  transition: transform 0.3s ease;
+}
+
+.vicco-product-card:hover .vicco-product-img {
+  transform: scale(1.05);
+  /* Slight pop on hover */
+}
+
+/* ── Details ── */
+.vicco-details-box {
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+
+.vicco-product-name {
+  font-size: 1.1rem;
   font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  color: #222222;
+  margin: 0 0 1rem 0;
+  line-height: 1.4;
 }
 
-.add-to-cart-overlay:hover {
-  background: #ff4d6d;
-  color: white;
-  box-shadow: 0 8px 25px rgba(255, 77, 109, 0.4);
+.vicco-product-price {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #444444;
+  margin: 0;
 }
 
-.product-details {
-  padding: 1.5rem;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.product-details h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
-  color: #1a1a1a;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-.product-desc {
-  color: #666;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin-bottom: 1rem;
-  flex-grow: 1;
-}
-
-.product-rating-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 1rem;
-}
-
-.stars {
-  display: flex;
-  gap: 2px;
-}
-
-.rating-text {
-  color: #666;
-  font-size: 0.85rem;
-}
-
-.product-price {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #ff4d6d;
-  display: block;
-}
-
-@media (max-width: 1200px) {
-  .products-grid {
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .vicco-products-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
   }
 }
 
 @media (max-width: 600px) {
-  .products-grid {
+  .vicco-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .vicco-products-grid {
     grid-template-columns: 1fr;
   }
 }

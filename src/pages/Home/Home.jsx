@@ -2,6 +2,7 @@ import API_BASE_URL from '../../apiConfig.js';
 import React, { useEffect, useRef } from 'react';
 import { useNotifications } from '../../components/Notifications/NotificationHub';
 import Hero from '../../components/Hero/Hero';
+import CoreValues from '../../components/CoreValues/CoreValues';
 import Categories from '../../components/Categories/Categories';
 import AdSection from '../../components/AdSection/AdSection';
 import Bestsellers from '../../components/Bestsellers/Bestsellers';
@@ -49,6 +50,7 @@ const Home = () => {
         <Hero />
       </div>
       <main>
+        <CoreValues />
         <Categories />
         <AdSection />
         <Bestsellers />

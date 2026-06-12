@@ -1,117 +1,116 @@
 import API_BASE_URL from '../../apiConfig.js';
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Droplet, Sparkles, Waves, Flower, ArrowRight, Layers } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 import './Categories.css';
+
+// Static fallback category cards matching the reference design
+const FALLBACK_CATEGORIES = [
+  { id: 1, name: 'FACE WASH',   slug: 'face-wash',  image_url: '/facewash_banner.png',     hover_image_url: '/facewash_hover_1.png' },
+  { id: 2, name: 'FACE SERUM',  slug: 'face-serum', image_url: '/luxury_serum_hero.png',   hover_image_url: '/faceserum_hover_1.png' },
+  { id: 3, name: 'FACE CREAM',  slug: 'face-cream', image_url: '/hydrating_cream_hero.png', hover_image_url: '/facecream_hover_1.png' },
+  { id: 4, name: 'BODY WASH',   slug: 'body-wash',  image_url: '/body_wash_banner.png',    hover_image_url: '/bodywash_hover_1.png' },
+  { id: 5, name: 'SKIN CARE',   slug: 'skin-care',  image_url: '/skincare.png',            hover_image_url: '/natural_skincare_hero.png' },
+  { id: 6, name: 'MAKE UP',     slug: 'makeup',     image_url: '/makeup.png',              hover_image_url: '/lipstick_shade_finder.png' },
+];
+
+// Items for the bottom marquee slider
+const MARQUEE_ITEMS = [
+  { label: 'Face Wash',    image: '/facewash_product.png'   },
+  { label: 'Face Serum',   image: '/luxury_serum_hero.png'  },
+  { label: 'Face Cream',   image: '/face_cream_product.png' },
+  { label: 'Body Wash',    image: '/body_wash_product.png'  },
+  { label: 'Skin Care',    image: '/skincare.png'           },
+  { label: 'Natural Glow', image: '/natural_skincare_hero.png' },
+  { label: 'Hydration',    image: '/hydrating_cream_hero.png'  },
+  { label: 'Make Up',      image: '/makeup.png'             },
+];
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]       = useState(true);
+  const trackRef = useRef(null);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/categories`)
       .then(res => res.json())
       .then(data => {
-        setCategories(data);
+        setCategories(data.length > 0 ? data : FALLBACK_CATEGORIES);
         setLoading(false);
       })
-      .catch(err => {
-        console.error('Error fetching categories:', err);
+      .catch(() => {
+        setCategories(FALLBACK_CATEGORIES);
         setLoading(false);
       });
   }, []);
 
-  const getIcon = (index) => {
-    const icons = [
-      <Droplet size={24} color="white" strokeWidth={1.5} />,
-      <Sparkles size={24} color="white" strokeWidth={1.5} />,
-      <Waves size={24} color="white" strokeWidth={1.5} />,
-      <Flower size={24} color="white" strokeWidth={1.5} />
-    ];
-    return icons[index % icons.length];
-  };
+  const displayCats = categories.length > 0 ? categories : FALLBACK_CATEGORIES;
 
   if (loading) {
-     return (
-        <section className="explore-categories">
-           <div className="container text-center">
-              <p>Loading Categories...</p>
-           </div>
-        </section>
-     );
+    return (
+      <section className="cat-wrapper">
+        <div className="cat-loading">Loading…</div>
+      </section>
+    );
   }
 
   return (
-    <section className="explore-categories">
-      <div className="container">
-        <div className="section-title">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+    <section className="cat-wrapper">
+      {/* ── Section Header ── */}
+      <div className="cat-header-block">
+        <p className="cat-eyebrow">A2P COSMETICS COLLECTION</p>
+        <h2 className="cat-heading">
+          Explore Our <span className="cat-heading-accent">Categories</span>
+        </h2>
+      </div>
+
+      <div className="cat-grid">
+        {displayCats.slice(0, 6).map((cat, i) => (
+          <a
+            key={cat.id}
+            href={`/${cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-')}`}
+            className={`cat-tile cat-tile--${i}`}
           >
-            Explore Our <span className="gradient-text">Categories</span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            From skincare essentials to glamorous makeup, find everything you need for your beauty routine
-          </motion.p>
+            <img
+              src={cat.image_url || '/skincare.png'}
+              alt={cat.name}
+              className="cat-tile__img cat-tile__img--main"
+              onError={e => { e.target.src = '/skincare.png'; }}
+            />
+            {cat.hover_image_url && (
+              <img
+                src={cat.hover_image_url}
+                alt={`${cat.name} hover`}
+                className="cat-tile__img cat-tile__img--hover"
+                onError={e => { e.target.src = cat.image_url || '/skincare.png'; }}
+              />
+            )}
+            <div className="cat-tile__veil" />
+            <div className="cat-tile__label">
+              <span className="cat-tile__name">{cat.name}</span>
+              <span className="cat-tile__explore">EXPLORE</span>
+            </div>
+          </a>
+        ))}
+
+        {/* Last tile — Shop All CTA */}
+        <div className="cat-tile cat-tile--cta">
+          <div className="cat-tile__cta-inner">
+            <p className="cat-tile__cta-tag">— All Products</p>
+            <h3 className="cat-tile__cta-title">SHOP OUR COLLECTION</h3>
+            <a href="/shop" className="cat-tile__cta-btn">SHOP NOW</a>
+          </div>
         </div>
+      </div>
 
-        <div className="categories-grid">
-          {categories.length === 0 ? (
-             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#64748b' }}>
-                <Layers size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
-                <p>No categories found.</p>
-             </div>
-          ) : categories.map((cat, index) => (
-            <motion.div
-              key={cat.id}
-              className="cat-card-next"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={{ y: -10 }}
-            >
-              <div className="cat-image-wrapper">
-                <img 
-                  src={cat.image_url || 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?q=80&w=1200'} 
-                  alt={cat.name} 
-                  className="cat-bg-image" 
-                  onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?q=80&w=1200'; }}
-                />
-                <div className="cat-overlay"></div>
-              </div>
-
-              <div className="cat-content">
-                <div className="cat-header">
-                  <div className="icon-badge">
-                    {getIcon(index)}
-                  </div>
-                  <span className="product-count-badge">{cat.status}</span>
-                </div>
-
-                <div className="cat-bottom-content">
-                  <div className="cat-info">
-                    <h3>{cat.name}</h3>
-                    <p>Experience the finest {cat.name} products</p>
-                  </div>
-
-                  <div className="cat-action">
-                    <span>Explore Now</span>
-                    <div className="arrow-circle">
-                      <ArrowRight size={16} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+      {/* ── Marquee Product Slider ── */}
+      <div className="cat-marquee-wrap">
+        <div className="cat-marquee-track" ref={trackRef}>
+          {/* Duplicate for seamless loop */}
+          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, idx) => (
+            <div key={idx} className="cat-marquee-item">
+              <img src={item.image} alt={item.label} className="cat-marquee-img"
+                   onError={e => { e.target.src = '/skincare.png'; }} />
+              <span className="cat-marquee-label">{item.label}</span>
+            </div>
           ))}
         </div>
       </div>

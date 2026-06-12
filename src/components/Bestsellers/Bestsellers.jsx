@@ -1,155 +1,97 @@
 import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Star, ShoppingCart, Heart, Package } from 'lucide-react';
-import { useCart } from '../../context/CartContext';
-import { useWishlist } from '../../context/WishlistContext';
+import { Heart } from 'lucide-react';
 import './Bestsellers.css';
+
+// Fallback products matching the reference in case API fails
+const FALLBACK_PRODUCTS = [
+  { id: 1, name: 'A2P Turmeric Skin Cream', price: 75.00,  image_url: '/facewash_product.png' },
+  { id: 2, name: 'A2P Vajradanti Paste',    price: 25.00,  image_url: '/face_cream_product.png' },
+  { id: 3, name: 'WSO Skin Cream',          price: 37.00,  image_url: '/body_wash_product.png' },
+  { id: 4, name: 'A2P Vajradanti Powder',   price: 20.00,  image_url: '/luxury_serum_hero.png' },
+];
 
 const Bestsellers = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist, wishlistItems } = useWishlist();
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/products`)
       .then(res => res.json())
       .then(data => {
-        setProducts(data);
+        setProducts(data.length > 0 ? data : FALLBACK_PRODUCTS);
         setLoading(false);
       })
       .catch(err => {
         console.error('Error fetching products:', err);
+        setProducts(FALLBACK_PRODUCTS);
         setLoading(false);
       });
   }, []);
 
-  const toggleWishlist = (product) => {
-    const existingItem = wishlistItems.find(item => item.name === product.name);
-    if (existingItem) {
-      removeFromWishlist(existingItem.id);
-    } else {
-      addToWishlist({
-        name: product.name,
-        price: product.price,
-        image_url: product.image_url
-      });
-    }
-  };
-
-  const handleAddToCart = (product) => {
-    addToCart({
-      name: product.name,
-      price: product.price,
-      image_url: product.image_url,
-      quantity: 1
-    });
-  };
-
   if (loading) {
     return (
-      <section className="section bestsellers">
-        <div className="container text-center">
-          <p>Loading Featured Products...</p>
+      <section className="vicco-bestsellers">
+        <div className="vicco-container">
+          <p style={{textAlign: 'center'}}>Loading Best Sellers...</p>
         </div>
       </section>
     );
   }
 
+  const displayProducts = products.length > 0 ? products : FALLBACK_PRODUCTS;
+
   return (
-    <section className="section bestsellers" id="bestsellers">
-      <div className="container">
-        <div className="section-header text-center">
-          <h2>Featured <span className="highlight-text">Products</span></h2>
-          <p className="section-desc">
-            Discover our carefully curated selection of premium cosmetics<br />
-            designed to enhance your natural beauty
-          </p>
+    <section className="vicco-bestsellers" id="bestsellers">
+      <div className="vicco-container">
+        
+        {/* Top Header Row */}
+        <div className="vicco-header-row">
+          <h2 className="vicco-title">BEST SELLERS</h2>
+          <a href="/shop" className="vicco-view-all-btn">VIEW ALL</a>
         </div>
 
-        <div className="products-grid">
-          {products.length === 0 ? (
-             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#64748b' }}>
-                <Package size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
-                <p>No products available yet. Check back soon!</p>
-             </div>
-          ) : products.slice(0, 8).map((product, index) => (
+        {/* Product Grid */}
+        <div className="vicco-products-grid">
+          {displayProducts.slice(0, 4).map((product, index) => (
             <motion.div
               key={product.id}
-              className="product-card"
-              initial={{ opacity: 0, y: 30 }}
+              className="vicco-product-card"
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <div className="product-image-container">
-                {product.category && <span className="product-category-tag">{product.category}</span>}
-                <button 
-                  className={`wishlist-btn ${isInWishlist(product.name) ? 'active' : ''}`}
-                  onClick={() => toggleWishlist(product)}
-                >
-                  <Heart 
-                    size={20} 
-                    fill={isInWishlist(product.name) ? "var(--accent-color, #ff4d6d)" : "none"}
-                    color={isInWishlist(product.name) ? "var(--accent-color, #ff4d6d)" : "currentColor"}
-                  />
+              {/* Image Box */}
+              <div className="vicco-image-box">
+                <span className="vicco-bestseller-badge">BESTSELLER</span>
+                
+                <button className="vicco-wishlist-btn">
+                  <Heart size={20} strokeWidth={1.5} />
                 </button>
 
-                {/* Primary product image */}
                 <img 
-                  src={product.image_url || 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop'} 
+                  src={product.image_url || '/facewash_product.png'} 
                   alt={product.name}
-                  className="product-img primary-img"
-                  onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop'; }}
+                  className="vicco-product-img"
+                  onError={(e) => { e.target.src = '/facewash_product.png'; }}
                 />
 
-                {/* Hover lifestyle image */}
-                <img
-                  src={
-                    product.hover_image_url ||
-                    (product.category?.toLowerCase().includes('face wash')
-                      ? 'https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=600&auto=format&fit=crop'
-                      : product.category?.toLowerCase().includes('serum')
-                      ? 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?q=80&w=600&auto=format&fit=crop'
-                      : product.category?.toLowerCase().includes('cream')
-                      ? 'https://images.unsplash.com/photo-1612817288484-6f916006741a?q=80&w=600&auto=format&fit=crop'
-                      : product.category?.toLowerCase().includes('body')
-                      ? 'https://images.unsplash.com/photo-1570194065650-d99fb4b38779?q=80&w=600&auto=format&fit=crop'
-                      : 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=600&auto=format&fit=crop')
-                  }
-                  alt={`${product.name} lifestyle`}
-                  className="product-img hover-img"
-                />
-
-                <div className="add-to-cart-wrapper">
-                  <button 
-                    className="add-to-cart-overlay"
-                    onClick={() => handleAddToCart(product)}
-                  >
-                    <ShoppingCart size={18} /> Add to Cart
-                  </button>
-                </div>
+                <button className="vicco-quick-add-btn">
+                  QUICK ADD
+                </button>
               </div>
 
-              <div className="product-details">
-                <h3>{product.name}</h3>
-                <p className="product-desc">{product.description || 'Premium quality skincare product'}</p>
-
-                <div className="product-rating-box">
-                  <div className="stars">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={14} fill="#ffb400" color="#ffb400" />
-                    ))}
-                  </div>
-                  <span className="rating-text">4.8 (342)</span>
-                </div>
-
-                <span className="product-price">₹{parseFloat(product.price).toFixed(0)}</span>
+              {/* Details Box */}
+              <div className="vicco-details-box">
+                <h3 className="vicco-product-name">{product.name}</h3>
+                <p className="vicco-product-price">From ₹ {parseFloat(product.price).toFixed(2)}</p>
               </div>
             </motion.div>
           ))}
         </div>
+
       </div>
     </section>
   );

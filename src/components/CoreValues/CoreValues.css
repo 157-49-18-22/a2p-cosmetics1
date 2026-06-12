@@ -1,0 +1,287 @@
+.cv-container {
+  width: 100%;
+  margin: 0;
+  padding: 5rem 0;
+  /* Side padding removed for edge-to-edge right side */
+  font-family: 'Inter', 'Outfit', sans-serif;
+  overflow: clip;
+  /* clip prevents horizontal scroll without breaking sticky like hidden does */
+  background-color: var(--primary-pink-light);
+}
+
+.cv-title-header {
+  margin-bottom: 3rem;
+  max-width: 1360px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 2rem;
+}
+
+.cv-title-header h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.cv-layout {
+  display: flex;
+  position: relative;
+  max-width: 100%;
+  margin: 0;
+  gap: 0;
+  /* controlled internally */
+}
+
+.cv-left {
+  flex: 1;
+  position: relative;
+  /* Align text left edge nicely while right side takes full remaining width */
+  /* Extra 70vh padding ensures the sticky image stays visible when reading point 3 */
+  padding: 2rem 4rem 70vh max(2rem, calc((100vw - 1360px) / 2 + 2rem));
+  max-width: 50%;
+}
+
+/* The vertical line behind dots */
+.cv-timeline-line {
+  position: absolute;
+  top: 2rem;
+  bottom: calc(70vh + 0rem);
+  /* Ends right before the empty space */
+  left: max(2rem, calc((100vw - 1360px) / 2 + 2rem));
+  width: 2px;
+  background-color: #e2e8f0;
+  z-index: 1;
+  transform: translateX(-50%);
+}
+
+.cv-text-block {
+  position: relative;
+  padding-bottom: 15vh;
+  /* Reduced gap between the bullet points */
+  transition: opacity 0.5s ease;
+  opacity: 0.35;
+}
+
+.cv-text-block:last-child {
+  padding-bottom: 0;
+}
+
+.cv-text-block.active {
+  opacity: 1;
+}
+
+.cv-timeline-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 48px;
+  height: 48px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  background: white;
+  transition: all 0.4s ease;
+}
+
+.cv-timeline-dot-inner {
+  width: 12px;
+  height: 12px;
+  background-color: #cbd5e1;
+  /* Making it a square as requested in reference */
+  border-radius: 2px;
+  transition: all 0.4s ease;
+}
+
+.cv-text-block.active .cv-timeline-dot-inner {
+  width: 22px;
+  height: 22px;
+  background-color: #dc2626;
+  /* Strong red */
+}
+
+.cv-text-block.active .cv-timeline-dot {
+  /* Faint red translucent background behind active square */
+  background: #fee2e2;
+}
+
+.cv-content-wrap {
+  padding-left: 3.5rem;
+}
+
+.cv-block-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-top: 0;
+  margin-bottom: 1.2rem;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  text-transform: uppercase;
+}
+
+.cv-block-desc {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: #4b5563;
+  margin: 0;
+}
+
+.cv-right {
+  flex: 1;
+  position: relative;
+  max-width: 50%;
+}
+
+.cv-sticky-container {
+  position: sticky;
+  top: 15vh;
+  /* Vertically center the smaller image container */
+  height: 70vh;
+  /* Reduced from 100vh - 100px */
+  width: 100%;
+  perspective: 2500px;
+  overflow: hidden;
+  border-radius: 12px 0 0 12px;
+  /* Optional: soft rounded corners on the inner side to look nice */
+}
+
+/* The actual image page */
+.cv-image-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transform-origin: left center;
+  backface-visibility: hidden;
+  will-change: transform;
+
+  /* Smooth realistic spring curve */
+  transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Subtle gradient to give shadow when flipping */
+.cv-page-shadow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 20%);
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+/* Page states */
+
+/* Passed pages - flipped to the left and invisible */
+.cv-image-layer.prev {
+  transform: rotateY(-180deg);
+  z-index: 10;
+  /* Needs to be on top to cast shadow as it flips */
+}
+
+.cv-image-layer.prev .cv-page-shadow {
+  opacity: 1;
+  /* Darkens as it flips */
+}
+
+/* Current page - visible and flat */
+.cv-image-layer.active {
+  transform: rotateY(0deg);
+  z-index: 5;
+  /* Middle layer */
+}
+
+.cv-image-layer.active .cv-page-shadow {
+  opacity: 0;
+}
+
+/* Upcoming pages - waiting underneath */
+.cv-image-layer.next {
+  transform: rotateY(0deg);
+  z-index: 1;
+  /* Bottom layer */
+}
+
+.cv-mobile-wrapper {
+  display: none;
+}
+
+@media (max-width: 992px) {
+  .cv-container {
+    padding: 2rem 0 0 0; /* reduce extreme padding creating gap */
+  }
+
+  .cv-layout {
+    display: none;
+  }
+  
+  .cv-title-header {
+    text-align: center;
+  }
+
+  .cv-mobile-wrapper {
+    display: block;
+    position: relative;
+    height: 300vh; /* 3 times the scroll distance for 3 cards */
+    width: 100%;
+  }
+
+  .cv-mobile-sticky {
+    position: sticky;
+    top: 80px; /* offset slightly below standard top navbar */
+    width: 100vw;
+    overflow: hidden;
+    margin-left: max(-2rem, -5vw); /* Negate padding if any container constraint */
+    padding-bottom: 2rem;
+  }
+
+  .cv-mobile-scroll-track {
+    display: flex;
+    width: 300vw;
+    will-change: transform;
+  }
+
+  .cv-mobile-card {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.5rem;
+    box-sizing: border-box;
+    justify-content: flex-start;
+  }
+
+  .cv-mobile-card-img {
+    width: 100%;
+    height: 45vh;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+
+  .cv-mobile-card-content {
+    padding: 2rem 0;
+    text-align: center;
+  }
+
+  .cv-mobile-card-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 1rem;
+    font-family: 'Playfair Display', 'Georgia', serif;
+    text-transform: uppercase;
+  }
+
+  .cv-mobile-card-desc {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #4b5563;
+    margin: 0;
+  }
+}
