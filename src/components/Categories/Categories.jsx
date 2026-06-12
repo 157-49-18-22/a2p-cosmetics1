@@ -38,38 +38,25 @@ const mergeCatWithFallback = (cat, idx) => {
 };
 
 const Categories = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading]       = useState(true);
+  // Initialize directly with fallback — no loading state needed
+  const [categories, setCategories] = useState(FALLBACK_CATEGORIES);
   const trackRef = useRef(null);
 
   useEffect(() => {
+    // Silently upgrade with DB data if available
     fetch(`${API_BASE_URL}/categories`)
       .then(res => res.json())
       .then(data => {
-        if (data.length > 0) {
+        if (data && data.length > 0) {
           setCategories(data.map(mergeCatWithFallback));
-        } else {
-          setCategories(FALLBACK_CATEGORIES);
         }
-        setLoading(false);
       })
       .catch(() => {
-        setCategories(FALLBACK_CATEGORIES);
-        setLoading(false);
+        // Already showing fallback, nothing to do
       });
   }, []);
 
-  // Always show something — use FALLBACK if still empty
-  const displayCats = categories.length > 0 ? categories : FALLBACK_CATEGORIES;
-
-  if (loading) {
-    // Show fallback immediately while loading
-    return (
-      <section className="cat-wrapper">
-        <div className="cat-loading">Loading…</div>
-      </section>
-    );
-  }
+  const displayCats = categories;
 
   return (
     <section className="cat-wrapper">
