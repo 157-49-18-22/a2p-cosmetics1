@@ -213,7 +213,7 @@
 
 @media (max-width: 992px) {
   .cv-container {
-    padding: 2rem 0 0 0; /* reduce extreme padding creating gap */
+    padding: 2rem 0 0 0; /* reduced — no bottom padding, marquee sits flush */
   }
 
   .cv-layout {
@@ -233,11 +233,11 @@
 
   .cv-mobile-sticky {
     position: sticky;
-    top: 80px; /* offset slightly below standard top navbar */
+    top: 80px;
     width: 100vw;
     overflow: hidden;
-    margin-left: max(-2rem, -5vw); /* Negate padding if any container constraint */
-    padding-bottom: 2rem;
+    margin-left: max(-2rem, -5vw);
+    padding-bottom: 0; /* removed — was adding gap below last card */
   }
 
   .cv-mobile-scroll-track {

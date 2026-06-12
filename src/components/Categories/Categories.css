@@ -5,6 +5,7 @@
   padding: 5rem 0 0 0;
   font-family: 'Inter', 'Outfit', sans-serif;
   overflow: hidden;
+  /* No bottom padding — marquee sits flush at bottom */
 }
 
 /* ─── Header ─────────────────────────────────────── */
@@ -226,8 +227,8 @@
   background: #f9f9f9;
   border-top: 1px solid #efefef;
   border-bottom: 1px solid #efefef;
-
-
+  padding: 1.5rem 0;
+  margin-top: 0;
   position: relative;
 }
 
@@ -329,32 +330,51 @@
   .cat-grid {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(3, 220px) auto;
-    gap: 6px;
+    gap: 4px;
   }
 
   .cat-tile--cta {
     grid-column: span 2;
   }
+
+  .cat-marquee-wrap {
+    padding: 1rem 0;
+    margin-top: 0;
+  }
 }
 
 @media (max-width: 600px) {
+  .cat-wrapper {
+    /* Remove large top padding on mobile — causes blank space */
+    padding: 1.5rem 0 0 0;
+  }
+
   .cat-grid {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(6, 200px) auto;
-    gap: 6px;
-    padding: 0 0 6px 0;
+    gap: 4px;
   }
 
   .cat-tile--cta {
     grid-column: span 1;
   }
 
+  .cat-marquee-wrap {
+    padding: 1rem 0;
+    margin-top: 0;
+  }
+
   .cat-marquee-img {
-    width: 75px;
-    height: 75px;
+    width: 70px;
+    height: 70px;
   }
 
   .cat-header-block {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
+    padding: 0 1rem;
+  }
+
+  .cat-heading {
+    font-size: 1.8rem;
   }
 }
