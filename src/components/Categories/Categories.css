@@ -164,8 +164,10 @@
 
 /* ─── Shop-All CTA Tile  ─────────────────────────── */
 .cat-tile--cta {
-  grid-column: 1 / -1; /* Make it span all 3 columns full-width */
-  background: #dc2626; /* Bold red like Vicco */
+  grid-column: 1 / -1;
+  /* Make it span all 3 columns full-width */
+  background: #dc2626;
+  /* Bold red like Vicco */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -225,7 +227,7 @@
   border-top: 1px solid #efefef;
   border-bottom: 1px solid #efefef;
   padding: 1.5rem 0;
-  margin-top: 3rem;
+
   position: relative;
 }
 
@@ -323,11 +325,13 @@
   .cat-wrapper {
     padding: 2rem 0 0 0;
   }
+
   .cat-grid {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(3, 220px) auto;
     gap: 6px;
   }
+
   .cat-tile--cta {
     grid-column: span 2;
   }
@@ -340,13 +344,16 @@
     gap: 6px;
     padding: 0 0 6px 0;
   }
+
   .cat-tile--cta {
     grid-column: span 1;
   }
+
   .cat-marquee-img {
     width: 75px;
     height: 75px;
   }
+
   .cat-header-block {
     margin-bottom: 1.5rem;
   }
