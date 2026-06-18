@@ -167,12 +167,23 @@
 .cat-tile--cta {
   grid-column: 1 / -1;
   /* Make it span all 3 columns full-width */
-  background: #dc2626;
-  /* Bold red like Vicco */
+  background: linear-gradient(135deg, #e8607a 0%, #f28fa3 40%, #e07090 100%);
+  /* Light rose-pink — soft but with enough contrast for white text */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle shine overlay for premium look */
+.cat-tile--cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.12) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .cat-tile__cta-inner {
@@ -184,18 +195,20 @@
 .cat-tile__cta-tag {
   font-size: 0.75rem;
   letter-spacing: 0.2em;
-  opacity: 0.8;
+  opacity: 0.9;
   text-transform: uppercase;
   margin: 0 0 1rem 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .cat-tile__cta-title {
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 900;
-  letter-spacing: 0.04em;
-  color: white;
+  letter-spacing: 0.08em;
+  color: #ffffff;
   line-height: 1.2;
   margin: 0 0 2rem 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .cat-tile__cta-btn {

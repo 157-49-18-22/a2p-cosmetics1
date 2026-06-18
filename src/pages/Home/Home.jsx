@@ -25,7 +25,7 @@ const Home = () => {
         const res = await fetch(`${API_BASE_URL}/announcements`);
         const data = await res.json();
         const active = data.filter(n => n.status === 'Active');
-        
+
         active.forEach((n, index) => {
           const t = setTimeout(() => {
             showNotification({
@@ -52,12 +52,12 @@ const Home = () => {
       <main>
         <CoreValues />
         <Categories />
-        <AdSection />
+        {/* <AdSection /> */}
         <Bestsellers />
         <About />
-        <CTASection />
+        {/* <CTASection /> */}
         <Testimonials />
-        <Newsletter />
+        {/* <Newsletter /> */}
       </main>
     </>
   );
