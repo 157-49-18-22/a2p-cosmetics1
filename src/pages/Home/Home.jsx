@@ -54,7 +54,7 @@ const Home = () => {
         <Categories />
         {/* <AdSection /> */}
         <Bestsellers />
-        <About />
+        {/* <About /> */}
         {/* <CTASection /> */}
         <Testimonials />
         {/* <Newsletter /> */}

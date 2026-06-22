@@ -1,39 +1,84 @@
 .hero-static {
   position: relative;
   width: 100%;
-  display: flex;
-  align-items: center;
   overflow: hidden;
   font-family: 'Inter', 'Outfit', sans-serif;
   background-color: #f8f9fa;
 }
 
-.hero-banner-img {
+/* ── Slider wrapper ── */
+.hero-slider-wrapper {
+  position: relative;
   width: 100%;
+}
+
+/* ── Each slide ── */
+.hero-slide {
+  display: none;
+  width: 100%;
+  animation: heroFadeIn 0.6s ease-in-out;
+}
+
+.hero-slide.active {
   display: block;
 }
 
-/* Desktop: show bg.jpg, hide bg1.png */
-.desktop-banner {
+@keyframes heroFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Images ── */
+.hero-banner-img {
+  width: 100%;
   display: block;
   height: auto;
   object-fit: contain;
 }
 
-.mobile-banner {
-  display: none;
+/* Desktop: show desk img, hide mob img */
+.desktop-banner { display: block; }
+.mobile-banner  { display: none;  }
+
+/* ── Dot indicators (overlaid on image) ── */
+.hero-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
 }
 
+.hero-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.8);
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+  padding: 0;
+}
+
+.hero-dot.active {
+  background: #333;
+  border-color: #333;
+  transform: scale(1.2);
+}
+
+/* ── Mobile ── */
 @media (max-width: 768px) {
-  /* Mobile: hide desktop banner, show mobile banner */
-  .desktop-banner {
-    display: none;
+  .desktop-banner { display: none;  }
+  .mobile-banner  { display: block; width: 100%; height: auto; object-fit: contain; }
+
+  .hero-dots {
+    padding: 8px 0 6px;
   }
 
-  .mobile-banner {
-    display: block;
-    width: 100%;
-    height: auto;
-    object-fit: contain;
+  .hero-dot {
+    width: 7px;
+    height: 7px;
   }
 }

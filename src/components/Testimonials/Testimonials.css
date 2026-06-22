@@ -1,138 +1,139 @@
-.testimonials {
-  background-color: #fffafb;
-  padding: 8rem 0;
+.vicco-testimonials {
+  background-color: var(--primary-pink-light);
+  padding: 6rem 0;
+  border-top: 1px solid #eaeaea;
+  border-bottom: 1px solid #eaeaea;
 }
 
-.testimonials-heading {
-  font-size: 3rem;
+.vicco-testimonials-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.vicco-testimonials-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.2rem;
   font-weight: 700;
-  margin-bottom: 1rem;
-  color: #1e293b;
-}
-
-.testimonials-subheading {
-  font-size: 1.125rem;
-  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #333;
   margin-bottom: 4rem;
 }
 
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-}
-
-.testimonial-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-  display: flex;
-  flex-direction: column;
-  transition: var(--transition);
-  border: 1px solid #f1f5f9;
-}
-
-.testimonial-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
-}
-
-.stars {
-  display: flex;
-  gap: 2px;
-  margin-bottom: 1.5rem;
-}
-
-.review-text {
-  font-size: 1rem;
-  color: #334155;
-  line-height: 1.6;
-  font-style: italic;
-  margin-bottom: 2rem;
-  flex-grow: 1;
-}
-
-.product-tag-bubble {
-  display: inline-block;
-  background-color: #fff1f2;
-  color: #f43f5e;
-  padding: 0.4rem 1rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
-  align-self: flex-start;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  border-top: 1px solid #f8fafc;
-  padding-top: 1.5rem;
-}
-
-.avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  color: white;
+.vicco-slider-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1.1rem;
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-.user-details {
+.vicco-slider-nav {
+  background: linear-gradient(135deg, #ff4d6d, #ff8fa3);
+  border: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.19, 1, 0.22, 1);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  box-shadow: 0 6px 20px rgba(255, 77, 109, 0.35);
+  color: white;
+}
+
+.vicco-slider-nav:hover {
+  transform: translateY(-50%) scale(1.12);
+  box-shadow: 0 10px 28px rgba(255, 77, 109, 0.5);
+  background: linear-gradient(135deg, #e0003d, #ff6b8a);
+}
+
+.vicco-slider-nav:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.vicco-slider-nav.prev {
+  left: 0;
+}
+
+.vicco-slider-nav.next {
+  right: 0;
+}
+
+.vicco-slider-content {
+  width: 100%;
+  padding: 0 4rem;
+  min-height: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.vicco-review-block {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-
-.user-row {
-  display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
+  width: 100%;
 }
 
-.user-row h3 {
-  font-family: var(--font-sans);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0;
+.vicco-review-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 400;
+  color: #555;
+  line-height: 1.4;
+  margin-bottom: 1.5rem;
 }
 
-.verified {
+.vicco-review-stars {
   display: flex;
-  align-items: center;
   gap: 4px;
-  color: #10b981;
+  margin-bottom: 1rem;
 }
 
-.verified span {
-  font-size: 0.75rem;
-  font-weight: 600;
+.vicco-review-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #333;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem 0;
 }
 
-.review-date {
+.vicco-review-date {
+  font-family: 'Inter', sans-serif;
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: #888;
 }
 
-@media (max-width: 1200px) {
-  .testimonials-grid {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 768px) {
+  .vicco-review-text {
+    font-size: 1.5rem;
   }
-}
 
-@media (max-width: 640px) {
-  .testimonials-grid {
-    grid-template-columns: 1fr;
+  .vicco-slider-content {
+    padding: 0 2rem;
   }
-  .testimonials-heading {
-    font-size: 2.25rem;
+
+  .vicco-slider-nav {
+    width: 36px;
+    height: 36px;
+  }
+
+  .vicco-slider-nav.prev {
+    left: -1rem;
+  }
+
+  .vicco-slider-nav.next {
+    right: -1rem;
   }
 }

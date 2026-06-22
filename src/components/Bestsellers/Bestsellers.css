@@ -28,7 +28,7 @@
 }
 
 .vicco-view-all-btn {
-  background-color: #cc0000;
+  background: linear-gradient(135deg, #ff4d6d, #ff8fa3);
   color: #ffffff;
   font-weight: 600;
   font-size: 0.9rem;
@@ -36,11 +36,13 @@
   text-decoration: none;
   padding: 0.9rem 2.2rem;
   letter-spacing: 0.05em;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 77, 109, 0.35);
 }
 
 .vicco-view-all-btn:hover {
-  background-color: #aa0000;
+  background: linear-gradient(135deg, #e0003d, #ff6b8a);
+  box-shadow: 0 6px 20px rgba(255, 77, 109, 0.5);
 }
 
 /* ── Grid ── */
@@ -120,8 +122,8 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  background: #cc0000;
-  color: white;
+  background: pink;
+  color: #1a1a1a;
   font-weight: 700;
   font-size: 0.95rem;
   border: none;
@@ -136,7 +138,7 @@
 }
 
 .vicco-quick-add-btn:hover {
-  background: #aa0000;
+  background: hotpink;
 }
 
 .vicco-product-card:hover .vicco-quick-add-btn {
