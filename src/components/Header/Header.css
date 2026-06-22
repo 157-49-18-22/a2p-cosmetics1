@@ -42,7 +42,7 @@
 }
 
 .header-logo-img {
-  height: 80px;
+  height: 90px;
   width: auto;
   display: block;
   transition: height 0.3s ease;
@@ -185,9 +185,8 @@
   .beauty-logo {
     position: absolute;
     left: 50%;
-    transform: translateX(calc(-50% + 24px));
     top: 50%;
-    margin-top: -36px;
+    transform: translate(calc(-49% + 34px), calc(-50% + 8px));
     width: auto;
     display: flex;
     justify-content: center;
@@ -196,8 +195,8 @@
   }
 
   .header-logo-img {
-    height: 68px;
-    max-width: 180px;
+    height: 85px;
+    max-width: 220px;
   }
 
   /* Icons on left — smaller size */
@@ -305,13 +304,13 @@
   }
 
   .header-logo-img {
-    height: 58px;
-    max-width: 160px;
+    height: 75px;
+    max-width: 200px;
     margin-right: 0;
   }
 
   .beauty-logo {
-    margin-top: -29px;
+    /* Vertical centering is now handled by translate */
   }
 
   .beauty-nav.active {
