@@ -59,7 +59,8 @@ const AgentCRM = () => {
   const handleStatusUpdate = async (id, newStatus) => {
     setProcessing(id);
     try {
-      const creds = approvalFields[id] || {};
+      const agent = agents.find(a => a.id === id);
+      const creds = approvalFields[id] || { email: agent?.email || '', password: '' };
       const res = await fetch(`${API}/agent/applicants/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -69,14 +70,16 @@ const AgentCRM = () => {
           password: creds.password 
         })
       });
-      if (!res.ok) throw new Error('Update failed');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Update failed');
       showToast(`Agent ${newStatus === 'Active' ? 'Approved' : 'Rejected'}!`);
+      setShowApproveModal(false);
       fetchData();
       if (selectedAgent && selectedAgent.id === id) {
         setSelectedAgent({ ...selectedAgent, status: newStatus });
       }
     } catch (e) {
-      showToast('Failed to update status', 'danger');
+      showToast(e.message || 'Failed to update status', 'danger');
     } finally {
       setProcessing(null);
     }

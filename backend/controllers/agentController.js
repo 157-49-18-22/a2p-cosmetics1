@@ -101,6 +101,26 @@ exports.updateStatus = async (req, res) => {
   const { status, email, password } = req.body;
   try {
     if (status === 'Active') {
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required to approve an agent' });
+      }
+
+      // Ensure password column exists (older DBs may miss migration)
+      try {
+        await db.query('ALTER TABLE agents ADD COLUMN password VARCHAR(255) AFTER email');
+      } catch (e) {
+        // ignore if column already exists
+      }
+
+      // Prevent duplicate email on another agent
+      const [dup] = await db.query(
+        'SELECT id FROM agents WHERE email = ? AND id != ? LIMIT 1',
+        [email, req.params.id]
+      );
+      if (dup.length > 0) {
+        return res.status(400).json({ error: 'This email is already used by another agent. Use a different email.' });
+      }
+
       await db.query(
         'UPDATE agents SET status = ?, email = ?, password = ? WHERE id = ?',
         [status, email, password, req.params.id]
@@ -108,13 +128,23 @@ exports.updateStatus = async (req, res) => {
     } else {
       await db.query('UPDATE agents SET status = ? WHERE id = ?', [status, req.params.id]);
     }
-    
-    await db.query(
-      'INSERT INTO agent_logs (agent_id, activity_text, activity_type, status) VALUES (?, ?, "Verification", ?)',
-      [req.params.id, `Agent status updated to ${status}${status === 'Active' ? ' (Credentials set)' : ''}`, status]
-    );
+
+    try {
+      await db.query(
+        'INSERT INTO agent_logs (agent_id, activity_text, activity_type, status) VALUES (?, ?, ?, ?)',
+        [req.params.id, `Agent status updated to ${status}${status === 'Active' ? ' (Credentials set)' : ''}`, 'Verification', status]
+      );
+    } catch (logErr) {
+      console.error('Agent log insert failed (status still updated):', logErr.message);
+    }
+
     res.json({ message: `Agent status updated to ${status}` });
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'This email is already registered. Use a different email.' });
+    }
+    res.status(500).json({ error: error.message });
+  }
 };
 
 // Update Notes
