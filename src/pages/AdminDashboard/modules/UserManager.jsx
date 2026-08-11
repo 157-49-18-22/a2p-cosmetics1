@@ -20,9 +20,10 @@ const UserManager = () => {
       setLoading(true);
       const res = await fetch(`${API}/users/all`);
       const data = await res.json();
-      setUsers(data);
+      setUsers(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error('Failed to fetch users', e);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -46,7 +47,7 @@ const UserManager = () => {
     }
   };
 
-  const filtered = users.filter(u => 
+  const filtered = (Array.isArray(users) ? users : []).filter(u => 
     u.name?.toLowerCase().includes(search.toLowerCase()) || 
     u.email?.toLowerCase().includes(search.toLowerCase())
   );
@@ -102,7 +103,7 @@ const UserManager = () => {
                   <td style={{ paddingLeft: '24px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: i % 2 === 0 ? '#eff6ff' : '#f5f3ff', color: i % 2 === 0 ? '#3b82f6' : '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem' }}>
-                        {u.name[0]}
+                        {u.name?.[0] || '?'}
                       </div>
                       <span style={{ fontWeight: 600, color: '#1e293b' }}>{u.name}</span>
                     </div>

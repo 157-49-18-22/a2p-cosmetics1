@@ -103,11 +103,11 @@ router.get('/admin/stats', async (req, res) => {
 // Unified User Management
 router.get('/users/all', async (req, res) => {
   try {
-    const [cust] = await db.query('SELECT id, name, email, phone, "Customer" as role, joined_at as created_at, status FROM customers');
-    const [ag] = await db.query('SELECT id, name, email, phone, "Agent" as role, created_at, status FROM agents');
-    const [dist] = await db.query('SELECT id, name, email, phone, "Distributor" as role, created_at, status FROM distributors');
+    const [cust] = await db.query("SELECT id, name, email, phone, 'Customer' as role, joined_at as created_at, status FROM customers");
+    const [ag] = await db.query("SELECT id, name, email, phone, 'Agent' as role, created_at, status FROM agents");
+    const [dist] = await db.query("SELECT id, name, email, phone, 'Distributor' as role, created_at, status FROM distributors");
     
-    const allUsers = [...cust, ...ag, ...dist].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const allUsers = [...(cust || []), ...(ag || []), ...(dist || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     res.json(allUsers);
   } catch (error) { res.status(500).json({ error: error.message }); }
 });
