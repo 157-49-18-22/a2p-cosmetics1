@@ -1,5 +1,5 @@
 import { BloomEffect, EffectComposer, EffectPass, RenderPass, SMAAEffect, SMAAPreset } from 'postprocessing';
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 import './Hyperspeed.css';
@@ -42,9 +42,11 @@ const DEFAULT_EFFECT_OPTIONS = {
   }
 };
 
-const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
+const Hyperspeed = memo(function Hyperspeed({ effectOptions = DEFAULT_EFFECT_OPTIONS }) {
   const hyperspeed = useRef(null);
   const appRef = useRef(null);
+  const optionsRef = useRef(effectOptions);
+  optionsRef.current = effectOptions;
 
   useEffect(() => {
     if (appRef.current) {
@@ -57,6 +59,7 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
         }
       }
     }
+    const effectOptions = optionsRef.current;
     const mountainUniforms = {
       uFreq: { value: new THREE.Vector3(3, 6, 10) },
       uAmp: { value: new THREE.Vector3(30, 30, 20) }
@@ -1175,9 +1178,9 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
         appRef.current = null;
       }
     };
-  }, [effectOptions]);
+  }, []);
 
   return <div id="lights" ref={hyperspeed}></div>;
-};
+});
 
 export default Hyperspeed;

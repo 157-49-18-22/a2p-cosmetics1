@@ -1,10 +1,93 @@
 import API_BASE_URL from '../../apiConfig.js';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Hyperspeed from './Hyperspeed';
 import './LoginPage.css';
 
 const API = API_BASE_URL;
+
+// Stable reference — must not be recreated on each keystroke or Hyperspeed remounts
+const LOGIN_HYPERSPEED_OPTIONS = {
+  distortion: 'mountainDistortion',
+  length: 600,
+  roadWidth: 12,
+  islandWidth: 2,
+  lanesPerRoad: 4,
+  fov: 100,
+  fovSpeedUp: 120,
+  speedUp: 3,
+  carLightsFade: 0.5,
+  totalSideLightSticks: 30,
+  lightPairsPerRoadWay: 50,
+  shoulderLinesWidthPercentage: 0.05,
+  brokenLinesWidthPercentage: 0.1,
+  brokenLinesLengthPercentage: 0.5,
+  lightStickWidth: [0.1, 0.4],
+  lightStickHeight: [1.5, 2.5],
+  movingAwaySpeed: [80, 120],
+  movingCloserSpeed: [-150, -200],
+  carLightsLength: [600 * 0.05, 600 * 0.3],
+  carLightsRadius: [0.03, 0.1],
+  carWidthPercentage: [0.2, 0.4],
+  carShiftX: [-1, 1],
+  carFloorSeparation: [0, 3],
+  colors: {
+    roadColor: 0x050505,
+    islandColor: 0x080808,
+    background: 0x000000,
+    shoulderLines: 0xffffff,
+    brokenLines: 0xffffff,
+    leftCars: [0x2563eb, 0x1d4ed8, 0x1e40af],
+    rightCars: [0x60a5fa, 0x3b82f6, 0x2563eb],
+    sticks: 0x3b82f6,
+  }
+};
+
+const LoginVisual = memo(function LoginVisual() {
+  return (
+    <section className="auth-visual">
+      <div className="auth-visual-bg">
+        <Hyperspeed effectOptions={LOGIN_HYPERSPEED_OPTIONS} />
+        <div className="auth-visual-overlay"></div>
+      </div>
+
+      <div className="auth-visual-content">
+        <div className="auth-badge">
+          <span className="auth-badge-dot"></span>
+          <span className="auth-badge-text">System Online</span>
+        </div>
+        
+        <h1 className="auth-title">
+          High-Velocity <br/>
+          <span className="auth-title-accent">Commerce Control.</span>
+        </h1>
+        
+        <p className="auth-description">
+          The next-generation interface for distributors and agents. Manage global inventory with precision and institutional trust.
+        </p>
+
+        <div className="auth-metric-card glass-panel">
+          <div className="auth-metric-header">
+            <span className="material-symbols-outlined metric-icon">insights</span>
+            <span className="metric-label">Real-time throughput</span>
+          </div>
+          <div className="auth-metric-value">99.98%</div>
+          <div className="auth-metric-sub">Fulfillment Accuracy</div>
+          <div className="auth-metric-progress">
+            <div className="auth-metric-progress-fill" style={{ width: '80%' }}></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="auth-brand">
+        <div className="auth-brand-logo">
+          <span className="material-symbols-outlined">hub</span>
+        </div>
+        <span className="auth-brand-name">AgentPortal</span>
+      </div>
+    </section>
+  );
+});
 
 const LoginPage = ({ type: initialType }) => {
   const navigate = useNavigate();
@@ -53,84 +136,7 @@ const LoginPage = ({ type: initialType }) => {
 
   return (
     <div className="auth-screen">
-      {/* Left Side: Visual/Context */}
-      <section className="auth-visual">
-        <div className="auth-visual-bg">
-          <Hyperspeed 
-            effectOptions={{
-              distortion: 'mountainDistortion',
-              length: 600,
-              roadWidth: 12,
-              islandWidth: 2,
-              lanesPerRoad: 4,
-              fov: 100,
-              fovSpeedUp: 120,
-              speedUp: 3,
-              carLightsFade: 0.5,
-              totalSideLightSticks: 30,
-              lightPairsPerRoadWay: 50,
-              shoulderLinesWidthPercentage: 0.05,
-              brokenLinesWidthPercentage: 0.1,
-              brokenLinesLengthPercentage: 0.5,
-              lightStickWidth: [0.1, 0.4],
-              lightStickHeight: [1.5, 2.5],
-              movingAwaySpeed: [80, 120],
-              movingCloserSpeed: [-150, -200],
-              carLightsLength: [600 * 0.05, 600 * 0.3],
-              carLightsRadius: [0.03, 0.1],
-              carWidthPercentage: [0.2, 0.4],
-              carShiftX: [-1, 1],
-              carFloorSeparation: [0, 3],
-              colors: {
-                roadColor: 0x050505,
-                islandColor: 0x080808,
-                background: 0x000000,
-                shoulderLines: 0xffffff,
-                brokenLines: 0xffffff,
-                leftCars: [0x2563eb, 0x1d4ed8, 0x1e40af], // Deep Blues
-                rightCars: [0x60a5fa, 0x3b82f6, 0x2563eb], // Lighter Blues
-                sticks: 0x3b82f6,
-              }
-            }}
-          />
-          <div className="auth-visual-overlay"></div>
-        </div>
-
-        <div className="auth-visual-content">
-          <div className="auth-badge">
-            <span className="auth-badge-dot"></span>
-            <span className="auth-badge-text">System Online</span>
-          </div>
-          
-          <h1 className="auth-title">
-            High-Velocity <br/>
-            <span className="auth-title-accent">Commerce Control.</span>
-          </h1>
-          
-          <p className="auth-description">
-            The next-generation interface for distributors and agents. Manage global inventory with precision and institutional trust.
-          </p>
-
-          <div className="auth-metric-card glass-panel">
-            <div className="auth-metric-header">
-              <span className="material-symbols-outlined metric-icon">insights</span>
-              <span className="metric-label">Real-time throughput</span>
-            </div>
-            <div className="auth-metric-value">99.98%</div>
-            <div className="auth-metric-sub">Fulfillment Accuracy</div>
-            <div className="auth-metric-progress">
-              <div className="auth-metric-progress-fill" style={{ width: '80%' }}></div>
-            </div>
-          </div>
-        </div>
-
-        <div className="auth-brand">
-          <div className="auth-brand-logo">
-            <span className="material-symbols-outlined">hub</span>
-          </div>
-          <span className="auth-brand-name">AgentPortal</span>
-        </div>
-      </section>
+      <LoginVisual />
 
       {/* Right Side: Login Form */}
       <section className="auth-form-section bg-mesh">
