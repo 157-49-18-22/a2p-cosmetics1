@@ -20,7 +20,9 @@ const Onboarding = () => {
   const [loading, setLoading] = useState(true);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
-  const distributorId = 1;
+  const [submitting, setSubmitting] = useState(false);
+  const distributor = JSON.parse(localStorage.getItem('active_distributor') || '{}');
+  const distributorId = distributor.id || 1;
 
   // Form State
   const [formData, setFormData] = useState({
@@ -38,9 +40,10 @@ const Onboarding = () => {
   const fetchApplicants = async () => {
     try {
       const res = await axios.get(`${API_BASE}/${distributorId}/dealers`);
-      setApplicants(res.data);
+      setApplicants(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error fetching applicants:', err);
+      setApplicants([]);
     } finally {
       setLoading(false);
     }
@@ -56,11 +59,18 @@ const Onboarding = () => {
 
   const handleSubmit = async () => {
     try {
+      setSubmitting(true);
+      const businessName = (formData.business_name || formData.name || '').trim();
+      if (!businessName) {
+        alert('Please enter business name or full name');
+        return;
+      }
       await axios.post(`${API_BASE}/dealers`, {
         ...formData,
-        name: formData.business_name,
-        contact_person: formData.name,
-        distributor_id: distributorId
+        name: businessName,
+        contact_person: formData.name || businessName,
+        distributor_id: distributorId,
+        status: 'Pending'
       });
       setShowForm(false);
       setStep(0);
@@ -70,26 +80,28 @@ const Onboarding = () => {
         business_name: '', gst: '', zone: 'Zone A',
         role: 'Primary Dealer', credit_limit: ''
       });
+      alert('Application submitted successfully!');
     } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Failed to submit application';
       console.error('Error submitting application:', err);
-      alert('Failed to submit application');
+      alert(msg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      // In a real app, this would be a PATCH/PUT request to the backend
-      // await axios.patch(`${API_BASE}/dealers/${id}`, { status: newStatus });
-      
-      // For now, let's update local state to show it works
+      await axios.patch(`${API_BASE}/dealers/${id}/status`, { status: newStatus });
       setApplicants(applicants.map(a => a.id === id ? { ...a, status: newStatus } : a));
       if (selectedApplicant && selectedApplicant.id === id) {
         setSelectedApplicant({ ...selectedApplicant, status: newStatus });
       }
       alert(`Application ${newStatus} successfully!`);
     } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Failed to update status';
       console.error('Error updating status:', err);
-      alert('Failed to update status');
+      alert(msg);
     }
   };
 
@@ -99,7 +111,7 @@ const Onboarding = () => {
   };
 
   const filtered = applicants.filter(a =>
-    a.name.toLowerCase().includes(search.toLowerCase()) || (a.zone && a.zone.toLowerCase().includes(search.toLowerCase()))
+    a.name?.toLowerCase().includes(search.toLowerCase()) || (a.zone && a.zone.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -209,7 +221,7 @@ const Onboarding = () => {
               {step > 0 && <button className="dd-btn dd-btn-outline" style={{ flex: window.innerWidth <= 768 ? 1 : 'none', justifyContent: 'center' }} onClick={() => setStep(s => s - 1)}>← Back</button>}
               {step < steps.length - 1
                 ? <button className="dd-btn dd-btn-primary" style={{ flex: window.innerWidth <= 768 ? 2 : 'none', justifyContent: 'center' }} onClick={() => setStep(s => s + 1)}>Next <ChevronRight size={14} /></button>
-                : <button className="dd-btn dd-btn-primary" style={{ flex: window.innerWidth <= 768 ? 2 : 'none', justifyContent: 'center' }} onClick={handleSubmit}><CheckCircle size={14} /> Submit Application</button>
+                : <button className="dd-btn dd-btn-primary" style={{ flex: window.innerWidth <= 768 ? 2 : 'none', justifyContent: 'center' }} onClick={handleSubmit} disabled={submitting}><CheckCircle size={14} /> {submitting ? 'Submitting...' : 'Submit Application'}</button>
               }
             </div>
           </div>

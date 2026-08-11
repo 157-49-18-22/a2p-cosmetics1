@@ -167,10 +167,19 @@ const setupDatabase = async () => {
         email VARCHAR(255),
         zone VARCHAR(100),
         type ENUM('Dealer','Sub-Dealer') DEFAULT 'Dealer',
-        status ENUM('Active','Inactive') DEFAULT 'Active',
+        status ENUM('Active','Inactive','Pending','Rejected') DEFAULT 'Pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Migration: allow Pending/Rejected on existing dealers.status
+    try {
+      await promiseConn.query(
+        "ALTER TABLE dealers MODIFY COLUMN status ENUM('Active','Inactive','Pending','Rejected') DEFAULT 'Pending'"
+      );
+    } catch (err) {
+      console.log('ℹ️ dealers.status migration skipped:', err.message);
+    }
 
     // Orders
     await promiseConn.query(`

@@ -103,18 +103,47 @@ exports.getSingleDealer = async (req, res) => {
 exports.createDealer = async (req, res) => {
   const { distributor_id, name, contact_person, phone, email, zone, type, status } = req.body;
   try {
+    if (!distributor_id) {
+      return res.status(400).json({ error: 'Distributor ID is required' });
+    }
+    const dealerName = (name || contact_person || '').trim();
+    if (!dealerName) {
+      return res.status(400).json({ error: 'Business name or contact name is required' });
+    }
+
+    // Ensure status ENUM supports Pending (older DBs)
+    try {
+      await db.query(
+        "ALTER TABLE dealers MODIFY COLUMN status ENUM('Active','Inactive','Pending','Rejected') DEFAULT 'Pending'"
+      );
+    } catch (e) { /* already migrated */ }
+
     const [result] = await db.query(
       'INSERT INTO dealers (distributor_id, name, contact_person, phone, email, zone, type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [distributor_id, name, contact_person, phone, email, zone || 'Zone A', type || 'Dealer', status || 'Pending']
+      [distributor_id, dealerName, contact_person || null, phone || null, email || null, zone || 'Zone A', type || 'Dealer', status || 'Pending']
     );
 
-    // Log activity
-    await db.query(
-      "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Success')",
-      [distributor_id, `New application submitted for "${name}" (${type})`]
-    );
+    try {
+      await db.query(
+        "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Success')",
+        [distributor_id, `New application submitted for "${dealerName}" (${type || 'Dealer'})`]
+      );
+    } catch (logErr) {
+      console.error('Activity log failed (dealer still created):', logErr.message);
+    }
 
     res.json({ id: result.insertId, message: 'Application submitted successfully' });
+  } catch (error) { res.status(500).json({ error: error.message }); }
+};
+
+exports.updateDealerStatus = async (req, res) => {
+  const { status } = req.body;
+  try {
+    if (!['Active', 'Inactive', 'Pending', 'Rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+    await db.query('UPDATE dealers SET status = ? WHERE id = ?', [status, req.params.id]);
+    res.json({ message: `Dealer status updated to ${status}` });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
 

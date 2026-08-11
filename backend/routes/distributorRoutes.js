@@ -16,6 +16,7 @@ router.get('/:id/stats', distributorController.getDistributorStats);
 router.get('/:id/dealers', distributorController.getDealers);
 router.get('/dealers/:id', distributorController.getSingleDealer);
 router.post('/dealers', distributorController.createDealer);
+router.patch('/dealers/:id/status', distributorController.updateDealerStatus);
 router.delete('/dealers/:id', distributorController.deleteDealer);
 router.get('/:id/campaigns', distributorController.getCampaigns);
 router.post('/campaigns', distributorController.createCampaign);
