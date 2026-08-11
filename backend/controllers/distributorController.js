@@ -232,6 +232,27 @@ exports.getZones = async (req, res) => {
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
 
+exports.createZone = async (req, res) => {
+  const { distributor_id, zone_name, status } = req.body;
+  try {
+    if (!distributor_id || !zone_name) {
+      return res.status(400).json({ error: 'Distributor and zone name are required' });
+    }
+    const [result] = await db.query(
+      "INSERT INTO distributor_zones (distributor_id, zone_name, status) VALUES (?, ?, ?)",
+      [distributor_id, zone_name, status || 'Allocated']
+    );
+    res.json({ id: result.insertId, message: 'Zone allocated' });
+  } catch (error) { res.status(500).json({ error: error.message }); }
+};
+
+exports.deleteZone = async (req, res) => {
+  try {
+    await db.query('DELETE FROM distributor_zones WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Zone removed' });
+  } catch (error) { res.status(500).json({ error: error.message }); }
+};
+
 // Create Order
 exports.createOrder = async (req, res) => {
   const { distributor_id, amount, items_count } = req.body;
@@ -336,15 +357,21 @@ exports.getStockRequestItems = async (req, res) => {
 exports.updateStockRequestStatus = async (req, res) => {
   const { status } = req.body;
   try {
+    if (!['Pending', 'Approved', 'Shipped', 'Delivered', 'Cancelled'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
     await db.query('UPDATE stock_requests SET status = ? WHERE id = ?', [status, req.params.id]);
     
-    // Log Activity for distributor
-    const [[reqRow]] = await db.query('SELECT distributor_id, request_number FROM stock_requests WHERE id = ?', [req.params.id]);
-    if (reqRow) {
-      await db.query(
-        "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Info')",
-        [reqRow.distributor_id, `Stock Request ${reqRow.request_number} marked as ${status} by Admin`]
-      );
+    try {
+      const [[reqRow]] = await db.query('SELECT distributor_id, request_number FROM stock_requests WHERE id = ?', [req.params.id]);
+      if (reqRow) {
+        await db.query(
+          "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Info')",
+          [reqRow.distributor_id, `Stock Request ${reqRow.request_number} marked as ${status} by Admin`]
+        );
+      }
+    } catch (logErr) {
+      console.error('Activity log failed (status still updated):', logErr.message);
     }
     
     res.json({ message: `Request status updated to ${status}` });

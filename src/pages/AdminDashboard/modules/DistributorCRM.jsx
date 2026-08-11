@@ -34,8 +34,8 @@ const DistributorCRM = () => {
         fetch(`${API}/distributors/stats`)
       ]);
       const [distData, statsData] = await Promise.all([distRes.json(), statsRes.json()]);
-      setDistributors(distData);
-      setStats(statsData);
+      setDistributors(Array.isArray(distData) ? distData : []);
+      setStats(statsData && typeof statsData === 'object' ? statsData : { active_partners: 0, total_credit: 0, total_outstanding: 0, platinum_partners: 0 });
     } catch (e) {
       showToast('Failed to load data', 'danger');
     } finally {
@@ -48,21 +48,6 @@ const DistributorCRM = () => {
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
-  };
-
-  const handleViewZones = async (dist) => {
-    setSelectedDist(dist);
-    setShowZonesModal(true);
-    try {
-      setLoadingZones(true);
-      const res = await fetch(`${API}/distributors/${dist.id}/zones`);
-      const data = await res.json();
-      setZones(Array.isArray(data) ? data : []);
-    } catch (e) {
-      showToast('Error loading zones', 'danger');
-    } finally {
-      setLoadingZones(false);
-    }
   };
 
   const handleViewRequests = async (dist) => {
@@ -84,10 +69,64 @@ const DistributorCRM = () => {
     try {
       const res = await fetch(`${API}/distributors/stock-requests/${reqId}/items`);
       const data = await res.json();
-      setSelectedReqItems(data);
+      setSelectedReqItems(Array.isArray(data) ? data : []);
       setShowItemsModal(true);
     } catch (e) {
       showToast('Error loading items', 'danger');
+    }
+  };
+
+  const handleStatusUpdate = async (id, status) => {
+    try {
+      const res = await fetch(`${API}/distributors/stock-requests/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to update status');
+      showToast(`Request ${status}!`);
+      setRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+    } catch (e) {
+      showToast(e.message || 'Failed to approve request', 'danger');
+    }
+  };
+
+  const handleAllocateZone = async () => {
+    if (!selectedDist) return;
+    const zone_name = window.prompt('Enter zone name (e.g. Zone A - North):');
+    if (!zone_name || !zone_name.trim()) return;
+    try {
+      const res = await fetch(`${API}/distributors/zones`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ distributor_id: selectedDist.id, zone_name: zone_name.trim(), status: 'Allocated' })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to allocate zone');
+      showToast('Zone allocated!');
+      const zonesRes = await fetch(`${API}/distributors/${selectedDist.id}/zones`);
+      const zonesData = await zonesRes.json();
+      setZones(Array.isArray(zonesData) ? zonesData : []);
+    } catch (e) {
+      showToast(e.message || 'Error allocating zone', 'danger');
+    }
+  };
+
+  const handleViewZones = async (dist) => {
+    setSelectedDist(dist);
+    setShowZonesModal(true);
+    try {
+      setLoadingZones(true);
+      const res = await fetch(`${API}/distributors/${dist.id}/zones`);
+      const data = await res.json().catch(() => []);
+      if (!res.ok) throw new Error(data.error || 'Failed to load zones');
+      setZones(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setZones([]);
+      showToast(e.message || 'Error loading zones', 'danger');
+    } finally {
+      setLoadingZones(false);
     }
   };
 
@@ -275,7 +314,7 @@ const DistributorCRM = () => {
                   </div>
                 ))}
               </div>
-              <button className="adm-btn adm-btn-primary" style={{ width: '100%', marginTop: '24px', justifyContent: 'center' }}>Allocate New Zone</button>
+              <button className="adm-btn adm-btn-primary" style={{ width: '100%', marginTop: '24px', justifyContent: 'center' }} onClick={handleAllocateZone}>Allocate New Zone</button>
             </div>
           </div>
         </div>
