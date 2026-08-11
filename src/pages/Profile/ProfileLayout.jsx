@@ -1,18 +1,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  Package, MapPin, Bookmark, Sparkles, 
-  User, CreditCard, Bell, Shield
+  Package, MapPin, Heart, User, CreditCard, Bell, Shield
 } from 'lucide-react';
 import './Profile.css';
 
 const ProfileLayout = ({ children }) => {
   const menuItems = [
-    { to: "/skin-profile", icon: Sparkles, label: "Skin Profile" },
     { to: "/my-orders", icon: Package, label: "My Orders" },
     { to: "/my-addresses", icon: MapPin, label: "My Addresses" },
-    { to: "/saved-items", icon: Bookmark, label: "Saved Items" },
-    { to: "/wishlist", icon: Bookmark, label: "Wishlist" },
+    { to: "/wishlist", icon: Heart, label: "Wishlist" },
   ];
 
   return (

@@ -23,7 +23,6 @@ import { useAuth } from './context/AuthContext';
 import MyOrders from './pages/Profile/MyOrders';
 import MyAddresses from './pages/Profile/MyAddresses';
 import SavedItems from './pages/Profile/SavedItems';
-import SkinProfile from './pages/Profile/SkinProfile';
 import Checkout from './pages/Checkout/Checkout';
 import OrderSuccess from './pages/Checkout/OrderSuccess';
 import LoginPage from './pages/Auth/LoginPage';
@@ -86,9 +85,9 @@ function App() {
         {/* User Profile Routes */}
         <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
         <Route path="/my-addresses" element={<ProtectedRoute><MyAddresses /></ProtectedRoute>} />
-        <Route path="/saved-items" element={<ProtectedRoute><SavedItems /></ProtectedRoute>} />
         <Route path="/wishlist" element={<ProtectedRoute><SavedItems /></ProtectedRoute>} />
-        <Route path="/skin-profile" element={<ProtectedRoute><SkinProfile /></ProtectedRoute>} />
+        <Route path="/saved-items" element={<Navigate to="/wishlist" replace />} />
+        <Route path="/skin-profile" element={<Navigate to="/my-orders" replace />} />
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         <Route path="/order-success" element={<ProtectedRoute><OrderSuccess /></ProtectedRoute>} />
 

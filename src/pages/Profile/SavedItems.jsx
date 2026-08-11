@@ -1,41 +1,87 @@
 import React from 'react';
 import './Profile.css';
-import { ShoppingBag, X } from 'lucide-react';
+import { ShoppingBag, X, Heart } from 'lucide-react';
+import { useWishlist } from '../../context/WishlistContext';
+import { useCart } from '../../context/CartContext';
+import { Link } from 'react-router-dom';
 
 const SavedItems = () => {
-  const items = [
-    { id: 1, name: 'Vitamin C Face Serum', price: '₹899', image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=200', inStock: true },
-    { id: 2, name: 'Hyaluronic Acid Moisturizer', price: '₹1,250', image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=200', inStock: false },
-    { id: 3, name: 'Charcoal Face Wash', price: '₹450', image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=200', inStock: true },
-  ];
+  const { wishlistItems, removeFromWishlist } = useWishlist();
+  const { addToCart } = useCart();
+
+  const formatPrice = (price) => {
+    const num = typeof price === 'string'
+      ? parseFloat(price.replace(/[^\d.]/g, ''))
+      : Number(price);
+    if (Number.isNaN(num)) return `₹${price}`;
+    return `₹${num.toLocaleString('en-IN')}`;
+  };
+
+  const handleAddToBag = (item) => {
+    addToCart({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.image_url || item.image,
+      image_url: item.image_url || item.image,
+    });
+  };
 
   return (
     <div className="profile-page-container">
       <div className="profile-header">
-        <h1>Saved Items</h1>
-        <p>Products you've saved to buy later.</p>
+        <h1>Wishlist</h1>
+        <p>
+          {wishlistItems.length === 0
+            ? 'Products you heart will show up here.'
+            : `${wishlistItems.length} item${wishlistItems.length === 1 ? '' : 's'} saved in your wishlist.`}
+        </p>
       </div>
 
-      <div className="saved-items-grid">
-        {items.map((item) => (
-          <div key={item.id} className="saved-item-card">
-            <button className="remove-item-btn"><X size={16} /></button>
-            <div className="item-image">
-              <img src={item.image} alt={item.name} />
-            </div>
-            <div className="item-info">
-              <h3>{item.name}</h3>
-              <p className="price">{item.price}</p>
-              <div className={`stock-status ${item.inStock ? 'in-stock' : 'out-of-stock'}`}>
-                {item.inStock ? 'In Stock' : 'Out of Stock'}
+      {wishlistItems.length === 0 ? (
+        <div className="wishlist-empty-state" style={{
+          textAlign: 'center',
+          padding: '64px 24px',
+          background: '#fff',
+          borderRadius: '16px',
+          border: '1px dashed #e5e7eb'
+        }}>
+          <Heart size={40} color="#ff4d6d" style={{ marginBottom: 16 }} />
+          <h3 style={{ margin: '0 0 8px', fontSize: '1.25rem' }}>Your wishlist is empty</h3>
+          <p style={{ color: '#6b7280', marginBottom: 24 }}>Browse products and tap the heart to save them here.</p>
+          <Link to="/" className="add-to-cart-btn" style={{ display: 'inline-flex', textDecoration: 'none' }}>
+            Browse Products
+          </Link>
+        </div>
+      ) : (
+        <div className="saved-items-grid">
+          {wishlistItems.map((item) => (
+            <div key={item.id} className="saved-item-card">
+              <button
+                className="remove-item-btn"
+                aria-label="Remove from wishlist"
+                onClick={() => removeFromWishlist(item.id)}
+              >
+                <X size={16} />
+              </button>
+              <div className="item-image">
+                <img
+                  src={item.image_url || item.image || 'https://via.placeholder.com/200'}
+                  alt={item.name}
+                />
               </div>
+              <div className="item-info">
+                <h3>{item.name}</h3>
+                <p className="price">{formatPrice(item.price)}</p>
+                <div className="stock-status in-stock">In Stock</div>
+              </div>
+              <button className="add-to-cart-btn" onClick={() => handleAddToBag(item)}>
+                <ShoppingBag size={18} /> Add to Bag
+              </button>
             </div>
-            <button className="add-to-cart-btn" disabled={!item.inStock}>
-              <ShoppingBag size={18} /> Add to Bag
-            </button>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

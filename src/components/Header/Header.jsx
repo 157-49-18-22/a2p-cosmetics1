@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ShoppingBag, User, Heart, Search, Menu, X, 
-  LayoutDashboard, UserCheck, ShieldCheck, 
-  Package, MapPin, Bookmark, LogOut, Mail, Settings, Sparkles
+  LayoutDashboard, Package, MapPin, LogOut
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -149,10 +148,8 @@ const Header = () => {
                     <div className="dropdown-links">
                       {[
                         { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard" },
-                        { to: "/skin-profile", icon: Sparkles, label: "Skin Profile" },
                         { to: "/my-orders", icon: Package, label: "My Orders" },
                         { to: "/my-addresses", icon: MapPin, label: "My Addresses" },
-                        { to: "/saved-items", icon: Bookmark, label: "Saved Items" },
                         { to: "/wishlist", icon: Heart, label: "Wishlist" },
                       ].map((item, index) => (
                         <motion.div
