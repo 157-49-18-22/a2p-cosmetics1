@@ -1,4 +1,10 @@
 const db = require('../db');
+const Razorpay = require('razorpay');
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
 // Stats for Admin View
 exports.getAdminStats = async (req, res) => {
@@ -404,3 +410,52 @@ exports.createStockRequest = async (req, res) => {
     res.json({ id: requestId, request_number, message: 'Stock request sent successfully' });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
+
+// Create Razorpay Order for Stock Request
+exports.createStockRazorpayOrder = async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const options = {
+      amount: Math.round(amount * 100), // paise
+      currency: 'INR',
+      receipt: `stock_${Date.now()}`
+    };
+    const order = await razorpay.orders.create(options);
+    if (!order) return res.status(500).json({ success: false, message: 'Could not create Razorpay order' });
+    res.json({ success: true, order_id: order.id, amount: order.amount, key_id: process.env.RAZORPAY_KEY_ID });
+  } catch (error) {
+    console.error('Razorpay Stock Order Error:', error);
+    res.status(500).json({ success: false, message: 'Razorpay error' });
+  }
+};
+
+// Verify Payment & Save Stock Request
+exports.verifyStockPayment = async (req, res) => {
+  const { distributor_id, items, total_amount, payment_id, razorpay_order_id, payment_method } = req.body;
+  const request_number = 'REQ-' + Math.floor(Math.random() * 1000000);
+  try {
+    const [result] = await db.query(
+      "INSERT INTO stock_requests (distributor_id, request_number, total_amount, status, payment_status, payment_id, payment_method) VALUES (?, ?, ?, 'Pending', 'Paid', ?, ?)",
+      [distributor_id, request_number, total_amount, payment_id || null, payment_method || 'Online']
+    );
+    const requestId = result.insertId;
+
+    for (const item of items) {
+      await db.query(
+        'INSERT INTO stock_request_items (request_id, product_id, product_name, quantity, price) VALUES (?, ?, ?, ?, ?)',
+        [requestId, item.id, item.name, item.quantity, item.price]
+      );
+    }
+
+    await db.query(
+      "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Success')",
+      [distributor_id, `Stock Request ${request_number} paid via ${payment_method || 'Online'} — ₹${total_amount}`]
+    );
+
+    res.json({ success: true, request_number, message: 'Payment received & stock request submitted!' });
+  } catch (error) {
+    console.error('Verify stock payment error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+

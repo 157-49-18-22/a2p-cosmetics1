@@ -37,7 +37,9 @@ const AgentOnboarding = () => {
     email: '',
     phone: '',
     city: '',
-    address: ''
+    address: '',
+    role: 'Master Agent',
+    parent_id: ''
   });
 
   const [aadharFile, setAadharFile] = useState(null);
@@ -112,7 +114,7 @@ const AgentOnboarding = () => {
 
       setShowForm(false);
       setStep(1);
-      setFormData({ name: '', email: '', phone: '', city: '', address: '' });
+      setFormData({ name: '', email: '', phone: '', city: '', address: '', role: 'Master Agent', parent_id: '' });
       setAadharFile(null);
       setPhotoFile(null);
       fetchApplicants();
@@ -171,6 +173,25 @@ const AgentOnboarding = () => {
                 <div className="ag-field"><label>Email Address</label><input name="email" value={formData.email} onChange={handleInputChange} placeholder="rahul@example.com" /></div>
                 <div className="ag-field"><label>Phone Number</label><input name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+91 9876543210" /></div>
                 <div className="ag-field"><label>City</label><input name="city" value={formData.city} onChange={handleInputChange} placeholder="Mumbai" /></div>
+                <div className="ag-field">
+                  <label>Agent Role in Hierarchy</label>
+                  <select name="role" value={formData.role} onChange={handleInputChange} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}>
+                    <option value="Master Agent">Master Agent (Top Level)</option>
+                    <option value="Sub Agent">Sub Agent (Middle Tier)</option>
+                    <option value="Sales Rep">Sales Rep (Field Level)</option>
+                  </select>
+                </div>
+                <div className="ag-field">
+                  <label>Parent Agent (Reporting Manager)</label>
+                  <select name="parent_id" value={formData.parent_id} onChange={handleInputChange} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}>
+                    <option value="">None (Top Level Root Agent)</option>
+                    {applicants.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name} ({a.role || 'Agent'} - #{a.id})
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <div className="ag-field" style={{ gridColumn: window.innerWidth <= 768 ? 'auto' : 'span 2' }}>
                   <label>Full Address</label>
                   <textarea name="address" value={formData.address} onChange={handleInputChange} placeholder="Line 1, Line 2, Pincode" />

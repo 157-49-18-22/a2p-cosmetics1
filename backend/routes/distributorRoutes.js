@@ -41,4 +41,8 @@ router.patch('/stock-requests/:id/status', distributorController.updateStockRequ
 router.post('/stock-requests', distributorController.createStockRequest);
 router.post('/invoices', distributorController.createInvoice);
 
+// Payment Gateway Routes for Stock Requests
+router.post('/stock-requests/razorpay', distributorController.createStockRazorpayOrder);
+router.post('/stock-requests/verify-payment', distributorController.verifyStockPayment);
+
 module.exports = router;

@@ -347,6 +347,13 @@ const DistributorCRM = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                           <span style={{ fontWeight: 800, fontSize: '1rem' }}>{r.request_number}</span>
                           <span className="adm-badge" style={{ background: '#fef3c7', color: '#d97706', fontSize: '0.6rem' }}>{r.status}</span>
+                          <span className="adm-badge" style={{ 
+                            background: r.payment_status === 'Paid' ? '#dcfce7' : '#f1f5f9', 
+                            color: r.payment_status === 'Paid' ? '#166534' : '#475569', 
+                            fontSize: '0.6rem', border: '1px solid #e2e8f0' 
+                          }}>
+                            {r.payment_method === 'Online' || r.payment_method === 'Online (Razorpay)' ? 'Online Paid ✅' : 'Cash Pending ⏳'}
+                          </span>
                         </div>
                         <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Date: {new Date(r.created_at).toLocaleDateString()} | Value: ₹{r.total_amount?.toLocaleString()}</p>
                       </div>

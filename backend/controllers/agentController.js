@@ -77,11 +77,11 @@ exports.getHierarchy = async (req, res) => {
 
 // Onboard
 exports.onboard = async (req, res) => {
-  const { name, email, phone, city, address, profile_pic, document_url } = req.body;
+  const { name, email, phone, city, address, profile_pic, document_url, role, parent_id } = req.body;
   try {
     const [result] = await db.query(
-      "INSERT INTO agents (name, email, phone, city, address, profile_pic, document_url, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')",
-      [name, email, phone, city, address, profile_pic, document_url]
+      "INSERT INTO agents (name, email, phone, city, address, profile_pic, document_url, status, role, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending', ?, ?)",
+      [name, email, phone, city, address, profile_pic, document_url, role || 'Sales Rep', parent_id ? parseInt(parent_id) : null]
     );
     await db.query(
       "INSERT INTO agent_logs (agent_id, activity_text, activity_type, status) VALUES (?, ?, 'Onboarding', 'Pending')",
