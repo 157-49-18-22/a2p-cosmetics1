@@ -7,7 +7,7 @@ import './Checkout.css';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { cartItems, total, subtotal, discountAmount, coupon, clearCart } = useCart();
+  const { cartItems, total, subtotal, discountAmount, coupon, clearCart, applyCoupon, removeCoupon } = useCart();
   
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
@@ -25,11 +25,36 @@ const Checkout = () => {
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Promo states
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [promoMessage, setPromoMessage] = useState({ text: '', type: '' });
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+
+  // Referral code state
+  const [referralCodeInput, setReferralCodeInput] = useState('');
+  const [referralMessage, setReferralMessage] = useState({ text: '', type: '' });
+  const [isValidatingReferral, setIsValidatingReferral] = useState(false);
+  const [validatedReferral, setValidatedReferral] = useState(null); // { code, agent_name, agent_id, discount_type, discount_value }
+
+  // Calculate Referral Discount dynamically
+  let referralDiscountAmount = 0;
+  if (validatedReferral) {
+    const dVal = parseFloat(validatedReferral.discount_value || 0);
+    if (validatedReferral.discount_type === 'fixed') {
+      referralDiscountAmount = dVal;
+    } else {
+      referralDiscountAmount = Math.round((subtotal * dVal) / 100);
+    }
+  }
+
+  const totalDiscountAmount = (discountAmount || 0) + referralDiscountAmount;
+  const finalTotal = Math.max(0, subtotal - totalDiscountAmount);
 
   useEffect(() => {
     const fetchSavedAddresses = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/customers/addresses`);
+        const response = await fetch(`${API_BASE_URL}/customers/addresses`, { credentials: 'include' });
         const data = await response.json();
         setSavedAddresses(data);
         
@@ -73,6 +98,49 @@ const Checkout = () => {
     setIsProcessing(true);
 
     try {
+      if (formData.paymentMethod === 'cod') {
+        // Direct order creation for COD
+        const saveOrderRes = await fetch(`${API_BASE_URL}/orders/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            customer_name: `${formData.firstName} ${formData.lastName}`,
+            customer_email: formData.email,
+            customer_phone: formData.phone,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zip_code: formData.zipCode,
+            subtotal: subtotal,
+            discount: totalDiscountAmount,
+            total_amount: finalTotal,
+            items: cartItems,
+            payment_id: 'COD_' + Date.now(),
+            razorpay_order_id: null,
+            razorpay_signature: null,
+            referral_code: validatedReferral ? validatedReferral.code : null,
+            referral_agent_id: validatedReferral ? validatedReferral.agent_id : null
+          })
+        });
+
+        const data = await saveOrderRes.json();
+        if (data.success) {
+          clearCart();
+          navigate('/order-success', { 
+            state: { 
+              orderId: data.orderId,
+              amount: finalTotal,
+              customer: `${formData.firstName} ${formData.lastName}`
+            } 
+          });
+        } else {
+          alert("Order could not be saved. Please contact support.");
+        }
+        setIsProcessing(false);
+        return;
+      }
+
       // 1. Load Razorpay Script
       const loadScript = (src) => {
         return new Promise((resolve) => {
@@ -96,7 +164,8 @@ const Checkout = () => {
       const orderRes = await fetch(`${API_BASE_URL}/orders/razorpay`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: total })
+        credentials: 'include',
+        body: JSON.stringify({ amount: finalTotal })
       });
 
       const orderData = await orderRes.json();
@@ -121,6 +190,7 @@ const Checkout = () => {
             const saveOrderRes = await fetch(`${API_BASE_URL}/orders/create`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
               body: JSON.stringify({
                 customer_name: `${formData.firstName} ${formData.lastName}`,
                 customer_email: formData.email,
@@ -130,12 +200,14 @@ const Checkout = () => {
                 state: formData.state,
                 zip_code: formData.zipCode,
                 subtotal: subtotal,
-                discount: discountAmount,
-                total_amount: total,
+                discount: totalDiscountAmount,
+                total_amount: finalTotal,
                 items: cartItems,
                 payment_id: response.razorpay_payment_id,
                 razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature
+                razorpay_signature: response.razorpay_signature,
+                referral_code: validatedReferral ? validatedReferral.code : null,
+                referral_agent_id: validatedReferral ? validatedReferral.agent_id : null
               })
             });
 
@@ -146,7 +218,7 @@ const Checkout = () => {
               navigate('/order-success', { 
                 state: { 
                   orderId: data.orderId,
-                  amount: total,
+                  amount: finalTotal,
                   customer: `${formData.firstName} ${formData.lastName}`
                 } 
               });
@@ -332,7 +404,7 @@ const Checkout = () => {
             <section className="checkout-section" style={{ marginTop: '40px' }}>
               <h2><CreditCard size={22} color="#d4a373" /> Payment Method</h2>
               <div className="payment-options">
-                <div className="payment-option active">
+                <div className={`payment-option ${formData.paymentMethod === 'razorpay' ? 'active' : ''}`}>
                   <input 
                     type="radio" 
                     id="razorpay" 
@@ -346,11 +418,25 @@ const Checkout = () => {
                     <span>Secure payment via Razorpay</span>
                   </label>
                 </div>
+                <div className={`payment-option ${formData.paymentMethod === 'cod' ? 'active' : ''}`}>
+                  <input 
+                    type="radio" 
+                    id="cod" 
+                    name="paymentMethod" 
+                    value="cod" 
+                    checked={formData.paymentMethod === 'cod'} 
+                    onChange={handleInputChange}
+                  />
+                  <label htmlFor="cod">
+                    <strong>Cash on Delivery (COD)</strong>
+                    <span>Pay at your doorstep (Good for testing)</span>
+                  </label>
+                </div>
               </div>
             </section>
 
             <button type="submit" className="place-order-btn" disabled={isProcessing}>
-              {isProcessing ? 'PROCESSING...' : `PAY RS. ${total}`} <ArrowRight size={20} />
+              {isProcessing ? 'PROCESSING...' : `PAY RS. ${finalTotal}`} <ArrowRight size={20} />
             </button>
           </form>
         </div>
@@ -373,6 +459,121 @@ const Checkout = () => {
               ))}
             </div>
             
+            <div className="promo-section" style={{ padding: '15px 0', borderTop: '1px solid #eee', borderBottom: '1px solid #eee', margin: '15px 0' }}>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input 
+                  type="text" 
+                  placeholder="Enter Promo Code" 
+                  value={promoCodeInput}
+                  onChange={(e) => {
+                    setPromoCodeInput(e.target.value.toUpperCase());
+                    setPromoMessage({text: '', type: ''});
+                  }}
+                  disabled={coupon || isApplyingPromo}
+                  style={{ flex: 1, padding: '10px 15px', borderRadius: 8, border: '1px solid #ccc', outline: 'none' }}
+                />
+                {!coupon ? (
+                  <button 
+                    type="button"
+                    onClick={async () => {
+                      if (!promoCodeInput) return;
+                      setIsApplyingPromo(true);
+                      const res = await applyCoupon(promoCodeInput);
+                      setPromoMessage({ text: res.message, type: res.success ? 'success' : 'error' });
+                      setIsApplyingPromo(false);
+                    }}
+                    disabled={isApplyingPromo || !promoCodeInput}
+                    style={{ background: '#d4a373', color: '#fff', border: 'none', padding: '0 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}
+                  >
+                    {isApplyingPromo ? '...' : 'Apply'}
+                  </button>
+                ) : (
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      removeCoupon();
+                      setPromoCodeInput('');
+                      setPromoMessage({text: '', type: ''});
+                    }}
+                    style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '0 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              {promoMessage.text && (
+                <p style={{ marginTop: 8, fontSize: '0.8rem', color: promoMessage.type === 'error' ? '#ef4444' : '#10b981', fontWeight: 500 }}>
+                  {promoMessage.text}
+                </p>
+              )}
+            </div>
+
+            {/* Referral Code Section */}
+            <div className="promo-section" style={{ padding: '15px 0', borderBottom: '1px solid #eee', marginBottom: '15px' }}>
+              <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#888', marginBottom: 8 }}>REFERRAL CODE (Optional)</p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input
+                  type="text"
+                  placeholder="Enter Agent Referral Code"
+                  value={referralCodeInput}
+                  onChange={(e) => {
+                    setReferralCodeInput(e.target.value.toUpperCase());
+                    setReferralMessage({ text: '', type: '' });
+                    if (validatedReferral) setValidatedReferral(null);
+                  }}
+                  disabled={!!validatedReferral || isValidatingReferral}
+                  style={{ flex: 1, padding: '10px 15px', borderRadius: 8, border: `1px solid ${validatedReferral ? '#10b981' : '#ccc'}`, outline: 'none', fontFamily: 'monospace', fontWeight: 700, textTransform: 'uppercase' }}
+                />
+                {!validatedReferral ? (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!referralCodeInput.trim()) return;
+                      setIsValidatingReferral(true);
+                      try {
+                        const res = await fetch(`${API_BASE_URL}/agent/referral-codes/validate/${referralCodeInput.trim()}`, { credentials: 'include' });
+                        const data = await res.json();
+                        if (res.ok && data.valid) {
+                          setValidatedReferral(data);
+                          const offerText = data.discount_type === 'fixed'
+                            ? `₹${data.discount_value} OFF`
+                            : `${data.discount_value}% OFF`;
+                          setReferralMessage({ text: `✓ Valid! Agent: ${data.agent_name} • You save ${offerText}`, type: 'success' });
+                        } else {
+                          setReferralMessage({ text: data.message || 'Invalid referral code', type: 'error' });
+                        }
+                      } catch (err) {
+                        setReferralMessage({ text: 'Could not validate code', type: 'error' });
+                      } finally {
+                        setIsValidatingReferral(false);
+                      }
+                    }}
+                    disabled={isValidatingReferral || !referralCodeInput}
+                    style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '0 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 600, whiteSpace: 'nowrap' }}
+                  >
+                    {isValidatingReferral ? '...' : 'Apply'}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setValidatedReferral(null);
+                      setReferralCodeInput('');
+                      setReferralMessage({ text: '', type: '' });
+                    }}
+                    style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '0 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              {referralMessage.text && (
+                <p style={{ marginTop: 8, fontSize: '0.8rem', color: referralMessage.type === 'error' ? '#ef4444' : '#10b981', fontWeight: 500 }}>
+                  {referralMessage.text}
+                </p>
+              )}
+            </div>
+
             <div className="summary-totals">
               <div className="total-row">
                 <span>Subtotal</span>
@@ -380,8 +581,16 @@ const Checkout = () => {
               </div>
               {coupon && (
                 <div className="total-row discount">
-                  <span>Discount ({coupon.code})</span>
+                  <span>Promo Discount ({coupon.code})</span>
                   <span>- Rs. {discountAmount}</span>
+                </div>
+              )}
+              {validatedReferral && referralDiscountAmount > 0 && (
+                <div className="total-row discount" style={{ color: '#6366f1' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    🎁 Referral ({validatedReferral.code})
+                  </span>
+                  <span>- Rs. {referralDiscountAmount}</span>
                 </div>
               )}
               <div className="total-row">
@@ -390,7 +599,7 @@ const Checkout = () => {
               </div>
               <div className="total-row grand-total">
                 <span>Total</span>
-                <span>Rs. {total}</span>
+                <span>Rs. {finalTotal}</span>
               </div>
             </div>
 

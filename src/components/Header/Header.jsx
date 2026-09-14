@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ShoppingBag, User, Heart, Search, Menu, X, 
-  LayoutDashboard, Package, MapPin, LogOut
+  LayoutDashboard, Package, MapPin, LogOut, LifeBuoy
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -74,10 +74,8 @@ const Header = () => {
 
         <nav className={`beauty-nav ${isMenuOpen ? 'active' : ''}`}>
           <ul className="nav-links">
-            <li><Link to="/facewash" onClick={() => setIsMenuOpen(false)}>Face Wash</Link></li>
-            <li><Link to="/faceserum" onClick={() => setIsMenuOpen(false)}>Face Serum</Link></li>
-            <li><Link to="/facecream" onClick={() => setIsMenuOpen(false)}>Face Cream</Link></li>
-            <li><Link to="/bodywash" onClick={() => setIsMenuOpen(false)}>Body Wash</Link></li>
+            <li><Link to="/new-arrivals" onClick={() => setIsMenuOpen(false)}>New Arrivals</Link></li>
+            <li><Link to="/all-products" onClick={() => setIsMenuOpen(false)}>All Products</Link></li>
             <li><Link to="/articles" onClick={() => setIsMenuOpen(false)}>Journal</Link></li>
             <li><Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contact Us</Link></li>
           </ul>
@@ -147,8 +145,9 @@ const Header = () => {
                   {user && (
                     <div className="dropdown-links">
                       {[
-                        { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard" },
+                        ...((user.role === 'Admin' || user.role === 'admin' || user.email === 'admin@crm.com' || user.email?.startsWith('admin@')) ? [{ to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard" }] : []),
                         { to: "/my-orders", icon: Package, label: "My Orders" },
+                        { to: "/help-support", icon: LifeBuoy, label: "Help & Support / Report Issue" },
                         { to: "/my-addresses", icon: MapPin, label: "My Addresses" },
                         { to: "/wishlist", icon: Heart, label: "Wishlist" },
                       ].map((item, index) => (
@@ -173,7 +172,7 @@ const Header = () => {
                         <button 
                           className="dropdown-item logout-btn"
                           onClick={() => {
-                            logout();
+                            logout('/login');
                             setIsUserDropdownOpen(false);
                           }}
                         >

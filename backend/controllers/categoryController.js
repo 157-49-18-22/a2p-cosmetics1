@@ -8,20 +8,23 @@ exports.getCategories = async (req, res) => {
 };
 
 exports.createCategory = async (req, res) => {
-  const { name, slug, image_url, status } = req.body;
+  const { name, slug, image_url, status, meta_title, meta_description, meta_keywords } = req.body;
   try {
     const [result] = await db.query(
-      'INSERT INTO categories (name, slug, image_url, status) VALUES (?, ?, ?, ?)',
-      [name, slug, image_url || '', status || 'Active']
+      'INSERT INTO categories (name, slug, image_url, status, meta_title, meta_description, meta_keywords) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [name, slug, image_url || '', status || 'Active', meta_title || '', meta_description || '', meta_keywords || '']
     );
-    res.json({ id: result.insertId, name, slug, image_url, status: status || 'Active' });
+    res.json({ id: result.insertId, name, slug, image_url, status: status || 'Active', meta_title, meta_description, meta_keywords });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
 
 exports.updateCategory = async (req, res) => {
-  const { name, slug, image_url, status } = req.body;
+  const { name, slug, image_url, status, meta_title, meta_description, meta_keywords } = req.body;
   try {
-    await db.query('UPDATE categories SET name=?, slug=?, image_url=?, status=? WHERE id=?', [name, slug, image_url, status, req.params.id]);
+    await db.query(
+      'UPDATE categories SET name=?, slug=?, image_url=?, status=?, meta_title=?, meta_description=?, meta_keywords=? WHERE id=?',
+      [name, slug, image_url, status, meta_title, meta_description, meta_keywords, req.params.id]
+    );
     res.json({ message: 'Category updated' });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };

@@ -4,6 +4,8 @@ import { Star, ChevronDown, CheckCircle, Sparkles, Droplets, Filter, X } from 'l
 import { useCart } from '../../context/CartContext';
 import { useNotifications } from '../../components/Notifications/NotificationHub';
 import './FaceSerum.css';
+import SEO from '../../components/SEO/SEO';
+import { calculateRatingFromLikes } from '../../utils/ratingUtils';
 
 const FaceSerum = () => {
   const { addToCart } = useCart();
@@ -15,6 +17,23 @@ const FaceSerum = () => {
   const [activeConcern, setActiveConcern] = useState('All');
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [seo, setSeo] = useState({ title: 'Face Serum - A2P Cosmetics', description: 'Shop premium organic Face Serums at A2P Cosmetics.', keywords: 'face serum, vitamin c serum, hyaluronic acid, skincare, a2p cosmetics' });
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/categories`)
+      .then(res => res.json())
+      .then(data => {
+        const cat = data.find(c => c.name === 'Face Serum' || c.slug === 'faceserum');
+        if (cat) {
+          setSeo({
+            title: cat.meta_title || `${cat.name} - A2P Cosmetics`,
+            description: cat.meta_description || `Shop premium organic ${cat.name} products at A2P Cosmetics.`,
+            keywords: cat.meta_keywords || `${cat.name}, organic, skincare, a2p cosmetics`
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
 
   useEffect(() => {
@@ -50,8 +69,8 @@ const FaceSerum = () => {
       name: product.name,
       price: product.price,
       image: product.image_url || "/faceserum_product.png",
-      rating: 4.9,
-      reviews: 85
+      rating: product.rating,
+      reviews: product.review_count
     };
     addToCart(cartProduct);
     showNotification({
@@ -64,6 +83,7 @@ const FaceSerum = () => {
 
   return (
     <div className="lips-page serum-page">
+      <SEO title={seo.title} description={seo.description} keywords={seo.keywords} />
       {/* Premium Banner */}
       <div className="lips-banner">
         <video

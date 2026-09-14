@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { CheckCircle, ShoppingBag, ArrowRight, Package } from 'lucide-react';
+import { CheckCircle, ShoppingBag, ArrowRight, Package, LifeBuoy } from 'lucide-react';
 import './Checkout.css'; // Reusing some styles
 
 const OrderSuccess = () => {
@@ -87,6 +87,23 @@ const OrderSuccess = () => {
           >
             CONTINUE SHOPPING <ArrowRight size={18} />
           </button>
+          
+          <Link
+            to={orderId && orderId !== 'N/A' ? `/help-support?orderId=${orderId}` : '/help-support'}
+            style={{
+              fontSize: '0.85rem',
+              color: '#2563eb',
+              textDecoration: 'none',
+              fontWeight: '600',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              marginTop: '8px'
+            }}
+          >
+            <LifeBuoy size={16} /> Have a question or need to report an issue on this order?
+          </Link>
         </div>
       </div>
     </div>

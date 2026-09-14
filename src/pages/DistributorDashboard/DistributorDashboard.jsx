@@ -15,6 +15,7 @@ import SuperStockist from './modules/SuperStockist';
 import BrandingManagement from './modules/BrandingManagement';
 import DashboardHome from './modules/DashboardHome';
 import StockRequest from './modules/StockRequest';
+import { useAuth } from '../../context/AuthContext';
 import './DistributorDashboard.css';
 
 const navItems = [
@@ -24,7 +25,7 @@ const navItems = [
   { id: 'inventory', label: 'Inventory Management', icon: Package },
   { id: 'billing', label: 'Billing Management', icon: FileText },
   { id: 'area', label: 'Area Allocation', icon: Map },
-  { id: 'dealer', label: 'Dealer / Sub-Dealer', icon: Users },
+  { id: 'dealer', label: 'Dealers & Orders', icon: Users },
   { id: 'stockist', label: 'Super Stockist', icon: Star },
   { id: 'branding', label: 'Branding Management', icon: Megaphone },
 ];
@@ -76,13 +77,13 @@ const AnnouncementTicker = () => {
 };
 
 const DistributorDashboard = () => {
+  const { user, logout } = useAuth();
   const [activeModule, setActiveModule] = useState('home');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
   const [notifOpen, setNotifOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem('active_distributor');
-    window.location.href = '/distributor/login';
+    logout('/distributor/login');
   };
 
   const ActiveComponent = moduleComponents[activeModule];
@@ -105,7 +106,12 @@ const DistributorDashboard = () => {
       <aside className={`dd-sidebar ${sidebarOpen ? 'open' : 'collapsed'}`}>
         <div className="dd-sidebar-logo">
           <img src="/A2P final logo.png" alt="A2P" className="dd-logo-img" />
-          {sidebarOpen && <span className="dd-logo-text">Distributor Portal</span>}
+          {sidebarOpen && <span className="dd-logo-text" style={{ flex: 1 }}>Distributor Portal</span>}
+          {sidebarOpen && (
+            <button className="dd-sidebar-close-btn" onClick={() => setSidebarOpen(false)} aria-label="Close Sidebar">
+              <X size={20} />
+            </button>
+          )}
         </div>
 
         <nav className="dd-nav">

@@ -1,6 +1,6 @@
 import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Filter, Mail, Phone, Calendar, User, UserCheck, X, Trash2, MoreVertical, RefreshCcw } from 'lucide-react';
+import { Search, Plus, Filter, Mail, Phone, Calendar, User, UserCheck, X, Trash2, MoreVertical, RefreshCcw, ChevronDown } from 'lucide-react';
 
 const API = API_BASE_URL;
 
@@ -8,12 +8,19 @@ const UserManager = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedRole, setSelectedRole] = useState('All');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [toast, setToast] = useState(null);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', role: 'Customer', gender: 'Not set', dob: 'Not set', password: '' });
 
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const showToast = (msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const fetchUsers = async () => {
     try {
@@ -29,6 +36,31 @@ const UserManager = () => {
     }
   };
 
+  const handleRoleChange = async (userId, newRole, userName) => {
+    try {
+      // Optimistically update local state
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      
+      const res = await fetch(`${API}/users/${userId}/role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole })
+      });
+      
+      if (res.ok) {
+        showToast(`${userName || 'User'} is now set as ${newRole}!`, 'success');
+      } else {
+        const data = await res.json();
+        showToast(data.error || 'Failed to update role', 'danger');
+        fetchUsers();
+      }
+    } catch (err) {
+      console.error('Error changing user role:', err);
+      showToast('Network error updating role', 'danger');
+      fetchUsers();
+    }
+  };
+
   const handleAddUser = async (e) => {
     e.preventDefault();
     try {
@@ -39,21 +71,40 @@ const UserManager = () => {
       });
       if (res.ok) {
         setShowAddModal(false);
+        showToast(`${formData.role} created successfully!`);
         setFormData({ name: '', email: '', phone: '', role: 'Customer', gender: 'Not set', dob: 'Not set', password: '' });
         fetchUsers();
+      } else {
+        const err = await res.json();
+        showToast(err.error || 'Failed to create user', 'danger');
       }
     } catch (e) {
       console.error(e);
+      showToast('Error creating user', 'danger');
     }
   };
 
-  const filtered = (Array.isArray(users) ? users : []).filter(u => 
-    u.name?.toLowerCase().includes(search.toLowerCase()) || 
-    u.email?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = (Array.isArray(users) ? users : []).filter(u => {
+    const matchesSearch =
+      (u.name || '').toLowerCase().includes(search.toLowerCase()) || 
+      (u.email || '').toLowerCase().includes(search.toLowerCase());
+    const matchesRole = selectedRole === 'All' || (u.role || 'Customer') === selectedRole;
+    return matchesSearch && matchesRole;
+  });
 
   return (
     <div className="adm-fade-in" style={{ padding: '4px' }}>
+      {toast && (
+        <div style={{
+          position: 'fixed', top: 24, right: 24, zIndex: 99999,
+          background: toast.type === 'success' ? '#10b981' : '#f43f5e',
+          color: '#fff', padding: '12px 24px', borderRadius: '12px',
+          fontWeight: 700, boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+        }}>
+          {toast.msg}
+        </div>
+      )}
+
       {/* Header Section */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
@@ -113,17 +164,43 @@ const UserManager = () => {
                   <td style={{ color: '#64748b', fontSize: '0.85rem' }}>{u.phone || 'Not set'}</td>
                   <td style={{ color: '#64748b', fontSize: '0.85rem' }}>{u.dob || 'Not set'}</td>
                   <td>
-                    <span style={{ 
-                      fontSize: '0.65rem', 
-                      fontWeight: 800, 
-                      padding: '4px 10px', 
-                      borderRadius: '20px',
-                      background: u.role === 'Customer' ? '#dcfce7' : u.role === 'Agent' ? '#f3e8ff' : '#fff7ed',
-                      color: u.role === 'Customer' ? '#15803d' : u.role === 'Agent' ? '#7e22ce' : '#c2410c',
-                      textTransform: 'uppercase'
-                    }}>
-                      {u.role}
-                    </span>
+                    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                      <select
+                        value={u.role || 'Customer'}
+                        onChange={(e) => handleRoleChange(u.id, e.target.value, u.name)}
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          padding: '6px 28px 6px 12px',
+                          borderRadius: '20px',
+                          background: u.role === 'Admin' ? '#eff6ff' : '#dcfce7',
+                          color: u.role === 'Admin' ? '#1d4ed8' : '#15803d',
+                          border: `1.5px solid ${u.role === 'Admin' ? '#bfdbfe' : '#bbf7d0'}`,
+                          cursor: 'pointer',
+                          outline: 'none',
+                          appearance: 'none',
+                          WebkitAppearance: 'none',
+                          MozAppearance: 'none',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
+                          transition: 'all 0.2s ease'
+                        }}
+                        title="Click to change user role"
+                      >
+                        <option value="Customer" style={{ background: '#fff', color: '#0f172a' }}>Customer</option>
+                        <option value="Admin" style={{ background: '#fff', color: '#0f172a' }}>Admin</option>
+                      </select>
+                      <ChevronDown 
+                        size={13} 
+                        color={u.role === 'Admin' ? '#1d4ed8' : '#15803d'} 
+                        style={{ 
+                          position: 'absolute', 
+                          right: '9px', 
+                          pointerEvents: 'none' 
+                        }} 
+                      />
+                    </div>
                   </td>
                   <td style={{ paddingRight: '24px', color: '#64748b', fontSize: '0.85rem' }}>
                     {new Date(u.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
@@ -142,7 +219,7 @@ const UserManager = () => {
             <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
               <div>
                 <h3 style={{ fontWeight: 800, fontSize: '1.2rem', color: '#0f172a' }}>Add New User</h3>
-                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>Register a new profile in the ecosystem.</p>
+                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>Register a new Customer or Admin profile.</p>
               </div>
               <button className="adm-icon-btn" onClick={() => setShowAddModal(false)}><X size={20} /></button>
             </div>
@@ -168,8 +245,7 @@ const UserManager = () => {
                   <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase' }}>Account Role</label>
                   <select className="adm-btn adm-btn-outline" style={{ width: '100%', height: '44px', padding: '0 12px' }} value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
                     <option value="Customer">Customer</option>
-                    <option value="Agent">Agent</option>
-                    <option value="Distributor">Distributor</option>
+                    <option value="Admin">Admin</option>
                   </select>
                 </div>
               </div>

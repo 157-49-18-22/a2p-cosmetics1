@@ -1,6 +1,7 @@
 import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useSession } from '../../../hooks/useSession.js';
 import { 
   Users, 
   TrendingUp, 
@@ -10,17 +11,28 @@ import {
   ArrowDownRight,
   Clock,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  UserCheck
 } from 'lucide-react';
 
 const API_BASE = `${API_BASE_URL}/agent`;
 
 const AgentHome = ({ onNavigate }) => {
+  const { user: loggedAgent } = useSession();
+  const agentId = loggedAgent?.id || '';
+  const agentRole = loggedAgent?.role || '';
+  const isAdmin = agentRole === 'Admin Agent';
+  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+
   const [stats, setStats] = useState([
     { label: 'Total Agents', value: '0', change: '+0%', up: true, icon: Users, color: '#0ea5e9' },
     { label: 'Active Referrals', value: '0', change: '+0%', up: true, icon: TrendingUp, color: '#6366f1' },
     { label: 'Total Commission', value: '₹0', change: '+0%', up: true, icon: BadgeDollarSign, color: '#f59e0b' },
     { label: 'Pending Payouts', value: '₹0', change: '+0%', up: false, icon: Wallet, color: '#e11d48' },
+    { label: 'Direct Referrals', value: '0', change: '+0%', up: true, icon: UserCheck, color: '#16a34a' },
+    { label: 'Sub-Agent Referrals', value: '0', change: '+0%', up: true, icon: Users, color: '#8b5cf6' },
+    { label: 'Total Referral Orders', value: '0', change: '+0%', up: true, icon: TrendingUp, color: '#06b6d4' },
+    { label: 'Paid Commission', value: '₹0', change: '+0%', up: true, icon: CheckCircle2, color: '#22c55e' },
   ]);
   const [recentRequests, setRecentRequests] = useState([]);
   const [topAgents, setTopAgents] = useState([]);
@@ -29,29 +41,34 @@ const AgentHome = ({ onNavigate }) => {
   const fetchData = async () => {
     try {
       const [statsRes, reqRes, topRes] = await Promise.all([
-        axios.get(`${API_BASE}/stats`),
+        axios.get(`${API_BASE}/stats${agentParams}`),
         axios.get(`${API_BASE}/requests`),
         axios.get(`${API_BASE}/top`)
       ]);
 
-      const s = statsRes.data;
+      const s = statsRes.data || {};
       setStats([
-        { label: 'Total Agents', value: s.total_agents.toLocaleString(), change: '+12%', up: true, icon: Users, color: '#0ea5e9' },
-        { label: 'Active Referrals', value: s.active_referrals.toLocaleString(), change: '+5%', up: true, icon: TrendingUp, color: '#6366f1' },
-        { label: 'Total Commission', value: `₹${(s.total_commission / 100000).toFixed(1)}L`, change: '+18%', up: true, icon: BadgeDollarSign, color: '#f59e0b' },
-        { label: 'Pending Payouts', value: `₹${(s.pending_payouts / 1000).toFixed(1)}K`, change: '-2%', up: false, icon: Wallet, color: '#e11d48' },
+        { label: 'Total Agents', value: (s.total_agents || 0).toLocaleString('en-IN'), change: '+12%', up: true, icon: Users, color: '#0ea5e9' },
+        { label: 'Active Referrals', value: (s.active_referrals || 0).toLocaleString('en-IN'), change: '+5%', up: true, icon: TrendingUp, color: '#6366f1' },
+        { label: 'Total Commission', value: `₹${parseFloat(s.total_commission || 0).toLocaleString('en-IN')}`, change: '+18%', up: true, icon: BadgeDollarSign, color: '#f59e0b' },
+        { label: 'Pending Payouts', value: `₹${parseFloat(s.pending_payouts || 0).toLocaleString('en-IN')}`, change: '-0%', up: false, icon: Wallet, color: '#e11d48' },
+        { label: 'Direct Referrals', value: (s.direct_referrals || 0).toLocaleString('en-IN'), change: '+8%', up: true, icon: UserCheck, color: '#16a34a' },
+        { label: 'Sub-Agent Referrals', value: (s.sub_agent_referrals || 0).toLocaleString('en-IN'), change: '+0%', up: true, icon: Users, color: '#8b5cf6' },
+        { label: 'Total Referral Orders', value: (s.total_referral_orders || 0).toLocaleString('en-IN'), change: '+22%', up: true, icon: TrendingUp, color: '#06b6d4' },
+        { label: 'Paid Commission', value: `₹${parseFloat(s.paid_commission || 0).toLocaleString('en-IN')}`, change: '+25%', up: true, icon: CheckCircle2, color: '#22c55e' },
       ]);
 
-      setRecentRequests(reqRes.data.map(r => ({
+      const reqList = Array.isArray(reqRes.data) ? reqRes.data : [];
+      setRecentRequests(reqList.slice(0, 5).map(r => ({
         id: `REQ-${r.id}`,
-        agent: r.agent_name,
-        type: r.activity_type,
-        amount: r.activity_type === 'Payout' ? '₹15,000' : '-', // Amount logic can be expanded
-        status: r.status,
-        time: new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        agent: r.agent_name || 'Agent',
+        type: r.activity_type || 'Activity',
+        amount: r.amount ? `₹${parseFloat(r.amount).toLocaleString('en-IN')}` : '—',
+        status: r.status || 'Active',
+        time: new Date(r.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
       })));
 
-      setTopAgents(topRes.data);
+      setTopAgents(Array.isArray(topRes.data) ? topRes.data : []);
     } catch (err) {
       console.error('Error fetching agent home data:', err);
     } finally {
@@ -61,7 +78,7 @@ const AgentHome = ({ onNavigate }) => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [agentId]);
 
   if (loading) return <div className="ag-loading">Loading Overview...</div>;
 
@@ -69,19 +86,25 @@ const AgentHome = ({ onNavigate }) => {
     <div className="ag-enter">
       <div className="ag-module-header">
         <div className="ag-header-info">
-          <h1 className="ag-module-title">Agent Overview</h1>
-          <p className="ag-module-subtitle">Monitor agent performance, commissions, and payouts at a glance.</p>
+          <h1 className="ag-module-title">{isAdmin ? 'Agent Overview' : 'My Dashboard'}</h1>
+          <p className="ag-module-subtitle">
+            {isAdmin
+              ? 'Monitor agent performance, commissions, and payouts at a glance.'
+              : 'Your personal performance: referrals, commissions, and payout summary.'}
+          </p>
         </div>
-        <div className="ag-header-btns">
-          <button className="ag-btn ag-btn-outline">Export Stats</button>
-          <button 
-            className="ag-btn ag-btn-primary"
-            onClick={() => onNavigate('onboarding')}
-          >Add New Agent</button>
-        </div>
+        {isAdmin && (
+          <div className="ag-header-btns">
+            <button className="ag-btn ag-btn-outline">Export Stats</button>
+            <button 
+              className="ag-btn ag-btn-primary"
+              onClick={() => onNavigate('onboarding')}
+            >Add New Agent</button>
+          </div>
+        )}
       </div>
 
-      <div className="ag-stats-grid">
+      <div className="ag-stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
         {stats.map((stat, i) => (
           <div className="ag-stat-card" key={i}>
             <div className="ag-stat-icon" style={{ background: `${stat.color}15` }}>

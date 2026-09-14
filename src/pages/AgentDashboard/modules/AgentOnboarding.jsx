@@ -35,6 +35,7 @@ const AgentOnboarding = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     phone: '',
     city: '',
     address: '',
@@ -85,6 +86,10 @@ const AgentOnboarding = () => {
       alert('Please fill out all required fields (Name, Email, Phone).');
       return;
     }
+    if (!formData.password) {
+      alert('Please set a Login Password for this agent.');
+      return;
+    }
 
     try {
       let document_url = '';
@@ -114,7 +119,7 @@ const AgentOnboarding = () => {
 
       setShowForm(false);
       setStep(1);
-      setFormData({ name: '', email: '', phone: '', city: '', address: '', role: 'Master Agent', parent_id: '' });
+      setFormData({ name: '', email: '', password: '', phone: '', city: '', address: '', role: 'Master Agent', parent_id: '' });
       setAadharFile(null);
       setPhotoFile(null);
       fetchApplicants();
@@ -169,8 +174,20 @@ const AgentOnboarding = () => {
 
             {step === 1 && (
               <div className="ag-form-grid">
-                <div className="ag-field"><label>Full Name</label><input name="name" value={formData.name} onChange={handleInputChange} placeholder="e.g. Rahul Sharma" /></div>
-                <div className="ag-field"><label>Email Address</label><input name="email" value={formData.email} onChange={handleInputChange} placeholder="rahul@example.com" /></div>
+                <div className="ag-field"><label>Full Name <span style={{color:'#ef4444'}}>*</span></label><input name="name" value={formData.name} onChange={handleInputChange} placeholder="e.g. Rahul Sharma" /></div>
+                <div className="ag-field"><label>Email Address <span style={{color:'#ef4444'}}>*</span></label><input name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="rahul@example.com" /></div>
+                <div className="ag-field">
+                  <label>Login Password <span style={{color:'#ef4444'}}>*</span></label>
+                  <input 
+                    name="password" 
+                    type="text" 
+                    value={formData.password} 
+                    onChange={handleInputChange} 
+                    placeholder="Set a login password for this agent"
+                    style={{ fontFamily: 'monospace' }}
+                  />
+                  <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px', display: 'block' }}>🔑 Agent will use this to login at /agent/login</span>
+                </div>
                 <div className="ag-field"><label>Phone Number</label><input name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+91 9876543210" /></div>
                 <div className="ag-field"><label>City</label><input name="city" value={formData.city} onChange={handleInputChange} placeholder="Mumbai" /></div>
                 <div className="ag-field">

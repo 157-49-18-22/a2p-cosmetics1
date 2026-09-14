@@ -1,23 +1,24 @@
 import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import { 
-  MessageSquareQuote, Layers, Package, ChevronRight, 
-  Sparkles, CheckCircle, AlertCircle
+  MessageSquareQuote, Layers, ChevronRight, 
+  Sparkles, CheckCircle, AlertCircle, Package, BookOpen
 } from 'lucide-react';
 import CategoryManager from './CategoryManager';
 import ProductManager from './ProductManager';
 import TestimonialManager from './TestimonialManager';
+import ArticleManager from './ArticleManager';
 
 const API = API_BASE_URL;
 
 const siteSections = [
+  { id: 'articles', name: 'Articles & Journal', desc: 'Blogs, SEO & Content', icon: BookOpen },
   { id: 'testimonials', name: 'Testimonials', desc: 'Customer reviews', icon: MessageSquareQuote },
   { id: 'categories', name: 'Categories', desc: 'Product classification', icon: Layers },
-  { id: 'products', name: 'Products', desc: 'Full catalog', icon: Package },
 ];
 
 const CMSManager = () => {
-  const [activeSection, setActiveSection] = useState('testimonials');
+  const [activeSection, setActiveSection] = useState('articles');
   const [categories, setCategories] = useState([]);
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -70,7 +71,7 @@ const CMSManager = () => {
             CMS Manager <Sparkles size={20} color="#3b82f6" style={{ display: 'inline', marginLeft: 8 }} />
           </h2>
           <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: 4 }}>
-            Manage website banners, testimonials, and individual product categories.
+            Manage skincare articles, SEO metadata, banners, testimonials, and product categories.
           </p>
         </div>
       </div>
@@ -113,12 +114,12 @@ const CMSManager = () => {
 
         {/* Main Workspace */}
         <div style={{ minWidth: 0 }}>
-          {activeSection === 'testimonials' ? (
+          {activeSection === 'articles' ? (
+            <ArticleManager />
+          ) : activeSection === 'testimonials' ? (
             <TestimonialManager />
           ) : activeSection === 'categories' ? (
-            <CategoryManager />
-          ) : activeSection === 'products' ? (
-            <ProductManager />
+            <CategoryManager onCategoryChange={fetchInitialData} />
           ) : isCategoryView ? (
             <ProductManager initialCategory={activeCategory.name} />
           ) : null}

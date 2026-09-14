@@ -13,11 +13,14 @@
   "description": "",
   "dependencies": {
     "body-parser": "^2.2.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
     "mysql2": "^3.22.2",
+    "nodemailer": "^10.0.9",
     "razorpay": "^2.9.6"
   },
   "devDependencies": {

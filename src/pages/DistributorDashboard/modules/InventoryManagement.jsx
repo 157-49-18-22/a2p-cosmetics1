@@ -1,9 +1,11 @@
 import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../../../context/AuthContext';
+import { useSession } from '../../../hooks/useSession.js';
 import { 
-  Package, Plus, Search, AlertTriangle, TrendingDown, ArrowDown, ArrowUp, 
-  Edit2, Trash2, CheckCircle, X, ShoppingBag, CreditCard, Tag, Layers
+  Package, Search, AlertTriangle, 
+  CheckCircle, X, ShoppingBag, ShoppingCart, Download, Eye, Layers
 } from 'lucide-react';
 
 const API_BASE = API_BASE_URL;
@@ -14,24 +16,34 @@ const statusBadge = (stock, minStock = 50) => {
   return <span className="dd-badge dd-badge-green">In Stock</span>;
 };
 
-const InventoryManagement = () => {
+const InventoryManagement = ({ setActiveModule }) => {
+  const { user: authUser } = useAuth();
+  const { user: sessionUser } = useSession();
+  const localDist = JSON.parse(localStorage.getItem('active_distributor') || localStorage.getItem('distributor_user') || '{}');
+  const distributor = authUser || sessionUser || localDist;
+  const distId = distributor?.id || 1;
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState('All');
   const [categories, setCategories] = useState(['All']);
-
-  const [newProduct, setNewProduct] = useState({ name: '', category: 'Face Care', price: '', stock: '', status: 'Active' });
-  const [isEditing, setIsEditing] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [saving, setSaving] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const fetchInventory = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/inventory`);
-      setProducts(res.data.products || []);
-      const cats = ['All', ...new Set((res.data.products || []).map(p => p.category).filter(Boolean))];
+      setLoading(true);
+      const id = distId || 1;
+      let prods = [];
+      try {
+        const res = await axios.get(`${API_BASE}/distributors/${id}/inventory`);
+        prods = res.data.products || (Array.isArray(res.data) ? res.data : []);
+      } catch (e1) {
+        const res2 = await axios.get(`${API_BASE}/inventory?distributor_id=${id}`);
+        prods = res2.data.products || (Array.isArray(res2.data) ? res2.data : []);
+      }
+      setProducts(prods);
+      const cats = ['All', ...new Set(prods.map(p => p.category).filter(Boolean))];
       setCategories(cats);
     } catch (err) {
       console.error('Error fetching inventory:', err);
@@ -40,63 +52,9 @@ const InventoryManagement = () => {
     }
   };
 
-  const handleSaveProduct = async () => {
-    if (!newProduct.name || !newProduct.price) return alert('Name and price are required');
-    setSaving(true);
-    try {
-      if (isEditing) {
-        await axios.put(`${API_BASE}/products/${editId}`, newProduct);
-      } else {
-        await axios.post(`${API_BASE}/products`, newProduct);
-      }
-      setShowForm(false);
-      setIsEditing(false);
-      setEditId(null);
-      setNewProduct({ name: '', category: 'Face Care', price: '', stock: '', status: 'Active' });
-      fetchInventory();
-    } catch (err) {
-      console.error('Error saving product:', err);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleEditClick = (p) => {
-    setNewProduct({
-      name: p.name,
-      category: p.category || 'Face Care',
-      price: p.price,
-      stock: p.stock,
-      status: p.status || 'Active'
-    });
-    setEditId(p.id);
-    setIsEditing(true);
-    setShowForm(true);
-  };
-
-  const handleDeleteProduct = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
-    try {
-      await axios.delete(`${API_BASE}/products/${id}`);
-      fetchInventory();
-    } catch (err) {
-      console.error('Error deleting product:', err);
-    }
-  };
-
-  const handleUpdateStock = async (id, currentStock, type) => {
-    const change = type === 'up' ? 10 : -10;
-    try {
-      await axios.put(`${API_BASE}/inventory/${id}`, {
-        quantity_change: change,
-        change_type: 'Manual Update',
-        agent: 'Distributor'
-      });
-      fetchInventory();
-    } catch (err) {
-      console.error('Error updating stock:', err);
-    }
-  };
+  useEffect(() => {
+    fetchInventory();
+  }, [distId]);
 
   const handleExport = () => {
     if (products.length === 0) return alert('No products to export');
@@ -120,7 +78,7 @@ const InventoryManagement = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `A2P_Inventory_Export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `A2P_Distributor_Inventory_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -145,22 +103,28 @@ const InventoryManagement = () => {
       <div className="dd-module-header">
         <div className="dd-header-info">
           <h1 className="dd-module-title">Inventory Management</h1>
-          <p className="dd-module-subtitle">Control your stock levels and product catalog.</p>
+          <p className="dd-module-subtitle">View your allocated stock levels and request new stock from Admin.</p>
         </div>
         <div className="dd-header-btns">
-          <button className="dd-btn dd-btn-outline" onClick={handleExport} style={{ borderRadius: 12 }}>Export Catalog</button>
-          <button className="dd-btn dd-btn-primary" onClick={() => { setIsEditing(false); setNewProduct({ name: '', category: 'Face Care', price: '', stock: '', status: 'Active' }); setShowForm(true); }} style={{ borderRadius: 12, background: 'linear-gradient(135deg, #a855f7, #7c3aed)' }}>
-            <Plus size={18} /> Add Product
+          <button className="dd-btn dd-btn-outline" onClick={handleExport} style={{ borderRadius: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Download size={15} /> Export Catalog
+          </button>
+          <button 
+            className="dd-btn dd-btn-primary" 
+            onClick={() => setActiveModule && setActiveModule('stock_request')} 
+            style={{ borderRadius: 12, background: 'linear-gradient(135deg, #a855f7, #7c3aed)', display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <ShoppingCart size={16} /> Request Stock (Indent)
           </button>
         </div>
       </div>
 
       <div className="dd-stats-grid">
         {[
-          { label: 'Total Products', value: products.length, color: '#f3eeff', iconColor: '#a855f7' },
-          { label: 'In Stock', value: products.filter(p => p.stock >= 50).length, color: '#f0fdf4', iconColor: '#16a34a' },
-          { label: 'Low / Out', value: lowStockCount, color: '#fffbeb', iconColor: '#d97706' },
-          { label: 'Total Units', value: products.reduce((a, p) => a + p.stock, 0).toLocaleString(), color: '#eff6ff', iconColor: '#2563eb' },
+          { label: 'Total Catalog Products', value: products.length, color: '#f3eeff', iconColor: '#a855f7' },
+          { label: 'In Stock (>50)', value: products.filter(p => p.stock >= 50).length, color: '#f0fdf4', iconColor: '#16a34a' },
+          { label: 'Low / Out of Stock', value: lowStockCount, color: '#fffbeb', iconColor: '#d97706' },
+          { label: 'Total Units Available', value: products.reduce((a, p) => a + (p.stock || 0), 0).toLocaleString(), color: '#eff6ff', iconColor: '#2563eb' },
         ].map((s, i) => (
           <div className="dd-stat-card" key={i} style={{ borderRadius: 20 }}>
             <div className="dd-stat-icon" style={{ background: s.color, borderRadius: 12 }}>
@@ -189,85 +153,140 @@ const InventoryManagement = () => {
         <div className="dd-table-wrap" style={{ padding: '0 24px 24px' }}>
           <table className="dd-table">
             <thead>
-              <tr><th>ID</th><th>Product</th><th>Category</th><th>Stock Level</th><th>Status</th><th>Actions</th></tr>
+              <tr><th>ID</th><th>Product</th><th>Category</th><th>Distributor Stock</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
-              {filtered.map(p => (
-                <tr key={p.id}>
-                  <td style={{ color: '#7c3aed', fontWeight: 800 }}>#{p.id}</td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 10, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ShoppingBag size={18} color="#64748b" /></div>
-                      <span style={{ fontWeight: 700, color: '#1e293b' }}>{p.name}</span>
-                    </div>
-                  </td>
-                  <td><span className="cat-tag">{p.category || 'General'}</span></td>
-                  <td>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 120 }}>
-                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 700 }}>
-                          <span style={{ color: p.stock < 50 ? '#ef4444' : '#64748b' }}>{p.stock} Units</span>
-                          <span style={{ color: '#94a3b8' }}>Limit: 50</span>
-                       </div>
-                       <div className="stock-progress-bg">
-                          <div className="stock-progress-bar" style={{ 
-                            width: `${Math.min(100, (p.stock / 200) * 100)}%`,
-                            background: p.stock === 0 ? '#ef4444' : p.stock < 50 ? '#f59e0b' : '#10b981'
-                          }} />
-                       </div>
-                    </div>
-                  </td>
-                  <td>{statusBadge(p.stock)}</td>
-                  <td>
-                     <div style={{ display: 'flex', gap: 8 }}>
-                        <button className="row-btn" onClick={() => handleUpdateStock(p.id, p.stock, 'up')} title="Add 10"><ArrowUp size={14} /></button>
-                        <button className="row-btn" onClick={() => handleUpdateStock(p.id, p.stock, 'down')} title="Remove 10"><ArrowDown size={14} /></button>
-                        <button className="row-btn" onClick={() => handleEditClick(p)} title="Edit"><Edit2 size={14} /></button>
-                        <button className="row-btn" style={{ color: '#ef4444' }} onClick={() => handleDeleteProduct(p.id)} title="Delete"><Trash2 size={14} /></button>
-                     </div>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#94a3b8' }}>
+                    No products found matching your search.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filtered.map(p => (
+                  <tr key={p.id}>
+                    <td style={{ color: '#7c3aed', fontWeight: 800 }}>#{p.id}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        {p.image_url ? (
+                          <img src={p.image_url} alt={p.name} style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover', border: '1px solid #e2e8f0' }} />
+                        ) : (
+                          <div style={{ width: 40, height: 40, borderRadius: 10, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ShoppingBag size={18} color="#64748b" />
+                          </div>
+                        )}
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#1e293b' }}>{p.name}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>₹{p.price}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span className="cat-tag">{p.category || 'General'}</span></td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 120 }}>
+                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 700 }}>
+                            <span style={{ color: (p.stock || 0) === 0 ? '#ef4444' : (p.stock || 0) < 50 ? '#d97706' : '#10b981' }}>
+                              {p.stock || 0} Units
+                            </span>
+                            <span style={{ color: '#94a3b8' }}>Min: 50</span>
+                         </div>
+                         <div className="stock-progress-bg">
+                            <div className="stock-progress-bar" style={{ 
+                              width: `${Math.min(100, ((p.stock || 0) / 200) * 100)}%`,
+                              background: (p.stock || 0) === 0 ? '#ef4444' : (p.stock || 0) < 50 ? '#f59e0b' : '#10b981'
+                            }} />
+                         </div>
+                      </div>
+                    </td>
+                    <td>{statusBadge(p.stock || 0)}</td>
+                    <td>
+                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          <button 
+                            className="row-btn" 
+                            onClick={() => setSelectedProduct(p)} 
+                            title="View Product Details"
+                            style={{ color: '#475569' }}
+                          >
+                            <Eye size={15} />
+                          </button>
+                          <button 
+                            className="dd-btn-sm" 
+                            onClick={() => setActiveModule && setActiveModule('stock_request')} 
+                            title="Request Stock via Indenting"
+                            style={{ 
+                              padding: '6px 12px', 
+                              borderRadius: '8px', 
+                              background: '#f3eeff', 
+                              color: '#7c3aed', 
+                              border: '1px solid #ddd6fe', 
+                              fontWeight: 700, 
+                              fontSize: '0.75rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <ShoppingCart size={13} /> Indent
+                          </button>
+                       </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ADD PRODUCT MODAL */}
-      {showForm && (
-        <div className="dd-modal-overlay">
-          <div className="dd-modal-box adm-fade-in" style={{ width: 'min(480px, 100%)' }}>
+      {/* VIEW PRODUCT DETAIL MODAL */}
+      {selectedProduct && (
+        <div className="dd-modal-overlay" onClick={() => setSelectedProduct(null)}>
+          <div className="dd-modal-box adm-fade-in" style={{ width: 'min(440px, 95%)' }} onClick={e => e.stopPropagation()}>
              <div className="dd-modal-header-fancy">
                 <div>
-                   <h3 className="modal-title">{isEditing ? 'Edit Product' : 'Add New Product'}</h3>
-                   <p className="modal-subtitle">{isEditing ? 'Update details for this item.' : 'Define catalog details for new items.'}</p>
+                   <h3 className="modal-title">Product Details</h3>
+                   <p className="modal-subtitle">Catalog & Stock Information</p>
                 </div>
-                <button className="dd-modal-close" onClick={() => setShowForm(false)}><X size={20} /></button>
+                <button className="dd-modal-close" onClick={() => setSelectedProduct(null)}><X size={20} /></button>
              </div>
-             <div className="dd-modal-content-fancy" style={{ padding: 32, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                <div className="dd-input-group">
-                   <label><Tag size={14} /> Product Name</label>
-                   <input placeholder="e.g. Vitamin C Serum" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} />
+             <div className="dd-modal-content-fancy" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {selectedProduct.image_url && (
+                  <div style={{ textAlign: 'center' }}>
+                    <img src={selectedProduct.image_url} alt={selectedProduct.name} style={{ width: '100%', maxHeight: '180px', objectFit: 'contain', borderRadius: '14px', background: '#f8fafc', border: '1px solid #e2e8f0' }} />
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                   <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Product Name:</span>
+                   <span style={{ fontSize: '0.95rem', color: '#1e293b', fontWeight: 800 }}>{selectedProduct.name}</span>
                 </div>
-                <div className="dd-input-group">
-                   <label><Layers size={14} /> Category</label>
-                   <select value={newProduct.category} onChange={e => setNewProduct({ ...newProduct, category: e.target.value })}>
-                      <option>Face Care</option><option>Body Care</option><option>Hair Care</option><option>Fragrance</option>
-                   </select>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                   <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Category:</span>
+                   <span className="cat-tag">{selectedProduct.category || 'General'}</span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 480 ? '1fr' : '1fr 1fr', gap: 16 }}>
-                   <div className="dd-input-group">
-                      <label><CreditCard size={14} /> Price (₹)</label>
-                      <input type="number" placeholder="0.00" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} />
-                   </div>
-                   <div className="dd-input-group">
-                      <label><Package size={14} /> Stock</label>
-                      <input type="number" placeholder="0" value={newProduct.stock} onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })} />
-                   </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                   <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Retail Price:</span>
+                   <span style={{ fontSize: '0.95rem', color: '#10b981', fontWeight: 800 }}>₹{selectedProduct.price}</span>
                 </div>
-                <div className="dd-modal-actions-fancy" style={{ marginTop: 10, flexWrap: 'wrap' }}>
-                   <button className="dd-btn-sec" style={{ flex: window.innerWidth <= 480 ? '1 1 100%' : 1, order: window.innerWidth <= 480 ? 2 : 1 }} onClick={() => setShowForm(false)}>Cancel</button>
-                   <button className="dd-btn-pri" style={{ flex: window.innerWidth <= 480 ? '1 1 100%' : 2, order: window.innerWidth <= 480 ? 1 : 2, background: 'linear-gradient(135deg, #10b981, #059669)' }} onClick={handleSaveProduct} disabled={saving}>
-                      <CheckCircle size={16} /> {saving ? 'Saving...' : isEditing ? 'Update Product' : 'Save Product'}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                   <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Your Available Stock:</span>
+                   <span style={{ fontSize: '1rem', color: (selectedProduct.stock || 0) > 0 ? '#7c3aed' : '#ef4444', fontWeight: 900 }}>
+                     {selectedProduct.stock || 0} Units
+                   </span>
+                </div>
+                <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '12px 16px', fontSize: '0.78rem', color: '#64748b', lineHeight: '1.4' }}>
+                  ℹ️ <strong>Stock Policy:</strong> Products and pricing are managed centrally by Admin CMS. To add stock to your warehouse, please submit a request via <strong>Stock Indenting</strong>.
+                </div>
+                <div className="dd-modal-actions-fancy" style={{ marginTop: 6 }}>
+                   <button 
+                     className="dd-btn-pri" 
+                     style={{ width: '100%', background: 'linear-gradient(135deg, #a855f7, #7c3aed)' }} 
+                     onClick={() => {
+                       setSelectedProduct(null);
+                       setActiveModule && setActiveModule('stock_request');
+                     }}
+                   >
+                      <ShoppingCart size={16} /> Request Stock for this Product
                    </button>
                 </div>
              </div>
@@ -276,26 +295,26 @@ const InventoryManagement = () => {
       )}
 
       <style>{`
-        .cat-pill { padding: 6px 16px; border-radius: 10px; font-size: 0.8rem; fontWeight: 700; border: 1.5px solid #f1f5f9; background: #fff; color: #64748b; cursor: pointer; transition: all 0.2s; }
+        .cat-pill { padding: 6px 16px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; border: 1.5px solid #f1f5f9; background: #fff; color: #64748b; cursor: pointer; transition: all 0.2s; }
         .cat-pill.active { background: #f3eeff; border-color: #a855f7; color: #7c3aed; }
-        .cat-tag { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; fontWeight: 800; }
+        .cat-tag { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; }
         .stock-progress-bg { height: 6px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
         .stock-progress-bar { height: 100%; border-radius: 10px; transition: width 0.4s; }
-        .row-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #f1f5f9; background: #fff; color: #64748b; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .row-btn { width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
         .row-btn:hover { background: #f8fafc; color: #7c3aed; border-color: #a855f7; }
         
         .dd-modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10000; }
         .dd-modal-box { background: #fff; border-radius: 28px; box-shadow: 0 30px 60px rgba(0,0,0,0.2); overflow: hidden; }
-        .dd-modal-header-fancy { padding: 24px 32px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; }
-        .modal-title { margin: 0; fontWeight: 900; fontSize: 1.15rem; color: #1e293b; }
-        .modal-subtitle { margin: 4px 0 0; fontSize: 0.78rem; color: #64748b; }
+        .dd-modal-header-fancy { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; }
+        .modal-title { margin: 0; font-weight: 900; font-size: 1.15rem; color: #1e293b; }
+        .modal-subtitle { margin: 4px 0 0; font-size: 0.78rem; color: #64748b; }
         .dd-modal-close { background: #f1f5f9; border: none; width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; }
         .dd-input-group { display: flex; flex-direction: column; gap: 8px; }
-        .dd-input-group label { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; fontWeight: 800; color: #94a3b8; text-transform: uppercase; }
-        .dd-input-group input, .dd-input-group select { height: 48px; border-radius: 14px; border: 1.5px solid #e2e8f0; padding: 0 16px; font-size: 0.9rem; fontWeight: 600; outline: none; }
+        .dd-input-group label { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
+        .dd-input-group input, .dd-input-group select { height: 48px; border-radius: 14px; border: 1.5px solid #e2e8f0; padding: 0 16px; font-size: 0.9rem; font-weight: 600; outline: none; }
         .dd-modal-actions-fancy { display: flex; gap: 12px; }
-        .dd-btn-pri { height: 50px; border-radius: 14px; border: none; color: #fff; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .dd-btn-sec { height: 50px; border-radius: 14px; border: 1.5px solid #e2e8f0; background: #fff; color: #64748b; font-weight: 800; cursor: pointer; }
+        .dd-btn-pri { height: 46px; border-radius: 14px; border: none; color: #fff; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; }
+        .dd-btn-sec { height: 46px; border-radius: 14px; border: 1.5px solid #e2e8f0; background: #fff; color: #64748b; font-weight: 800; cursor: pointer; font-size: 0.85rem; }
       `}</style>
     </div>
   );

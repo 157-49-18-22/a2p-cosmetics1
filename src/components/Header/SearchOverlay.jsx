@@ -1,15 +1,18 @@
 import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
+import { Search, X, ArrowRight, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import './SearchOverlay.css';
 
+// Tracking & Analytics Imports
+import { trackUserActivity } from '../../utils/track';
+import { logGAEvent } from '../../utils/analytics';
+
 const SearchOverlay = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
-  const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [categories, setCategories] = useState([
+  const [categories] = useState([
     { name: 'Face Wash', path: '/facewash' },
     { name: 'Face Serum', path: '/faceserum' },
     { name: 'Face Cream', path: '/facecream' },
@@ -21,21 +24,11 @@ const SearchOverlay = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
-      fetchProducts();
     } else {
       setQuery('');
+      setFilteredProducts([]);
     }
   }, [isOpen]);
-
-  const fetchProducts = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/products`);
-      const data = await res.json();
-      setProducts(data);
-    } catch (err) {
-      console.error('Error fetching products:', err);
-    }
-  };
 
   useEffect(() => {
     if (query.trim() === '') {
@@ -43,18 +36,26 @@ const SearchOverlay = ({ isOpen, onClose }) => {
       return;
     }
 
-    const lowerQuery = query.toLowerCase();
-    const filtered = products.filter(p => 
-      p.name.toLowerCase().includes(lowerQuery) || 
-      p.category.toLowerCase().includes(lowerQuery)
-    );
-    setFilteredProducts(filtered.slice(0, 6)); // Limit to 6 results
-  }, [query, products]);
+    const delayDebounce = setTimeout(() => {
+      // Fetch ranked search results from backend
+      fetch(`${API_BASE_URL}/products/search?q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => {
+          setFilteredProducts(data.slice(0, 6));
+          
+          // Log search activity & GA4 event
+          trackUserActivity('Search', query);
+          logGAEvent('search', { search_term: query });
+        })
+        .catch(err => console.error('Search error:', err));
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(delayDebounce);
+  }, [query]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      // Logic for full search page or just closing with selection
       onClose();
     }
   };
@@ -111,28 +112,31 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                 <div className="search-results">
                   {filteredProducts.length > 0 ? (
                     <div className="results-grid">
-                      {filteredProducts.map(product => (
-                        <motion.div 
-                          key={product.id} 
-                          className="search-product-card"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          onClick={() => {
-                            // Navigate to product detail if available, or just category
-                            navigate(`/${product.category.replace(' ', '').toLowerCase()}`);
-                            onClose();
-                          }}
-                        >
-                          <div className="search-product-image">
-                            <img src={product.image_url} alt={product.name} />
-                          </div>
-                          <div className="search-product-info">
-                            <h4>{product.name}</h4>
-                            <p>{product.category}</p>
-                            <span className="search-product-price">₹{product.price}</span>
-                          </div>
-                        </motion.div>
-                      ))}
+                      {filteredProducts.map(product => {
+                        const imgUrl = product.image_url || '/facewash_product.png';
+                        return (
+                          <motion.div 
+                            key={product.id} 
+                            className="search-product-card"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            onClick={() => {
+                              // Navigate to product detail
+                              navigate(`/product/${product.id}`);
+                              onClose();
+                            }}
+                          >
+                            <div className="search-product-image">
+                              <img src={imgUrl} alt={product.name} />
+                            </div>
+                            <div className="search-product-info">
+                              <h4>{product.name}</h4>
+                              <p>{product.category}</p>
+                              <span className="search-product-price">₹{product.price}</span>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="no-results">

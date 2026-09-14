@@ -1,6 +1,7 @@
 import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useSession } from '../../../hooks/useSession.js';
 import { UserCheck, Plus, Search, CheckCircle, Clock, XCircle, ChevronRight, Upload, X, Phone, Mail, MapPin, Briefcase, FileText, ShieldCheck } from 'lucide-react';
 
 const steps = ['Basic Info', 'Documents', 'Area & Role', 'Review'];
@@ -17,28 +18,45 @@ const Onboarding = () => {
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState('');
   const [applicants, setApplicants] = useState([]);
+  const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const distributor = JSON.parse(localStorage.getItem('active_distributor') || '{}');
-  const distributorId = distributor.id || 1;
+  const { user: distributor } = useSession();
+  const distributorId = distributor?.id || 1;
 
   // Form State
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
+    password: '',
+    confirm_password: '',
     type: 'Dealer',
     business_name: '',
     gst: '',
-    zone: 'Zone A',
+    zone: '',
     role: 'Primary Dealer',
     credit_limit: ''
   });
 
+  const fetchZones = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/${distributorId}/zones`);
+      const zList = Array.isArray(res.data) ? res.data : [];
+      setZones(zList);
+      if (zList.length > 0) {
+        setFormData(prev => ({ ...prev, zone: prev.zone || zList[0].zone_name }));
+      }
+    } catch (err) {
+      console.error('Error fetching zones in Onboarding:', err);
+    }
+  };
+
   const fetchApplicants = async () => {
     try {
+      console.log('Fetching dealers for distributor:', distributorId);
       const res = await axios.get(`${API_BASE}/${distributorId}/dealers`);
       setApplicants(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
@@ -51,7 +69,8 @@ const Onboarding = () => {
 
   useEffect(() => {
     fetchApplicants();
-  }, []);
+    fetchZones();
+  }, [distributorId]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -65,6 +84,14 @@ const Onboarding = () => {
         alert('Please enter business name or full name');
         return;
       }
+      if (!formData.password || formData.password.length < 6) {
+        alert('Password must be at least 6 characters');
+        return;
+      }
+      if (formData.password !== formData.confirm_password) {
+        alert('Passwords do not match');
+        return;
+      }
       await axios.post(`${API_BASE}/dealers`, {
         ...formData,
         name: businessName,
@@ -76,7 +103,7 @@ const Onboarding = () => {
       setStep(0);
       fetchApplicants();
       setFormData({
-        name: '', phone: '', email: '', type: 'Dealer',
+        name: '', phone: '', email: '', password: '', confirm_password: '', type: 'Dealer',
         business_name: '', gst: '', zone: 'Zone A',
         role: 'Primary Dealer', credit_limit: ''
       });
@@ -119,7 +146,7 @@ const Onboarding = () => {
       <div className="dd-module-header">
         <div className="dd-header-info">
           <h1 className="dd-module-title">Onboarding</h1>
-          <p className="dd-module-subtitle">Manage new dealer & sub-dealer onboarding applications</p>
+          <p className="dd-module-subtitle">Manage new dealer onboarding applications</p>
         </div>
         <div className="dd-header-btns">
           <button className="dd-btn dd-btn-primary" onClick={() => setShowForm(!showForm)}>
@@ -176,8 +203,10 @@ const Onboarding = () => {
                 <div className="dd-field"><label>Mobile Number</label><input name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+91 XXXXX XXXXX" /></div>
                 <div className="dd-field"><label>Email Address</label><input name="email" value={formData.email} onChange={handleInputChange} placeholder="example@email.com" /></div>
                 <div className="dd-field"><label>Type</label>
-                  <select name="type" value={formData.type} onChange={handleInputChange}><option>Dealer</option><option>Sub-Dealer</option></select>
+                  <select name="type" value={formData.type} onChange={handleInputChange}><option>Dealer</option></select>
                 </div>
+                <div className="dd-field"><label>Password</label><input name="password" type="password" value={formData.password} onChange={handleInputChange} placeholder="Set login password (min 6 chars)" /></div>
+                <div className="dd-field"><label>Confirm Password</label><input name="confirm_password" type="password" value={formData.confirm_password} onChange={handleInputChange} placeholder="Confirm password" /></div>
                 <div className="dd-field"><label>Business Name</label><input name="business_name" value={formData.business_name} onChange={handleInputChange} placeholder="Enter firm name" /></div>
                 <div className="dd-field"><label>GST Number</label><input name="gst" value={formData.gst} onChange={handleInputChange} placeholder="GSTIN" /></div>
               </div>
@@ -198,10 +227,23 @@ const Onboarding = () => {
             {step === 2 && (
               <div className="dd-form-grid">
                 <div className="dd-field"><label>Assigned Zone</label>
-                  <select name="zone" value={formData.zone} onChange={handleInputChange}><option>Zone A</option><option>Zone B</option><option>Zone C</option><option>Zone D</option></select>
+                  <select name="zone" value={formData.zone} onChange={handleInputChange}>
+                    {zones.length > 0 ? (
+                      zones.map(z => (
+                        <option key={z.id} value={z.zone_name}>{z.zone_name}</option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="Zone A">Zone A</option>
+                        <option value="Zone B">Zone B</option>
+                        <option value="Zone C">Zone C</option>
+                        <option value="Zone D">Zone D</option>
+                      </>
+                    )}
+                  </select>
                 </div>
                 <div className="dd-field"><label>Role</label>
-                  <select name="role" value={formData.role} onChange={handleInputChange}><option>Primary Dealer</option><option>Sub-Dealer</option></select>
+                  <select name="role" value={formData.role} onChange={handleInputChange}><option>Primary Dealer</option></select>
                 </div>
                 <div className="dd-field"><label>Product Categories</label>
                   <select><option>All Products</option><option>Face Care</option><option>Body Care</option></select>

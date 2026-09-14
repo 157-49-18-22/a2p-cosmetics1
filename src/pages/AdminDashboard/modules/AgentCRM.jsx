@@ -1,10 +1,12 @@
 import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, UserCheck, Star, Shield, ExternalLink, Mail, Phone, X, Check, Trash2, AlertCircle, RefreshCcw, TrendingUp, Users, Wallet, Clock, Filter, Trophy, ChevronRight } from 'lucide-react';
+import { Search, MapPin, UserCheck, Star, Shield, ExternalLink, Mail, Phone, X, Check, Trash2, AlertCircle, RefreshCcw, TrendingUp, Users, Wallet, Clock, Filter, Trophy, ChevronRight, BadgeDollarSign } from 'lucide-react';
+import CommissionSetup from '../../AgentDashboard/modules/CommissionSetup';
 
 const API = API_BASE_URL;
 
 const AgentCRM = () => {
+  const [activeTab, setActiveTab] = useState('agents');
   const [agents, setAgents] = useState([]);
   const [stats, setStats] = useState({ total_agents: 0, active_referrals: 0, total_commission: 0, pending_payouts: 0 });
   const [topAgents, setTopAgents] = useState([]);
@@ -15,6 +17,8 @@ const AgentCRM = () => {
   const [filterStatus, setFilterStatus] = useState('All');
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showAdminAgentModal, setShowAdminAgentModal] = useState(false);
+  const [adminAgentForm, setAdminAgentForm] = useState({ name: '', email: '', password: '', phone: '', city: '' });
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [agentNotes, setAgentNotes] = useState('');
   const [toast, setToast] = useState(null);
@@ -115,6 +119,39 @@ const AgentCRM = () => {
     }
   };
 
+  const handleCreateAdminAgent = async () => {
+    const { name, email, password, phone, city } = adminAgentForm;
+    if (!name || !email || !password) return showToast('Name, Email & Password required', 'danger');
+    setProcessing('admin_create');
+    try {
+      // 1. Create agent via onboard (Pending)
+      const onboardRes = await fetch(`${API}/agent/onboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, city, address: '', role: 'Admin Agent', parent_id: null })
+      });
+      const onboardData = await onboardRes.json();
+      if (!onboardRes.ok) throw new Error(onboardData.error || 'Failed to create agent');
+      
+      // 2. Immediately approve with credentials
+      const approveRes = await fetch(`${API}/agent/applicants/${onboardData.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Active', email, password })
+      });
+      if (!approveRes.ok) throw new Error('Approval failed');
+      
+      showToast(`Admin Agent "${name}" created successfully!`);
+      setShowAdminAgentModal(false);
+      setAdminAgentForm({ name: '', email: '', password: '', phone: '', city: '' });
+      fetchData();
+    } catch (e) {
+      showToast(e.message || 'Failed to create admin agent', 'danger');
+    } finally {
+      setProcessing(null);
+    }
+  };
+
   const handleEmail = (email) => {
     if (!email) return showToast('No email found', 'warning');
     window.location.href = `mailto:${email}?subject=A2P%20Cosmetics%20Agent%20Update`;
@@ -144,7 +181,34 @@ const AgentCRM = () => {
         </div>
       )}
 
-      {/* Header & Main Actions */}
+      {/* Tab Switcher */}
+      <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid #f1f5f9', paddingBottom: '0' }}>
+        {[
+          { id: 'agents', label: 'Agent Management', icon: Users },
+          { id: 'commission', label: 'Commission Rules', icon: BadgeDollarSign },
+        ].map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '10px 20px', fontWeight: 700, fontSize: '0.88rem',
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: activeTab === id ? '#3b82f6' : '#64748b',
+              borderBottom: activeTab === id ? '2px solid #3b82f6' : '2px solid transparent',
+              marginBottom: '-2px', transition: 'all 0.2s'
+            }}
+          >
+            <Icon size={16} />{label}
+          </button>
+        ))}
+      </div>
+
+      {/* Commission Rules Tab — Admin Only */}
+      {activeTab === 'commission' && <CommissionSetup />}
+
+      {/* Agents Tab */}
+      {activeTab === 'agents' && (<>
       <div className="adm-module-header">
         <div className="adm-header-title-wrap">
           <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a' }}>Agent CRM</h2>
@@ -153,6 +217,13 @@ const AgentCRM = () => {
         <div style={{ display: 'flex', gap: '12px', width: window.innerWidth <= 768 ? '100%' : 'auto' }}>
           <button className="adm-btn adm-btn-outline" onClick={fetchData} disabled={loading} style={{ flex: window.innerWidth <= 768 ? 1 : 'none', justifyContent: 'center' }}>
             <RefreshCcw size={16} className={loading ? 'adm-spin' : ''} />
+          </button>
+          <button
+            className="adm-btn adm-btn-outline"
+            onClick={() => setShowAdminAgentModal(true)}
+            style={{ flex: window.innerWidth <= 768 ? 2 : 'none', justifyContent: 'center', borderColor: '#6366f1', color: '#6366f1' }}
+          >
+            <Shield size={16} /> Create Admin Agent
           </button>
           <button className="adm-btn adm-btn-primary" onClick={() => setShowApproveModal(true)} style={{ flex: window.innerWidth <= 768 ? 4 : 'none', justifyContent: 'center' }}>
             <UserCheck size={18} /> Approvals {pendingAgents.length > 0 && <span style={{ background: '#fff', color: '#3b82f6', padding: '2px 8px', borderRadius: '8px', marginLeft: '8px', fontSize: '0.8rem', fontWeight: 800 }}>{pendingAgents.length}</span>}
@@ -344,6 +415,16 @@ const AgentCRM = () => {
                     <div style={{ fontWeight: 700 }}>{selectedAgent.city}</div>
                   </div>
                 </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase' }}>Login Email</div>
+                    <div style={{ fontWeight: 700, wordBreak: 'break-all' }}>{selectedAgent.email}</div>
+                  </div>
+                  <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase' }}>Login Password</div>
+                    <div style={{ fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9rem' }}>{selectedAgent.password || 'N/A'}</div>
+                  </div>
+                </div>
                 <div>
                   <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase' }}>Admin Notes</div>
                   <textarea 
@@ -440,10 +521,54 @@ const AgentCRM = () => {
           </div>
         </div>
       )}
+      </>)}
+
+      {/* Create Admin Agent Modal */}
+      {showAdminAgentModal && (
+        <div className="adm-modal-overlay">
+          <div className="adm-modal adm-fade-in" style={{ width: '520px' }}>
+            <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontWeight: 800, fontSize: '1.2rem', margin: 0 }}>Create Admin Agent</h3>
+                <p style={{ fontSize: '0.8rem', color: '#6366f1', margin: '4px 0 0', fontWeight: 600 }}>⚡ Full Dashboard Access</p>
+              </div>
+              <button className="adm-icon-btn" onClick={() => setShowAdminAgentModal(false)}><X size={20} /></button>
+            </div>
+            <div style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ background: '#f0f1ff', padding: '12px 16px', borderRadius: '10px', border: '1px solid #c7d2fe', fontSize: '0.8rem', color: '#4338ca' }}>
+                <strong>ℹ️ Admin Agent</strong> — Login karne par inhe poora Agent Dashboard dikhega (sab modules).
+              </div>
+              {[['name','Full Name','e.g. Rahul Singh','text'],['email','Login Email','e.g. rahul@a2p.com','email'],['password','Login Password','Min 6 characters','text'],['phone','Phone Number','+91 98765 43210','tel'],['city','City','e.g. Delhi','text']]
+                .map(([key, label, ph, type]) => (
+                  <div key={key}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px', textTransform: 'uppercase' }}>{label} {['name','email','password'].includes(key) && <span style={{ color: '#ef4444' }}>*</span>}</label>
+                    <input
+                      type={type}
+                      placeholder={ph}
+                      value={adminAgentForm[key]}
+                      onChange={e => setAdminAgentForm({ ...adminAgentForm, [key]: e.target.value })}
+                      style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+              ))}
+            </div>
+            <div style={{ padding: '20px 32px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '12px', background: '#f8fafc', borderRadius: '0 0 24px 24px' }}>
+              <button className="adm-btn adm-btn-outline" onClick={() => setShowAdminAgentModal(false)}>Cancel</button>
+              <button
+                className="adm-btn adm-btn-primary"
+                style={{ background: 'linear-gradient(135deg,#6366f1,#4f46e5)' }}
+                onClick={handleCreateAdminAgent}
+                disabled={processing === 'admin_create'}
+              >
+                <Shield size={16} /> {processing === 'admin_create' ? 'Creating...' : 'Create Admin Agent'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default AgentCRM;
-
 

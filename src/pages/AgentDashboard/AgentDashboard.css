@@ -56,6 +56,30 @@
   color: rgba(255,255,255,0.4);
 }
 
+.ag-sidebar-close-btn {
+  display: none;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.ag-sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+@media (max-width: 1024px) {
+  .ag-sidebar-close-btn {
+    display: flex;
+  }
+}
+
 .ag-nav {
   flex: 1;
   padding: 14px 8px;
@@ -406,6 +430,9 @@
   border-radius: 20px;
   width: 100%;
   max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   position: relative;
   overflow: hidden;
@@ -437,7 +464,11 @@
 }
 .ag-modal-close:hover { background: #fee2e2; color: #ef4444; }
 
-.ag-modal-body { padding: 24px; }
+.ag-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
 .ag-modal-footer {
   padding: 16px 24px;
   background: #f8fafc;
@@ -445,6 +476,12 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Form grid inside modal — always single column */
+.ag-modal-body .ag-form-grid {
+  grid-template-columns: 1fr;
 }
 
 @keyframes agModalSlide {
@@ -461,7 +498,7 @@
     bottom: 0;
     width: 260px;
     z-index: 1000;
-    box-shadow: 10px 0 30px rgba(0,0,0,0.2);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.25);
   }
 
   .ag-sidebar.open {
@@ -471,13 +508,14 @@
   .ag-sidebar-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.4);
+    background: rgba(15, 23, 42, 0.5);
     backdrop-filter: blur(4px);
     z-index: 999;
   }
 
   .ag-main {
     width: 100%;
+    min-width: 0;
   }
 
   .ag-topbar {
@@ -499,25 +537,96 @@
 
 @media (max-width: 768px) {
   .ag-content {
-    padding: 20px 14px;
+    padding: 16px 12px;
   }
 
   .ag-stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .ag-dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
   }
 
   .ag-module-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
   }
 
-  .ag-module-header .ag-btn {
+  .ag-header-btns {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ag-header-btns .ag-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ag-card {
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+  }
+
+  .ag-card-header {
+    padding: 14px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .ag-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+    box-shadow: inset 0 0 0 1px #e0f2fe;
+  }
+
+  .ag-table th, .ag-table td {
+    padding: 10px 12px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .ag-modal-content {
+    width: 95% !important;
+    max-width: 95vw !important;
+    margin: 10px auto;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 16px;
+  }
+
+  .ag-modal-body {
+    padding: 18px 16px;
+  }
+
+  .ag-modal-footer {
+    padding: 14px 16px;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .ag-modal-footer .ag-btn {
     width: 100%;
     justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
+  .ag-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
   .ag-topbar-right {
     gap: 8px;
   }
@@ -528,5 +637,10 @@
   
   .ag-avatar {
     padding: 4px;
+  }
+
+  .ag-btn {
+    font-size: 0.8rem;
+    padding: 8px 14px;
   }
 }

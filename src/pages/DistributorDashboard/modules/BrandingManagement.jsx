@@ -2,9 +2,9 @@ import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Megaphone, Plus, Search, Image, FileText, Video, Edit2, Trash2, Eye, CheckCircle, Clock, Upload, Tag, X, Download } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 
 const API_BASE = `${API_BASE_URL}/distributors`;
-const distributorId = 1;
 
 const assetIcon = (type) => ({
   Print: <FileText size={16} color="#a855f7" />,
@@ -20,10 +20,13 @@ const statusBadge = (s) => ({
 }[s] || <span className="dd-badge dd-badge-yellow">{s}</span>);
 
 const BrandingManagement = () => {
+  const { user } = useAuth();
+  const distributorId = user?.id || 1;
   const fileInputRef = React.useRef(null);
   const assetInputRef = React.useRef(null);
   const [campaigns, setCampaigns] = useState([]);
   const [assets, setAssets] = useState([]);
+  const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('campaigns');
@@ -34,7 +37,7 @@ const BrandingManagement = () => {
   const [viewingAsset, setViewingAsset] = useState(null);
   const [editingAsset, setEditingAsset] = useState(null);
   const [newCampaign, setNewCampaign] = useState({
-    title: '', type: 'Digital', zone: 'All Zones', budget: '', start_date: '', end_date: '', description: ''
+    title: '', type: 'Digital', zone: 'All Zones', budget: '', start_date: '', end_date: '', description: '', status: 'Upcoming'
   });
   const [newAsset, setNewAsset] = useState({
     name: '', type: 'Digital', campaign_id: '', file: null
@@ -44,10 +47,12 @@ const BrandingManagement = () => {
 
   const fetchData = async () => {
     try {
-      const [campRes, assetRes] = await Promise.all([
-        axios.get(`${API_BASE}/${distributorId}/campaigns`),
-        axios.get(`${API_BASE}/${distributorId}/assets`)
+      const [campRes, assetRes, zoneRes] = await Promise.all([
+        axios.get(`${API_BASE}/${distributorId}/campaigns`).catch(() => ({ data: [] })),
+        axios.get(`${API_BASE}/${distributorId}/assets`).catch(() => ({ data: [] })),
+        axios.get(`${API_BASE}/${distributorId}/zones`).catch(() => ({ data: [] }))
       ]);
+      setZones(Array.isArray(zoneRes.data) ? zoneRes.data : []);
       setCampaigns(campRes.data.length > 0 ? campRes.data : [
         { id: 1, title: 'Summer Glow Campaign', type: 'Digital', zone: 'All Zones', start_date: '2026-05-01', end_date: '2026-05-30', budget: 50000, status: 'Upcoming', assets_count: 8 },
         { id: 2, title: 'Face Serum Launch', type: 'Print + Digital', zone: 'Zone A, B', start_date: '2026-04-10', end_date: '2026-04-25', budget: 35000, status: 'Active', assets_count: 12 },
@@ -78,11 +83,14 @@ const BrandingManagement = () => {
 
   const handleCreateCampaign = async () => {
     if (!newCampaign.title) return alert('Campaign title is required');
+    console.log('Creating campaign with data:', newCampaign);
+    console.log('Status value:', newCampaign.status);
     setSaving(true);
     try {
-      await axios.post(`${API_BASE}/campaigns`, { ...newCampaign, distributor_id: distributorId });
+      const response = await axios.post(`${API_BASE}/campaigns`, { ...newCampaign, distributor_id: distributorId });
+      console.log('Campaign created response:', response.data);
       setShowForm(false);
-      setNewCampaign({ title: '', type: 'Digital', zone: 'All Zones', budget: '', start_date: '', end_date: '', description: '' });
+      setNewCampaign({ title: '', type: 'Digital', zone: 'All Zones', budget: '', start_date: '', end_date: '', description: '', status: 'Upcoming' });
       fetchData();
     } catch (err) {
       console.error('Error creating campaign:', err);
@@ -239,7 +247,23 @@ const BrandingManagement = () => {
               </div>
               <div className="dd-field"><label>Target Zones</label>
                 <select value={newCampaign.zone} onChange={e => setNewCampaign({ ...newCampaign, zone: e.target.value })}>
-                  <option>All Zones</option><option>Zone A</option><option>Zone B</option><option>Zone C</option><option>Zone D</option><option>Zone E</option>
+                  <option value="All Zones">All Zones</option>
+                  {zones.map(z => (
+                    <option key={z.id} value={z.zone_name}>{z.zone_name}</option>
+                  ))}
+                  {zones.length === 0 && (
+                    <>
+                      <option value="Zone A">Zone A</option>
+                      <option value="Zone B">Zone B</option>
+                      <option value="Zone C">Zone C</option>
+                      <option value="Zone D">Zone D</option>
+                    </>
+                  )}
+                </select>
+              </div>
+              <div className="dd-field"><label>Status</label>
+                <select value={newCampaign.status} onChange={e => setNewCampaign({ ...newCampaign, status: e.target.value })}>
+                  <option>Upcoming</option><option>Active</option><option>Completed</option>
                 </select>
               </div>
               <div className="dd-field"><label>Budget (₹)</label><input type="number" placeholder="e.g. 50000" value={newCampaign.budget} onChange={e => setNewCampaign({ ...newCampaign, budget: e.target.value })} /></div>
@@ -424,6 +448,12 @@ const BrandingManagement = () => {
                   <label>Type</label>
                   <select value={editingCampaign.type} onChange={e => setEditingCampaign({ ...editingCampaign, type: e.target.value })}>
                     <option>Digital</option><option>Print</option><option>Print + Digital</option><option>In-Store</option>
+                  </select>
+                </div>
+                <div className="dd-field">
+                  <label>Status</label>
+                  <select value={editingCampaign.status || 'Upcoming'} onChange={e => setEditingCampaign({ ...editingCampaign, status: e.target.value })}>
+                    <option>Upcoming</option><option>Active</option><option>Completed</option>
                   </select>
                 </div>
                 <div className="dd-field">

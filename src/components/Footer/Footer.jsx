@@ -35,10 +35,10 @@ const Footer = () => {
           <div className="footer-links">
             <h3>Shop</h3>
             <ul>
+              <li><Link to="/new-arrivals">New Arrivals</Link></li>
+              <li><Link to="/all-products">All Products</Link></li>
               <li><Link to="/facewash">Face Wash</Link></li>
               <li><Link to="/faceserum">Face Serum</Link></li>
-              <li><Link to="/facecream">Face Cream</Link></li>
-              <li><Link to="/bodywash">Body Wash</Link></li>
               <li><Link to="/articles">Journal</Link></li>
             </ul>
           </div>

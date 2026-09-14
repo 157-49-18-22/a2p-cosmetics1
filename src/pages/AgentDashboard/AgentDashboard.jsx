@@ -1,56 +1,80 @@
 import React, { useState } from 'react';
 import {
-  LayoutDashboard, UserCheck, BadgeDollarSign, GitBranch,
-  Wallet, QrCode, ScrollText, ChevronRight, Bell, Search,
-  LogOut, Menu, X, ChevronDown, Settings
+  LayoutDashboard, UserCheck, GitBranch, ScrollText,
+  Wallet, QrCode, ChevronRight, Bell, Search,
+  LogOut, Menu, X, ChevronDown, Settings, Users, ShoppingCart, TrendingUp
 } from 'lucide-react';
 import AgentHome from './modules/AgentHome';
 import AgentOnboarding from './modules/AgentOnboarding';
+import CommissionHistory from './modules/CommissionHistory';
 import CommissionSetup from './modules/CommissionSetup';
 import HierarchyStructure from './modules/HierarchyStructure';
+import MyReferralNetwork from './modules/MyReferralNetwork';
+import ReferralOrders from './modules/ReferralOrders';
 import Payout from './modules/Payout';
 import ReferralCode from './modules/ReferralCode';
+import AgentEarnings from './modules/AgentEarnings';
 import Logs from './modules/Logs';
+import { useAuth } from '../../context/AuthContext';
 import './AgentDashboard.css';
 
-const navItems = [
-  { id: 'home',       label: 'Dashboard',          icon: LayoutDashboard },
-  { id: 'onboarding', label: 'Onboarding',          icon: UserCheck },
-  { id: 'commission', label: 'Commission Setup',    icon: BadgeDollarSign },
-  { id: 'hierarchy',  label: 'Hierarchy Structure', icon: GitBranch },
-  { id: 'payout',     label: 'Payout',              icon: Wallet },
-  { id: 'referral',   label: 'Referral Code',       icon: QrCode },
-  { id: 'logs',       label: 'Logs',                icon: ScrollText },
+// Full nav — Admin Agent sees all
+const ALL_NAV_ITEMS = [
+  { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'onboarding', label: 'Onboarding', icon: UserCheck },
+  { id: 'comm_hist', label: 'Commission History', icon: ScrollText },
+  { id: 'comm_setup', label: 'Commission Setup', icon: Settings },
+  { id: 'hierarchy', label: 'Hierarchy Structure', icon: GitBranch },
+  { id: 'referral_orders', label: 'Referral Orders', icon: ShoppingCart },
+  { id: 'payout', label: 'Payout', icon: Wallet },
+  { id: 'referral', label: 'Referral Code', icon: QrCode },
+  { id: 'logs', label: 'Logs', icon: ScrollText },
+];
+
+// Limited nav — Sub-agent sees only 3
+const SUB_AGENT_NAV_ITEMS = [
+  { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'referral', label: 'Referral Code', icon: QrCode },
+  { id: 'earnings', label: 'My Earnings', icon: TrendingUp },
 ];
 
 const moduleMap = {
-  home:       AgentHome,
+  home: AgentHome,
   onboarding: AgentOnboarding,
-  commission: CommissionSetup,
-  hierarchy:  HierarchyStructure,
-  payout:     Payout,
-  referral:   ReferralCode,
-  logs:       Logs,
+  comm_hist: CommissionHistory,
+  comm_setup: CommissionSetup,
+  hierarchy: HierarchyStructure,
+  my_network: MyReferralNetwork,
+  referral_orders: ReferralOrders,
+  payout: Payout,
+  referral: ReferralCode,
+  earnings: AgentEarnings,
+  logs: Logs,
 };
 
 const AgentDashboard = () => {
+  const { user, logout } = useAuth();
+  const isSubAgent = user && user.role && user.role !== 'Admin Agent';
+  const navItems = isSubAgent ? SUB_AGENT_NAV_ITEMS : ALL_NAV_ITEMS;
+
   const [active, setActive] = useState('home');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
   const [notifOpen, setNotifOpen] = useState(false);
 
-  const ActiveModule = moduleMap[active];
+  const ActiveModule = moduleMap[active] || AgentHome;
   const activeNav = navItems.find(n => n.id === active);
+
+  const agentName = user?.name || 'Admin Agent';
+  const agentRole = user?.role || 'Admin Agent';
+  const agentAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(agentName)}&background=0ea5e9&color=fff&size=36`;
 
   const handleNavClick = (id) => {
     setActive(id);
-    if (window.innerWidth <= 1024) {
-      setSidebarOpen(false);
-    }
+    if (window.innerWidth <= 1024) setSidebarOpen(false);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('active_agent');
-    window.location.href = '/agent/login';
+    logout('/distributor/login');
   };
 
   const notifications = [
@@ -71,10 +95,15 @@ const AgentDashboard = () => {
         <div className="ag-sidebar-logo">
           <img src="/A2P final logo.png" alt="A2P" className="ag-logo-img" />
           {sidebarOpen && (
-            <div>
+            <div style={{ flex: 1 }}>
               <span className="ag-logo-title">Agent Portal</span>
               <span className="ag-logo-sub">A2P Cosmetics</span>
             </div>
+          )}
+          {sidebarOpen && (
+            <button className="ag-sidebar-close-btn" onClick={() => setSidebarOpen(false)} aria-label="Close Sidebar">
+              <X size={20} />
+            </button>
           )}
         </div>
 
@@ -96,10 +125,10 @@ const AgentDashboard = () => {
         <div className="ag-sidebar-footer">
           {sidebarOpen && (
             <div className="ag-agent-pill">
-              <img src="https://ui-avatars.com/api/?name=Agent+Admin&background=0ea5e9&color=fff&size=32" alt="agent" />
+              <img src={agentAvatar} alt="agent" />
               <div>
-                <p className="ag-agent-name">Admin Agent</p>
-                <p className="ag-agent-tier">⭐ Gold Tier</p>
+                <p className="ag-agent-name">{agentName}</p>
+                <p className="ag-agent-tier">⭐ {agentRole}</p>
               </div>
             </div>
           )}
@@ -155,10 +184,10 @@ const AgentDashboard = () => {
             <button className="ag-icon-btn"><Settings size={17} /></button>
 
             <div className="ag-avatar">
-              <img src="https://ui-avatars.com/api/?name=Agent+Admin&background=0ea5e9&color=fff&size=36" alt="user" />
+              <img src={agentAvatar} alt="user" />
               <div className="ag-avatar-info">
-                <span className="ag-avatar-name">Admin Agent</span>
-                <span className="ag-avatar-role">⭐ Gold Tier</span>
+                <span className="ag-avatar-name">{agentName}</span>
+                <span className="ag-avatar-role">⭐ {agentRole}</span>
               </div>
               <ChevronDown size={13} />
             </div>

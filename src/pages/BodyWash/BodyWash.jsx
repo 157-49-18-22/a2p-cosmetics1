@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Star, ChevronDown, Filter, X } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useNotifications } from '../../components/Notifications/NotificationHub';
-import './BodyWash.css'; 
+import './BodyWash.css';
+import SEO from '../../components/SEO/SEO';
+import { calculateRatingFromLikes } from '../../utils/ratingUtils';
 
 const BodyWash = () => {
   const { addToCart } = useCart();
@@ -15,6 +17,23 @@ const BodyWash = () => {
   const [activeConcern, setActiveConcern] = useState('All');
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [seo, setSeo] = useState({ title: 'Body Wash - A2P Cosmetics', description: 'Shop premium refreshing Body Washes at A2P Cosmetics.', keywords: 'body wash, shower gel, refreshing body wash, a2p cosmetics' });
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/categories`)
+      .then(res => res.json())
+      .then(data => {
+        const cat = data.find(c => c.name === 'Body Wash' || c.slug === 'bodywash');
+        if (cat) {
+          setSeo({
+            title: cat.meta_title || `${cat.name} - A2P Cosmetics`,
+            description: cat.meta_description || `Shop premium refreshing ${cat.name} products at A2P Cosmetics.`,
+            keywords: cat.meta_keywords || `${cat.name}, shower gel, a2p cosmetics`
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/products?category=Body Wash`)
@@ -48,8 +67,8 @@ const BodyWash = () => {
       name: product.name,
       price: product.price,
       image: product.image_url || "/body_wash_product.png",
-      rating: 4.8,
-      reviews: 120
+      rating: product.rating || calculateRatingFromLikes(product.likes).rating,
+      reviews: product.review_count || calculateRatingFromLikes(product.likes).reviews
     };
     addToCart(cartProduct);
     showNotification({
@@ -62,6 +81,7 @@ const BodyWash = () => {
 
   return (
     <div className="lips-page facewash-page bodywash-page-alt">
+      <SEO title={seo.title} description={seo.description} keywords={seo.keywords} />
       <div className="lips-banner">
         <img 
           src="/body_wash_banner.png" 

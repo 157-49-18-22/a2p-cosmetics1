@@ -20,6 +20,8 @@ exports.getAdminStats = async (req, res) => {
 // Login
 exports.loginDistributor = async (req, res) => {
   const { email, password } = req.body;
+  const jwt = require('jsonwebtoken');
+  const JWT_SECRET = process.env.JWT_SECRET || 'a2p_super_secret_key_2024';
   try {
     const [rows] = await db.query('SELECT * FROM distributors WHERE email = ? AND password = ?', [email, password]);
     if (rows.length === 0) {
@@ -29,7 +31,14 @@ exports.loginDistributor = async (req, res) => {
     if (distributor.status !== 'Active') {
       return res.status(403).json({ error: 'Your account is not active' });
     }
-    res.json(distributor);
+    const payload = { id: distributor.id, name: distributor.name, email: distributor.email, role: distributor.role, type: 'distributor' };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+    res.cookie('a2p_token', token, {
+      httpOnly: true,
+      sameSite: 'Lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+    res.json(payload);
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
 
@@ -92,9 +101,14 @@ exports.getDistributorStats = async (req, res) => {
 // Dealers
 exports.getDealers = async (req, res) => {
   try {
+    console.log('Fetching dealers for distributor:', req.params.id);
     const [rows] = await db.query('SELECT * FROM dealers WHERE distributor_id = ? ORDER BY created_at DESC', [req.params.id]);
+    console.log('Dealers found:', rows.length, 'dealers');
     res.json(rows);
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { 
+    console.error('Error fetching dealers:', error);
+    res.status(500).json({ error: error.message }); 
+  }
 };
 
 exports.getSingleDealer = async (req, res) => {
@@ -107,14 +121,22 @@ exports.getSingleDealer = async (req, res) => {
 
 // Create Dealer (Onboarding)
 exports.createDealer = async (req, res) => {
-  const { distributor_id, name, contact_person, phone, email, zone, type, status } = req.body;
+  const { distributor_id, name, contact_person, phone, email, password, confirm_password, zone, type, status, business_name, gst, role, credit_limit } = req.body;
   try {
     if (!distributor_id) {
       return res.status(400).json({ error: 'Distributor ID is required' });
     }
-    const dealerName = (name || contact_person || '').trim();
+    const dealerName = (name || contact_person || business_name || '').trim();
     if (!dealerName) {
       return res.status(400).json({ error: 'Business name or contact name is required' });
+    }
+
+    // Password validation
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+    if (password !== confirm_password) {
+      return res.status(400).json({ error: 'Passwords do not match' });
     }
 
     // Ensure status ENUM supports Pending (older DBs)
@@ -124,10 +146,19 @@ exports.createDealer = async (req, res) => {
       );
     } catch (e) { /* already migrated */ }
 
+    // Ensure password column exists
+    try {
+      await db.query("ALTER TABLE dealers ADD COLUMN password VARCHAR(255)");
+    } catch (e) { /* column already exists */ }
+
+    console.log('Creating dealer with data:', { distributor_id, dealerName, phone, email, zone, type, status, business_name, gst, role, credit_limit });
+    
     const [result] = await db.query(
-      'INSERT INTO dealers (distributor_id, name, contact_person, phone, email, zone, type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [distributor_id, dealerName, contact_person || null, phone || null, email || null, zone || 'Zone A', type || 'Dealer', status || 'Pending']
+      'INSERT INTO dealers (distributor_id, name, contact_person, phone, email, password, zone, type, status, business_name, gst, role, credit_limit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [distributor_id, dealerName, contact_person || null, phone || null, email || null, password, zone || 'Zone A', type || 'Dealer', status || 'Pending', business_name || null, gst || null, role || null, credit_limit || null]
     );
+    
+    console.log('Dealer created successfully with ID:', result.insertId);
 
     try {
       await db.query(
@@ -163,21 +194,56 @@ exports.deleteDealer = async (req, res) => {
 // Campaigns
 exports.getCampaigns = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM branding_campaigns WHERE distributor_id = ?', [req.params.id]);
+    console.log('Fetching campaigns for distributor:', req.params.id);
+    const [rows] = await db.query('SELECT * FROM branding_campaigns WHERE distributor_id = ? ORDER BY created_at DESC', [req.params.id]);
+    console.log('Campaigns found:', rows.length, 'campaigns');
+    res.json(rows);
+  } catch (error) { 
+    console.error('Error fetching campaigns:', error);
+    res.status(500).json({ error: error.message }); 
+  }
+};
+
+// Campaigns filtered by dealer's zone (for Dealer Portal)
+exports.getCampaignsForDealer = async (req, res) => {
+  try {
+    const dealerId = req.params.dealerId;
+    // Get dealer's distributor_id and zone
+    const [[dealer]] = await db.query('SELECT distributor_id, zone FROM dealers WHERE id = ?', [dealerId]);
+    if (!dealer) return res.status(404).json({ error: 'Dealer not found' });
+
+    const distributor_id = dealer.distributor_id;
+    const zone = dealer.zone || 'Zone A';
+    // Return campaigns where zone matches dealer's zone OR is "All Zones"
+    const [rows] = await db.query(
+      `SELECT * FROM branding_campaigns 
+       WHERE distributor_id = ? 
+         AND (zone = 'All Zones' OR zone = ? OR zone LIKE ? OR zone LIKE ?)
+       ORDER BY created_at DESC`,
+      [distributor_id, zone, `%${zone}%`, `${zone}%`]
+    );
     res.json(rows);
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
 
 // Create Campaign
 exports.createCampaign = async (req, res) => {
-  const { distributor_id, title, type, zone, budget, start_date, end_date, description } = req.body;
+  const { distributor_id, title, type, zone, budget, start_date, end_date, description, status } = req.body;
+  console.log('Creating campaign with status:', status);
+  console.log('Full request body:', req.body);
   try {
+    const finalStatus = status || 'Upcoming';
+    console.log('Final status to save:', finalStatus);
     const [result] = await db.query(
-      "INSERT INTO branding_campaigns (distributor_id, title, type, zone, budget, start_date, end_date, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Upcoming')",
-      [distributor_id, title, type, zone, budget || 0, start_date, end_date, description]
+      "INSERT INTO branding_campaigns (distributor_id, title, type, zone, budget, start_date, end_date, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [distributor_id, title, type, zone, budget || 0, start_date, end_date, description, finalStatus]
     );
+    console.log('Campaign created with ID:', result.insertId, 'and status:', finalStatus);
     res.json({ id: result.insertId, message: 'Campaign created' });
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { 
+    console.error('Error creating campaign:', error);
+    res.status(500).json({ error: error.message }); 
+  }
 };
 
 // Update Campaign
@@ -239,16 +305,27 @@ exports.getZones = async (req, res) => {
 };
 
 exports.createZone = async (req, res) => {
-  const { distributor_id, zone_name, status } = req.body;
+  const { distributor_id, zone_name, region, assigned_to, status } = req.body;
   try {
     if (!distributor_id || !zone_name) {
       return res.status(400).json({ error: 'Distributor and zone name are required' });
     }
     const [result] = await db.query(
-      "INSERT INTO distributor_zones (distributor_id, zone_name, status) VALUES (?, ?, ?)",
-      [distributor_id, zone_name, status || 'Allocated']
+      "INSERT INTO distributor_zones (distributor_id, zone_name, region, assigned_to, status) VALUES (?, ?, ?, ?, ?)",
+      [distributor_id, zone_name, region || '', assigned_to || 'Unassigned', status || 'Allocated']
     );
     res.json({ id: result.insertId, message: 'Zone allocated' });
+  } catch (error) { res.status(500).json({ error: error.message }); }
+};
+
+exports.updateZone = async (req, res) => {
+  const { zone_name, region, assigned_to, status } = req.body;
+  try {
+    await db.query(
+      "UPDATE distributor_zones SET zone_name=?, region=?, assigned_to=?, status=? WHERE id=?",
+      [zone_name, region || '', assigned_to || 'Unassigned', status || 'Allocated', req.params.id]
+    );
+    res.json({ message: 'Zone updated' });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
 
@@ -279,27 +356,141 @@ exports.createOrder = async (req, res) => {
 
 // Create Invoice/Bill
 exports.createInvoice = async (req, res) => {
-  const { distributor_id, amount, due_date, bill_number, status } = req.body;
-  const final_bill_number = bill_number || ('INV-' + Math.floor(Math.random() * 1000000));
+  const { 
+    distributor_id, 
+    amount, 
+    due_date, 
+    bill_number, 
+    status,
+    buyer_name,
+    buyer_company,
+    buyer_address,
+    buyer_city,
+    buyer_state,
+    buyer_pincode,
+    buyer_contact,
+    buyer_email,
+    buyer_gstin,
+    products,
+    bank_account_holder,
+    bank_account_number,
+    bank_name,
+    bank_ifsc,
+    bank_branch
+  } = req.body;
+  const final_bill_number = bill_number || ('INV-' + Math.floor(100000 + Math.random() * 900000));
+  const valid_due_date = due_date && String(due_date).trim() !== '' ? due_date : null;
   try {
     const [result] = await db.query(
-      'INSERT INTO distributor_bills (distributor_id, bill_number, amount, due_date, status) VALUES (?, ?, ?, ?, ?)',
-      [distributor_id, final_bill_number, amount, due_date, status || 'Unpaid']
+      `INSERT INTO distributor_bills (
+        distributor_id, bill_number, amount, due_date, status,
+        buyer_name, buyer_company, buyer_address, buyer_city, buyer_state, buyer_pincode,
+        buyer_contact, buyer_email, buyer_gstin, products,
+        bank_account_holder, bank_account_number, bank_name, bank_ifsc, bank_branch
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        distributor_id || 1, final_bill_number, amount || 0, valid_due_date, status || 'Unpaid',
+        buyer_name || null, buyer_company || null, buyer_address || null, buyer_city || null, 
+        buyer_state || null, buyer_pincode || null, buyer_contact || null, buyer_email || null, 
+        buyer_gstin || null, products ? JSON.stringify(products) : null,
+        bank_account_holder || null, bank_account_number || null, bank_name || null, 
+        bank_ifsc || null, bank_branch || null
+      ]
     );
     // Log Activity
-    await db.query(
-      "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Invoice')",
-      [distributor_id, `Invoice ${final_bill_number} generated for ₹${amount}`]
-    );
+    try {
+      await db.query(
+        "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Invoice')",
+        [distributor_id || 1, `Invoice ${final_bill_number} generated for ₹${amount}`]
+      );
+    } catch (actErr) {
+      console.warn("Activity log skipped:", actErr.message);
+    }
     res.json({ id: result.insertId, bill_number: final_bill_number });
+  } catch (error) { 
+    console.error("Create invoice error:", error);
+    res.status(500).json({ error: error.message }); 
+  }
+};
+
+exports.updateInvoice = async (req, res) => {
+  const { 
+    amount, 
+    due_date, 
+    bill_number, 
+    status,
+    buyer_name,
+    buyer_company,
+    buyer_address,
+    buyer_city,
+    buyer_state,
+    buyer_pincode,
+    buyer_contact,
+    buyer_email,
+    buyer_gstin,
+    products,
+    bank_account_holder,
+    bank_account_number,
+    bank_name,
+    bank_ifsc,
+    bank_branch
+  } = req.body;
+  const valid_due_date = due_date && String(due_date).trim() !== '' ? due_date : null;
+  try {
+    await db.query(
+      `UPDATE distributor_bills SET 
+        bill_number=?, amount=?, due_date=?, status=?,
+        buyer_name=?, buyer_company=?, buyer_address=?, buyer_city=?, buyer_state=?, buyer_pincode=?,
+        buyer_contact=?, buyer_email=?, buyer_gstin=?, products=?,
+        bank_account_holder=?, bank_account_number=?, bank_name=?, bank_ifsc=?, bank_branch=?
+       WHERE id=?`,
+      [
+        bill_number, amount || 0, valid_due_date, status || 'Unpaid',
+        buyer_name || null, buyer_company || null, buyer_address || null, buyer_city || null, 
+        buyer_state || null, buyer_pincode || null, buyer_contact || null, buyer_email || null, 
+        buyer_gstin || null, products ? JSON.stringify(products) : null,
+        bank_account_holder || null, bank_account_number || null, bank_name || null, 
+        bank_ifsc || null, bank_branch || null,
+        req.params.id
+      ]
+    );
+    res.json({ message: 'Invoice updated' });
+  } catch (error) { 
+    console.error("Update invoice error:", error);
+    res.status(500).json({ error: error.message }); 
+  }
+};
+
+exports.deleteInvoice = async (req, res) => {
+  try {
+    await db.query('DELETE FROM distributor_bills WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Invoice deleted' });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
 
 exports.getBills = async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM distributor_bills WHERE distributor_id = ? ORDER BY created_at DESC', [req.params.id]);
-    res.json(rows);
-  } catch (error) { res.status(500).json({ error: error.message }); }
+    // Safely handle JSON fields for each bill
+    const billsWithParsedData = rows.map(bill => {
+      let parsedProducts = bill.products;
+      if (typeof bill.products === 'string') {
+        try {
+          parsedProducts = JSON.parse(bill.products);
+        } catch (e) {
+          parsedProducts = [];
+        }
+      }
+      return {
+        ...bill,
+        products: parsedProducts || []
+      };
+    });
+    res.json(billsWithParsedData);
+  } catch (error) { 
+    console.error("Error in getBills:", error);
+    res.status(500).json({ error: error.message }); 
+  }
 };
 
 // Activity
@@ -360,24 +551,91 @@ exports.getStockRequestItems = async (req, res) => {
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
 
+// Get Distributor-specific allocated inventory
+exports.getDistributorInventory = async (req, res) => {
+  const distributorId = req.params.id;
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        p.id, 
+        p.name, 
+        p.category, 
+        p.price, 
+        p.old_price, 
+        p.image_url, 
+        p.status as catalog_status,
+        COALESCE(MAX(di.stock_quantity), MAX(di.stock), 0) as stock,
+        50 as min_stock
+      FROM products p
+      LEFT JOIN distributor_inventory di 
+        ON di.product_id = p.id AND di.distributor_id = ?
+      GROUP BY p.id, p.name, p.category, p.price, p.old_price, p.image_url, p.status
+      ORDER BY p.id ASC
+    `, [distributorId]);
+    res.json({ products: rows });
+  } catch (error) { 
+    console.error('getDistributorInventory error:', error);
+    res.status(500).json({ error: error.message }); 
+  }
+};
+
 exports.updateStockRequestStatus = async (req, res) => {
   const { status } = req.body;
   try {
-    if (!['Pending', 'Approved', 'Shipped', 'Delivered', 'Cancelled'].includes(status)) {
+    if (!['Pending', 'Approved', 'Rejected', 'Shipped', 'Delivered', 'Cancelled'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
     await db.query('UPDATE stock_requests SET status = ? WHERE id = ?', [status, req.params.id]);
     
-    try {
-      const [[reqRow]] = await db.query('SELECT distributor_id, request_number FROM stock_requests WHERE id = ?', [req.params.id]);
+    // If Approved, add stock to distributor's inventory
+    if (status === 'Approved') {
+      const [[reqRow]] = await db.query('SELECT * FROM stock_requests WHERE id = ?', [req.params.id]);
+      const [items] = await db.query('SELECT * FROM stock_request_items WHERE request_id = ?', [req.params.id]);
+      const distId = reqRow ? reqRow.distributor_id : null;
+      
+      for (const item of items) {
+        const qty = parseInt(item.quantity) || 0;
+        let prodId = item.product_id;
+        if (!prodId && item.product_name) {
+          const [[prod]] = await db.query('SELECT id FROM products WHERE name = ?', [item.product_name]);
+          if (prod) prodId = prod.id;
+        }
+
+        if (distId && prodId) {
+          // Add to distributor's personal allocated inventory
+          await db.query(`
+            INSERT INTO distributor_inventory (distributor_id, product_id, stock_quantity, stock)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE stock_quantity = stock_quantity + ?, stock = stock + ?
+          `, [distId, prodId, qty, qty, qty, qty]);
+        }
+
+        try {
+          await db.query(
+            'INSERT INTO inventory_logs (product_id, product_name, change_type, quantity_change, agent) VALUES (?, ?, ?, ?, ?)',
+            [prodId || null, item.product_name || 'Product', 'Stock In', qty, `Admin Approved - ${reqRow?.request_number || req.params.id}`]
+          );
+        } catch (logErr) { console.error('Log error:', logErr); }
+      }
+      
       if (reqRow) {
         await db.query(
-          "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Info')",
-          [reqRow.distributor_id, `Stock Request ${reqRow.request_number} marked as ${status} by Admin`]
+          "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Success')",
+          [reqRow.distributor_id, `Stock Request ${reqRow.request_number} APPROVED — Stock added to your inventory`]
         );
       }
-    } catch (logErr) {
-      console.error('Activity log failed (status still updated):', logErr.message);
+    } else {
+      try {
+        const [[reqRow]] = await db.query('SELECT distributor_id, request_number FROM stock_requests WHERE id = ?', [req.params.id]);
+        if (reqRow) {
+          await db.query(
+            "INSERT INTO distributor_activity (distributor_id, activity_text, activity_type) VALUES (?, ?, 'Info')",
+            [reqRow.distributor_id, `Stock Request ${reqRow.request_number} marked as ${status} by Admin`]
+          );
+        }
+      } catch (logErr) {
+        console.error('Activity log failed (status still updated):', logErr.message);
+      }
     }
     
     res.json({ message: `Request status updated to ${status}` });
@@ -456,6 +714,130 @@ exports.verifyStockPayment = async (req, res) => {
   } catch (error) {
     console.error('Verify stock payment error:', error);
     res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+exports.getDealerOrders = async (req, res) => {
+  try {
+    const distributorId = req.params.id;
+    const [orders] = await db.query(
+      `SELECT o.id, o.order_number, o.created_at as date, o.total_amount as total, o.status, 
+              d.name as dealerName, d.phone as dealerPhone, d.email as dealerEmail, d.business_name as dealerBusiness, 
+              o.created_at as requiredBy 
+       FROM dealer_orders o 
+       JOIN dealers d ON o.dealer_id = d.id 
+       WHERE o.distributor_id = ? 
+       ORDER BY o.created_at DESC`,
+      [distributorId]
+    );
+    for (let order of orders) {
+      const [items] = await db.query('SELECT id, product_id, product_name, quantity, price FROM dealer_order_items WHERE order_id = ?', [order.id]);
+      order.order_items = items || [];
+      order.items = (items || []).reduce((sum, it) => sum + (parseInt(it.quantity) || 0), 0);
+    }
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.updateDealerOrderStatus = async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const { status } = req.body;
+    
+    // 1. Fetch current order details including stock_deducted flag
+    const numId = parseInt(String(orderId).replace(/[^0-9]/g, '')) || 0;
+    const [orders] = await db.query(
+      'SELECT * FROM dealer_orders WHERE order_number = ? OR id = ? LIMIT 1',
+      [orderId, numId]
+    );
+
+    if (orders.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    const order = orders[0];
+    const distId = order.distributor_id || 1;
+
+    // 2. Fetch order items
+    const [items] = await db.query('SELECT * FROM dealer_order_items WHERE order_id = ?', [order.id]);
+
+    const activeFulfillStatuses = ['Processing', 'Approved', 'Shipped', 'Delivered'];
+    let stockDeducted = order.stock_deducted ? 1 : 0;
+
+    // 3. Deduct stock if moving to an active fulfillment status and not already deducted
+    if (activeFulfillStatuses.includes(status) && !stockDeducted) {
+      for (const item of items) {
+        const qty = parseInt(item.quantity) || 1;
+        let prodId = item.product_id ? parseInt(String(item.product_id).replace(/[^0-9]/g, '')) : null;
+        if (!prodId && item.product_name) {
+          const [[prod]] = await db.query('SELECT id FROM products WHERE name = ? LIMIT 1', [item.product_name]);
+          if (prod) prodId = prod.id;
+        }
+
+        if (distId && prodId) {
+          // Deduct from distributor_inventory (both stock_quantity and stock)
+          await db.query(`
+            INSERT INTO distributor_inventory (distributor_id, product_id, stock_quantity, stock)
+            VALUES (?, ?, 0, 0)
+            ON DUPLICATE KEY UPDATE 
+              stock_quantity = GREATEST(0, COALESCE(stock_quantity, stock, 0) - ?),
+              stock = GREATEST(0, COALESCE(stock, stock_quantity, 0) - ?)
+          `, [distId, prodId, qty, qty]);
+        }
+
+        // Log inventory change
+        try {
+          await db.query(
+            'INSERT INTO inventory_logs (product_id, product_name, change_type, quantity_change, agent) VALUES (?, ?, ?, ?, ?)',
+            [prodId || null, item.product_name || 'Product', 'Stock Out', -qty, `Dealer Order ${order.order_number || order.id} (${status})`]
+          );
+        } catch (logErr) {
+          console.error('Inventory log error:', logErr);
+        }
+      }
+      stockDeducted = 1;
+    } 
+    // 4. Restore stock if cancelled after being deducted
+    else if (status === 'Cancelled' && stockDeducted) {
+      for (const item of items) {
+        const qty = parseInt(item.quantity) || 1;
+        let prodId = item.product_id ? parseInt(String(item.product_id).replace(/[^0-9]/g, '')) : null;
+        if (!prodId && item.product_name) {
+          const [[prod]] = await db.query('SELECT id FROM products WHERE name = ? LIMIT 1', [item.product_name]);
+          if (prod) prodId = prod.id;
+        }
+
+        if (distId && prodId) {
+          // Add back to distributor_inventory (both stock_quantity and stock)
+          await db.query(`
+            INSERT INTO distributor_inventory (distributor_id, product_id, stock_quantity, stock)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+              stock_quantity = COALESCE(stock_quantity, stock, 0) + ?,
+              stock = COALESCE(stock, stock_quantity, 0) + ?
+          `, [distId, prodId, qty, qty, qty, qty]);
+        }
+
+        try {
+          await db.query(
+            'INSERT INTO inventory_logs (product_id, product_name, change_type, quantity_change, agent) VALUES (?, ?, ?, ?, ?)',
+            [prodId || null, item.product_name || 'Product', 'Stock In', qty, `Dealer Order Cancelled ${order.order_number || order.id}`]
+          );
+        } catch (logErr) {
+          console.error('Inventory log error:', logErr);
+        }
+      }
+      stockDeducted = 0;
+    }
+
+    // 5. Update order status and stock_deducted flag
+    await db.query('UPDATE dealer_orders SET status = ?, stock_deducted = ? WHERE id = ?', [status, stockDeducted, order.id]);
+
+    res.json({ success: true, message: `Status updated to ${status}`, stockDeducted });
+  } catch (error) {
+    console.error('Error updating dealer order status:', error);
+    res.status(500).json({ error: error.message });
   }
 };
 

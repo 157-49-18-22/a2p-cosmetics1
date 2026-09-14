@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, ExternalLink, X, Save, Layers } from 'lucide-react';
 
 const API = API_BASE_URL;
-const EMPTY_FORM = { name: '', slug: '', image_url: '', status: 'Active' };
+const EMPTY_FORM = { name: '', slug: '', image_url: '', status: 'Active', meta_title: '', meta_description: '', meta_keywords: '' };
 
-const CategoryManager = () => {
+const CategoryManager = ({ onCategoryChange }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -38,7 +38,7 @@ const CategoryManager = () => {
   const autoSlug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   const openAdd = () => { setEditingCat(null); setForm(EMPTY_FORM); setShowModal(true); };
-  const openEdit = (c) => { setEditingCat(c); setForm({ name: c.name, slug: c.slug, image_url: c.image_url || '', status: c.status }); setShowModal(true); };
+  const openEdit = (c) => { setEditingCat(c); setForm({ name: c.name, slug: c.slug, image_url: c.image_url || '', status: c.status, meta_title: c.meta_title || '', meta_description: c.meta_description || '', meta_keywords: c.meta_keywords || '' }); setShowModal(true); };
 
   const handleSave = async () => {
     if (!form.name || !form.slug) return showToast('Name and slug are required', 'danger');
@@ -51,6 +51,7 @@ const CategoryManager = () => {
       showToast(editingCat ? 'Category updated!' : 'Category added!');
       setShowModal(false);
       fetchCategories();
+      if (onCategoryChange) onCategoryChange(); // refresh parent sidebar
     } catch (e) {
       showToast('Save failed. Check backend.', 'danger');
     } finally {
@@ -64,6 +65,7 @@ const CategoryManager = () => {
       await fetch(`${API}/categories/${id}`, { method: 'DELETE' });
       showToast('Category deleted');
       fetchCategories();
+      if (onCategoryChange) onCategoryChange(); // refresh parent sidebar
     } catch (e) {
       showToast('Delete failed', 'danger');
     }
@@ -183,7 +185,25 @@ const CategoryManager = () => {
                   <option>Inactive</option>
                 </select>
               </div>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '15px', marginTop: '5px' }}>
+                <h4 style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>SEO Optimization</h4>
+                <div className="adm-field" style={{ marginBottom: '12px' }}>
+                  <label>SEO Meta Title</label>
+                  <input style={{ padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem' }} value={form.meta_title}
+                    onChange={e => setForm({ ...form, meta_title: e.target.value })} placeholder="e.g. Organic Face Washes - A2P Cosmetics" />
+                </div>
+                <div className="adm-field" style={{ marginBottom: '12px' }}>
+                  <label>SEO Meta Description</label>
+                  <textarea style={{ padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem', minHeight: '60px', width: '100%', outline: 'none', resize: 'vertical' }} value={form.meta_description}
+                    onChange={e => setForm({ ...form, meta_description: e.target.value })} placeholder="Short search result description..." />
+                </div>
+                <div className="adm-field">
+                  <label>SEO Meta Keywords</label>
+                  <input style={{ padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem' }} value={form.meta_keywords}
+                    onChange={e => setForm({ ...form, meta_keywords: e.target.value })} placeholder="keywords, comma, separated" />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '10px' }}>
                 <button className="adm-btn adm-btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
                 <button className="adm-btn adm-btn-primary" onClick={handleSave} disabled={saving}>
                   <Save size={16} /> {saving ? 'Saving...' : editingCat ? 'Update' : 'Add Category'}

@@ -1,6 +1,8 @@
 import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../../../context/AuthContext.jsx';
+import { useSession } from '../../../hooks/useSession.js';
 import { Star, Plus, Search, Phone, Mail, MapPin, Edit2, Trash2, CheckCircle, TrendingUp, Package, Users } from 'lucide-react';
 
 const API_BASE = `${API_BASE_URL}/distributors`;
@@ -10,18 +12,35 @@ const SuperStockist = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const distributorId = 1;
+  const { user: authUser } = useAuth();
+  const { user: sessionUser } = useSession();
+  const distributor = authUser || sessionUser;
+  const distributorId = distributor?.id || 1;
 
-  const [newStockist, setNewStockist] = useState({ name: '', zone: 'Zone A', status: 'Active' });
+  const [zones, setZones] = useState([]);
+  const [newStockist, setNewStockist] = useState({ name: '', zone: '', status: 'Active' });
   const [selectedStockist, setSelectedStockist] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const fetchStockists = async () => {
+  const fetchZones = async (targetId = distributorId) => {
     try {
-      const res = await axios.get(`${API_BASE}/${distributorId}/stockists`);
+      const res = await axios.get(`${API_BASE}/${targetId}/zones`);
+      const zList = Array.isArray(res.data) ? res.data : [];
+      setZones(zList);
+      if (zList.length > 0) {
+        setNewStockist(prev => ({ ...prev, zone: prev.zone || zList[0].zone_name }));
+      }
+    } catch (err) {
+      console.error('Error fetching zones in SuperStockist:', err);
+    }
+  };
+
+  const fetchStockists = async (targetId = distributorId) => {
+    try {
+      const res = await axios.get(`${API_BASE}/${targetId}/stockists`);
       if (res.data.length === 0) {
         setStockists([
           { id: 1, name: 'Mehta Co. Distributors', zone: 'Zone C', status: 'Active' },
@@ -97,8 +116,11 @@ const SuperStockist = () => {
   };
 
   useEffect(() => {
-    fetchStockists();
-  }, []);
+    if (distributorId) {
+      fetchZones(distributorId);
+      fetchStockists(distributorId);
+    }
+  }, [distributorId]);
 
   const filtered = stockists.filter(s =>
     s.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -149,7 +171,19 @@ const SuperStockist = () => {
               <div className="dd-field"><label>Stockist ID</label><input placeholder="Auto-generated" disabled style={{ background: '#f5f4f9', color: '#9ca3af' }} /></div>
               <div className="dd-field"><label>Assigned Zone</label>
                 <select value={newStockist.zone} onChange={e => setNewStockist({...newStockist, zone: e.target.value})}>
-                  <option>Zone A</option><option>Zone B</option><option>Zone C</option><option>Zone D</option><option>Zone E</option>
+                  {zones.length > 0 ? (
+                    zones.map(z => (
+                      <option key={z.id} value={z.zone_name}>{z.zone_name}</option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Zone A">Zone A</option>
+                      <option value="Zone B">Zone B</option>
+                      <option value="Zone C">Zone C</option>
+                      <option value="Zone D">Zone D</option>
+                      <option value="Zone E">Zone E</option>
+                    </>
+                  )}
                 </select>
               </div>
               <div className="dd-field"><label>City</label><input placeholder="e.g. Mumbai" /></div>

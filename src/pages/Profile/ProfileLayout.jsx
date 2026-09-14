@@ -1,13 +1,16 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  Package, MapPin, Heart, User, CreditCard, Bell, Shield
+  Package, MapPin, Heart, User, CreditCard, Bell, Shield, LifeBuoy
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './Profile.css';
 
 const ProfileLayout = ({ children }) => {
+  const { user } = useAuth();
   const menuItems = [
     { to: "/my-orders", icon: Package, label: "My Orders" },
+    { to: "/help-support", icon: LifeBuoy, label: "Help & Support" },
     { to: "/my-addresses", icon: MapPin, label: "My Addresses" },
     { to: "/wishlist", icon: Heart, label: "Wishlist" },
   ];
@@ -21,8 +24,8 @@ const ProfileLayout = ({ children }) => {
               <User size={32} />
             </div>
             <div className="brief-info">
-              <h3>Admin User</h3>
-              <p>Premium Member</p>
+              <h3>{user?.name || 'Valued Customer'}</h3>
+              <p>{user?.email || 'A2P Member'}</p>
             </div>
           </div>
           

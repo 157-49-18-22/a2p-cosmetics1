@@ -12,9 +12,17 @@ import {
   Search
 } from 'lucide-react';
 
+import { useSession } from '../../../hooks/useSession.js';
+
 const API_BASE = `${API_BASE_URL}/agent`;
 
 const HierarchyStructure = () => {
+  const { user: loggedAgent } = useSession();
+  const agentId = loggedAgent?.id || '';
+  const agentRole = loggedAgent?.role || '';
+  const isAdmin = agentRole === 'Admin Agent' || !agentId;
+  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+
   const [tree, setTree] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ master: 0, sub: 0, rep: 0 });
@@ -24,7 +32,7 @@ const HierarchyStructure = () => {
   useEffect(() => {
     const fetchHierarchy = async () => {
       try {
-        const res = await axios.get(`${API_BASE}/hierarchy`);
+        const res = await axios.get(`${API_BASE}/hierarchy${agentParams}`);
         setTree(res.data);
         
         // Calculate basic stats by flattening the tree or just rough estimates based on roles

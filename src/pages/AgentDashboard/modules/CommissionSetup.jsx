@@ -24,6 +24,11 @@ const CommissionSetup = () => {
     min_payout_threshold: 0,
     commission_cycle_days: 0
   });
+  const [referralLevels, setReferralLevels] = useState([
+    { id: 1, name: 'Level 1 (Master Agent)', enabled: true, description: 'Top-level agents who can refer sub-agents' },
+    { id: 2, name: 'Level 2 (Sub Agent)', enabled: true, description: 'Middle-tier agents referred by master agents' },
+    { id: 3, name: 'Level 3 (Sales Rep)', enabled: true, description: 'Field-level sales representatives' }
+  ]);
   const [loading, setLoading] = useState(true);
   const [showNewRuleModal, setShowNewRuleModal] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -32,7 +37,12 @@ const CommissionSetup = () => {
     category_name: '',
     base_rate: '',
     bonus_margin: '',
-    status: 'Active'
+    referral_level: 'All Levels',
+    status: 'Active',
+    commission_type: 'percentage', // 'percentage' or 'fixed'
+    campaign_name: '',
+    start_date: '',
+    end_date: ''
   });
   const [bulkPercent, setBulkPercent] = useState('');
 
@@ -53,18 +63,11 @@ const CommissionSetup = () => {
         axios.get(`${API_BASE}/commission-rules`),
         axios.get(`${API_BASE}/settings`)
       ]);
-      setCategories(rulesRes.data.length > 0 ? rulesRes.data : [
-        { id: 1, category_name: 'Face Serum', base_rate: '15%', bonus_margin: '5%', status: 'Active' },
-        { id: 2, category_name: 'Moisturizers', base_rate: '12%', bonus_margin: '3%', status: 'Active' }
-      ]);
+      setCategories(rulesRes.data || []);
       setSettings(settingsRes.data || settings);
     } catch (err) {
       console.error('Error fetching commission config:', err);
-      // Fallback
-      setCategories([
-        { id: 1, category_name: 'Face Serum', base_rate: '15%', bonus_margin: '5%', status: 'Active' },
-        { id: 2, category_name: 'Moisturizers', base_rate: '12%', bonus_margin: '3%', status: 'Active' }
-      ]);
+      setCategories([]);
     } finally {
       setLoading(false);
     }
@@ -76,11 +79,28 @@ const CommissionSetup = () => {
     try {
       await axios.post(`${API_BASE}/commission-rules`, newRule);
       setShowNewRuleModal(false);
-      setNewRule({ category_name: '', base_rate: '', bonus_margin: '', status: 'Active' });
+      setNewRule({ 
+        category_name: '', 
+        base_rate: '', 
+        bonus_margin: '', 
+        referral_level: 'All Levels', 
+        status: 'Active',
+        commission_type: 'percentage',
+        campaign_name: '',
+        start_date: '',
+        end_date: ''
+      });
       fetchConfig();
     } catch (err) {
       console.error(err);
-      setCategories([...categories, { id: Date.now(), ...newRule }]);
+      setCategories([...categories, { 
+        id: Date.now(), 
+        ...newRule,
+        commission_type: newRule.commission_type || 'percentage',
+        campaign_name: newRule.campaign_name || '',
+        start_date: newRule.start_date || '',
+        end_date: newRule.end_date || ''
+      }]);
       setShowNewRuleModal(false);
     } finally {
       setSaving(false);
@@ -149,6 +169,64 @@ const CommissionSetup = () => {
       </div>
 
       <div className="ag-dashboard-grid">
+        {/* Referral Levels Management */}
+        <div className="ag-card">
+          <div className="ag-card-header">
+            <h3 className="ag-card-title">Referral Levels Control</h3>
+            <p style={{ fontSize: '0.75rem', color: '#64748b' }}>Enable or disable entire referral hierarchy levels</p>
+          </div>
+          <div className="ag-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {referralLevels.map((level, i) => (
+              <div key={i} style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px',
+                background: level.enabled ? '#f0fdf4' : '#fef2f2',
+                borderRadius: '12px',
+                border: `1px solid ${level.enabled ? '#bbf7d0' : '#fecaca'}`
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    background: level.enabled ? '#dcfce7' : '#fee2e2',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {level.enabled ? <CheckCircle size={20} color="#16a34a" /> : <AlertCircle size={20} color="#dc2626" />}
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '0.9rem', fontWeight: 700, margin: 0 }}>{level.name}</p>
+                    <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '4px 0 0' }}>{level.description}</p>
+                  </div>
+                </div>
+                <button
+                  className={`ag-btn ${level.enabled ? 'ag-btn-danger' : 'ag-btn-success'}`}
+                  style={{ padding: '6px 16px', fontSize: '0.75rem' }}
+                  onClick={async () => {
+                    const newLevels = [...referralLevels];
+                    newLevels[i].enabled = !newLevels[i].enabled;
+                    setReferralLevels(newLevels);
+                    try {
+                      await axios.put(`${API_BASE}/referral-levels/${level.id}`, { enabled: newLevels[i].enabled });
+                    } catch (err) {
+                      console.error('Error updating level status:', err);
+                      // Revert on error
+                      newLevels[i].enabled = !newLevels[i].enabled;
+                      setReferralLevels(newLevels);
+                    }
+                  }}
+                >
+                  {level.enabled ? 'Disable Level' : 'Enable Level'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Category Wise Commission */}
         <div className="ag-card">
           <div className="ag-card-header">
@@ -159,8 +237,12 @@ const CommissionSetup = () => {
               <thead>
                 <tr>
                   <th>Product Category</th>
+                  <th>Campaign</th>
+                  <th>Referral Level</th>
+                  <th>Type</th>
                   <th>Base Rate</th>
                   <th>Bonus Margin</th>
+                  <th>Valid Period</th>
                   <th>Status</th>
                   <th>Action</th>
                 </tr>
@@ -169,8 +251,31 @@ const CommissionSetup = () => {
                 {categories.length > 0 ? categories.map((cat, i) => (
                   <tr key={i}>
                     <td style={{ fontWeight: 600 }}>{cat.category_name}</td>
+                    <td style={{ fontSize: '0.8rem', color: '#64748b' }}>{cat.campaign_name || '—'}</td>
+                    <td>
+                      <span style={{
+                        fontSize: '0.72rem', fontWeight: 700, padding: '3px 10px', borderRadius: 8,
+                        background: cat.referral_level === 'Level 1 (Master Agent)' ? '#eff6ff' : cat.referral_level === 'Level 2 (Sub Agent)' ? '#f0fdf4' : cat.referral_level === 'Level 3 (Sales Rep)' ? '#fffbeb' : '#f3eeff',
+                        color: cat.referral_level === 'Level 1 (Master Agent)' ? '#0ea5e9' : cat.referral_level === 'Level 2 (Sub Agent)' ? '#16a34a' : cat.referral_level === 'Level 3 (Sales Rep)' ? '#d97706' : '#7c3aed'
+                      }}>{cat.referral_level || 'All Levels'}</span>
+                    </td>
+                    <td>
+                      <span style={{
+                        fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+                        background: cat.commission_type === 'percentage' ? '#eff6ff' : '#f0fdf4',
+                        color: cat.commission_type === 'percentage' ? '#0ea5e9' : '#16a34a'
+                      }}>
+                        {cat.commission_type === 'percentage' ? '%' : '₹'}
+                      </span>
+                    </td>
                     <td style={{ fontWeight: 700, color: '#0ea5e9' }}>{cat.base_rate}</td>
-                    <td style={{ fontWeight: 700, color: '#16a34a' }}>{cat.bonus_margin}</td>
+                    <td style={{ fontWeight: 700, color: '#16a34a' }}>{cat.bonus_margin || '—'}</td>
+                    <td style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                      {cat.start_date && cat.end_date 
+                        ? `${new Date(cat.start_date).toLocaleDateString()} - ${new Date(cat.end_date).toLocaleDateString()}`
+                        : '—'
+                      }
+                    </td>
                     <td>
                       <span className={`ag-badge ${cat.status === 'Active' ? 'ag-badge-green' : 'ag-badge-red'}`}>
                         {cat.status}
@@ -195,7 +300,7 @@ const CommissionSetup = () => {
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                    <td colSpan="9" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
                       <AlertCircle size={32} style={{ margin: '0 auto 10px', opacity: 0.5 }} />
                       <p>No commission rules found. Create one to get started.</p>
                     </td>
@@ -273,13 +378,70 @@ const CommissionSetup = () => {
                   <label>Category Name *</label>
                   <input placeholder="e.g. Skin Care" value={newRule.category_name} onChange={e => setNewRule({...newRule, category_name: e.target.value})} />
                 </div>
+                <div className="ag-field" style={{ gridColumn: '1 / -1' }}>
+                  <label>Campaign Name (Optional)</label>
+                  <input placeholder="e.g. Summer Sale 2026" value={newRule.campaign_name} onChange={e => setNewRule({...newRule, campaign_name: e.target.value})} />
+                  <p style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: 4 }}>Leave blank for standard commission rules.</p>
+                </div>
+                <div className="ag-field" style={{ gridColumn: '1 / -1' }}>
+                  <label>Applies to Level</label>
+                  <select value={newRule.referral_level} onChange={e => setNewRule({...newRule, referral_level: e.target.value})}>
+                    <option value="All Levels">All Levels</option>
+                    <option value="Level 1 (Master Agent)">Level 1 — Master Agent (Top Level)</option>
+                    <option value="Level 2 (Sub Agent)">Level 2 — Sub Agent (Middle Tier)</option>
+                    <option value="Level 3 (Sales Rep)">Level 3 — Sales Rep (Field Level)</option>
+                  </select>
+                  <p style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: 4 }}>Commission will only apply to agents at this hierarchy level.</p>
+                </div>
                 <div className="ag-field">
-                  <label>Base Rate (%) *</label>
-                  <input placeholder="e.g. 10%" value={newRule.base_rate} onChange={e => setNewRule({...newRule, base_rate: e.target.value})} />
+                  <label>Commission Type *</label>
+                  <select value={newRule.commission_type} onChange={e => setNewRule({...newRule, commission_type: e.target.value})}>
+                    <option value="percentage">Percentage (%)</option>
+                    <option value="fixed">Fixed Amount (₹)</option>
+                  </select>
+                </div>
+                <div className="ag-field">
+                  <label>{newRule.commission_type === 'percentage' ? 'Base Rate (%) *' : 'Fixed Amount (₹) *'}</label>
+                  <input 
+                    placeholder={newRule.commission_type === 'percentage' ? 'e.g. 10%' : 'e.g. 500'}
+                    value={newRule.base_rate} 
+                    onChange={e => {
+                      if (newRule.commission_type === 'percentage') {
+                        let val = e.target.value.replace(/[^0-9.]/g, '');
+                        setNewRule({...newRule, base_rate: val ? val + '%' : ''});
+                      } else {
+                        let val = e.target.value.replace(/[^0-9]/g, '');
+                        setNewRule({...newRule, base_rate: val ? '₹' + val : ''});
+                      }
+                    }} 
+                  />
                 </div>
                 <div className="ag-field">
                   <label>Bonus Margin (%)</label>
-                  <input placeholder="e.g. 2%" value={newRule.bonus_margin} onChange={e => setNewRule({...newRule, bonus_margin: e.target.value})} />
+                  <input 
+                    placeholder="e.g. 2%" 
+                    value={newRule.bonus_margin} 
+                    onChange={e => {
+                      let val = e.target.value.replace(/[^0-9.]/g, '');
+                      setNewRule({...newRule, bonus_margin: val ? val + '%' : ''});
+                    }} 
+                  />
+                </div>
+                <div className="ag-field">
+                  <label>Start Date</label>
+                  <input 
+                    type="date" 
+                    value={newRule.start_date} 
+                    onChange={e => setNewRule({...newRule, start_date: e.target.value})} 
+                  />
+                </div>
+                <div className="ag-field">
+                  <label>End Date</label>
+                  <input 
+                    type="date" 
+                    value={newRule.end_date} 
+                    onChange={e => setNewRule({...newRule, end_date: e.target.value})} 
+                  />
                 </div>
               </div>
             </div>

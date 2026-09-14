@@ -23,7 +23,7 @@ const MyAddresses = () => {
 
   const fetchAddresses = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/customers/addresses`);
+      const response = await fetch(`${API_BASE_URL}/customers/addresses`, { credentials: 'include' });
       const data = await response.json();
       setAddresses(data);
     } catch (err) {
@@ -73,7 +73,8 @@ const MyAddresses = () => {
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
+        credentials: 'include'
       });
       
       if (response.ok) {
@@ -99,7 +100,7 @@ const MyAddresses = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to remove this address?")) return;
     try {
-      await fetch(`${API_BASE_URL}/customers/addresses/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}/customers/addresses/${id}`, { method: 'DELETE', credentials: 'include' });
       fetchAddresses();
     } catch (err) {
       console.error("Error deleting address:", err);

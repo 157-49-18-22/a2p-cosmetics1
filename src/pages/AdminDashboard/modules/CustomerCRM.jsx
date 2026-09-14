@@ -13,6 +13,8 @@ const CustomerCRM = () => {
   const [showModal, setShowModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', location: '', status: 'Active', tier: 'Bronze' });
+  const [aiReport, setAiReport] = useState(null);
+  const [loadingAi, setLoadingAi] = useState(false);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -28,7 +30,22 @@ const CustomerCRM = () => {
     } finally { setLoading(false); }
   };
 
-  const handleView = (c) => { setSelectedCustomer(c); setShowModal(true); };
+  const handleView = async (c) => { 
+    setSelectedCustomer(c); 
+    setShowModal(true); 
+    setAiReport(null);
+    setLoadingAi(true);
+    try {
+      const res = await fetch(`${API}/admin/customer-ai-analysis/${c.id}`);
+      const data = await res.json();
+      setAiReport(data);
+    } catch (e) {
+      console.error('Error fetching AI analysis:', e);
+    } finally {
+      setLoadingAi(false);
+    }
+  };
+
 
   const handleDelete = async (id, e) => {
     e.stopPropagation();
@@ -205,28 +222,88 @@ const CustomerCRM = () => {
                 <div style={{ position: 'absolute', right: '-10px', top: '-10px', opacity: 0.06 }}><Brain size={100} /></div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
                   <div style={{ width: '30px', height: '30px', borderRadius: '10px', background: 'rgba(59,130,246,0.2)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Sparkles size={16} /></div>
-                  <h4 style={{ fontWeight: 800 }}>AI Sales Strategist</h4>
+                  <h4 style={{ fontWeight: 800 }}>AI Customer Profile (CRM Analysis)</h4>
                 </div>
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '6px' }}>
-                    <span style={{ color: '#94a3b8' }}>Churn Probability</span>
-                    <span style={{ fontWeight: 800, color: parseFloat(selectedCustomer.total_spend) > 2000 ? '#10b981' : '#f59e0b' }}>
-                      {parseFloat(selectedCustomer.total_spend) > 2000 ? 'Low Risk (12%)' : 'Medium Risk (45%)'}
-                    </span>
-                  </div>
-                  <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px' }}>
-                    <div style={{ width: parseFloat(selectedCustomer.total_spend) > 2000 ? '12%' : '45%', height: '100%', background: parseFloat(selectedCustomer.total_spend) > 2000 ? '#10b981' : '#f59e0b', borderRadius: '10px' }} />
-                  </div>
-                </div>
-                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '14px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <p style={{ fontSize: '0.65rem', color: '#3b82f6', fontWeight: 800, textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}><Zap size={11} /> Recommendation</p>
-                  <p style={{ fontSize: '0.82rem', color: '#e2e8f0', lineHeight: 1.5 }}>
-                    {activities.some(a => a.customer_id === selectedCustomer.id && a.type === 'Cart')
-                      ? 'Customer has items in cart. Sending a Limited Time 10% Discount could trigger a purchase in next 12 hours.'
-                      : 'Likely to respond to a New Product Alert in the Face Serum category based on past browsing.'}
-                  </p>
-                </div>
+                {loadingAi ? (
+                  <p style={{ fontSize: '0.85rem', color: '#94a3b8' }}>AI is analyzing customer activities and purchase history...</p>
+                ) : aiReport ? (
+                  <>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                      <div>
+                        <span style={{ fontSize: '0.65rem', color: '#94a3b8', display: 'block', textTransform: 'uppercase' }}>Persona Profile</span>
+                        <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#60a5fa' }}>{aiReport.persona}</span>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '0.65rem', color: '#94a3b8', display: 'block', textTransform: 'uppercase' }}>Purchase Likelihood</span>
+                        <span style={{ fontSize: '0.9rem', fontWeight: 800, color: aiReport.purchaseLikelihood === 'High' ? '#34d399' : '#fbbf24' }}>{aiReport.purchaseLikelihood}</span>
+                      </div>
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '6px' }}>
+                        <span style={{ color: '#94a3b8' }}>Interest Scoring Index</span>
+                        <span style={{ fontWeight: 800, color: '#3b82f6' }}>{aiReport.intentScore}%</span>
+                      </div>
+                      <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px' }}>
+                        <div style={{ width: `${aiReport.intentScore}%`, height: '100%', background: '#3b82f6', borderRadius: '10px' }} />
+                      </div>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '14px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '16px' }}>
+                      <p style={{ fontSize: '0.65rem', color: '#3b82f6', fontWeight: 800, textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}><Zap size={11} /> Next Marketing Action</p>
+                      <p style={{ fontSize: '0.82rem', color: '#e2e8f0', lineHeight: 1.5 }}>
+                        {aiReport.nextMarketingStep}
+                      </p>
+                      <div style={{ marginTop: '8px', fontSize: '0.75rem', color: '#94a3b8' }}>
+                        Suggested Promo: <strong style={{ color: '#fff' }}>{aiReport.suggestedPromoCode}</strong>
+                      </div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button 
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(`${API}/whatsapp/send-notification`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                phone: selectedCustomer.phone || '9876543210',
+                                message: `Hi ${selectedCustomer.name}, A2P Cosmetics has a special gift for you! Use coupon ${aiReport.suggestedPromoCode} to get a premium discount on your next skincare selection.`
+                              })
+                            });
+                            const r = await res.json();
+                            alert(`[WhatsApp Simulator Output]:\n${r.message}\nSent: "${r.details.message}"`);
+                          } catch(err) { alert(err.message); }
+                        }} 
+                        style={{ flex: 1, background: '#25d366', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                      >
+                        Send WhatsApp Discount
+                      </button>
+                      <button 
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(`${API}/email/send-abandoned-cart`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                email: selectedCustomer.email,
+                                customerName: selectedCustomer.name,
+                                cartItems: [{ name: 'Deep Cleansing Foaming Face Wash', quantity: 1 }]
+                              })
+                            });
+                            const r = await res.json();
+                            alert(`[Email Simulator Output]:\n${r.message}\nCampaign Content: "${r.details}"`);
+                          } catch(err) { alert(err.message); }
+                        }} 
+                        style={{ flex: 1, background: '#3b82f6', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                      >
+                        Email Recovery Alert
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <p style={{ fontSize: '0.85rem', color: '#f43f5e' }}>Unable to retrieve AI analysis report.</p>
+                )}
               </div>
+
 
               {/* Journey Timeline */}
               <div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Layers,
@@ -17,8 +18,11 @@ import {
   ChevronDown,
   Settings,
   ShoppingCart,
-  Megaphone
+  Megaphone,
+  Heart,
+  Tag
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import AdminHome from './modules/AdminHome';
 import CategoryManager from './modules/CategoryManager';
 import CMSManager from './modules/CMSManager';
@@ -31,6 +35,8 @@ import SupportManager from './modules/SupportManager';
 import UserManager from './modules/UserManager';
 import OrderManager from './modules/OrderManager';
 import BroadcastManager from './modules/BroadcastManager';
+import WishlistTracker from './modules/WishlistTracker';
+import PromoManager from './modules/PromoManager';
 import './AdminDashboard.css';
 
 const navItems = [
@@ -38,7 +44,9 @@ const navItems = [
   { id: 'broadcasts', label: 'Broadcasts', icon: Megaphone },
   { id: 'cms', label: 'CMS Manager', icon: FileCode },
   { id: 'inventory', label: 'Master Inventory', icon: Boxes },
+  { id: 'promo', label: 'Promo & Discounts', icon: Tag },
   { id: 'orders', label: 'Orders', icon: ShoppingCart },
+  { id: 'wishlist', label: 'Wishlist Tracker', icon: Heart },
   { id: 'users', label: 'Users', icon: Users2 },
   { id: 'agents', label: 'Agent CRM', icon: Users2 },
   { id: 'distributors', label: 'Distributor CRM', icon: Building2 },
@@ -51,7 +59,9 @@ const moduleMap = {
   broadcasts: BroadcastManager,
   cms: CMSManager,
   inventory: InventoryManager,
+  promo: PromoManager,
   orders: OrderManager,
+  wishlist: WishlistTracker,
   users: UserManager,
   agents: AgentCRM,
   distributors: DistributorCRM,
@@ -60,16 +70,18 @@ const moduleMap = {
 };
 
 const AdminDashboard = () => {
+  const { user, logout } = useAuth();
   const [active, setActive] = useState('home');
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
   const [notifOpen, setNotifOpen] = useState(false);
 
+  const isAdmin = user && (user.role === 'Admin' || user.role === 'admin' || user.email === 'admin@crm.com' || user.email?.startsWith('admin@'));
+  if (user && !isAdmin) {
+    return <Navigate to="/my-orders" replace />;
+  }
+
   const handleExit = () => {
-    // Clear admin session
-    localStorage.removeItem('active_admin');
-    // Clear other potential sessions if needed
-    // localStorage.clear(); 
-    window.location.href = '/login';
+    logout('/login');
   };
 
   const handleNavClick = (id) => {
@@ -83,12 +95,21 @@ const AdminDashboard = () => {
   const activeLabel = navItems.find(n => n.id === active)?.label;
 
   return (
-    <div className="adm-shell">
+    <div className={`adm-shell ${sidebarOpen ? 'sidebar-active' : ''}`}>
+      {/* Mobile Overlay */}
+      {sidebarOpen && window.innerWidth <= 1024 && (
+        <div className="adm-sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
       {/* ── Sidebar ── */}
       <aside className={`adm-sidebar ${sidebarOpen ? 'open' : 'collapsed'}`}>
         <div className="adm-sidebar-logo">
           <div className="adm-logo-box">A2P</div>
-          {sidebarOpen && <div className="adm-logo-text">Admin Panel <span>v2.0</span></div>}
+          {sidebarOpen && <div className="adm-logo-text" style={{ flex: 1 }}>Admin Panel <span>v2.0</span></div>}
+          {sidebarOpen && (
+            <button className="adm-sidebar-close-btn" onClick={() => setSidebarOpen(false)} aria-label="Close Sidebar">
+              <X size={20} />
+            </button>
+          )}
         </div>
 
         <nav className="adm-nav">
@@ -164,7 +185,7 @@ const AdminDashboard = () => {
             <div className="adm-profile">
               <img src="https://ui-avatars.com/api/?name=Admin+User&background=334155&color=fff" alt="admin" />
               <div className="adm-profile-info">
-                <p>System Admin</p>
+                <p>{user?.name || 'System Admin'}</p>
                 <span>Full Access</span>
               </div>
               <ChevronDown size={14} />

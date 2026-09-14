@@ -4,6 +4,8 @@ import { Star, ChevronDown, ShieldCheck, Headphones, CreditCard, Filter, X } fro
 import { useCart } from '../../context/CartContext';
 import { useNotifications } from '../../components/Notifications/NotificationHub';
 import './FaceWash.css'; // Dedicated FaceWash styles
+import SEO from '../../components/SEO/SEO';
+import { calculateRatingFromLikes } from '../../utils/ratingUtils';
 
 const faceWashProducts = [
   {
@@ -88,7 +90,23 @@ const FaceWash = () => {
   const [loading, setLoading] = React.useState(true);
   const [activeSkinType, setActiveSkinType] = React.useState('All Skin Types');
   const [priceRange, setPriceRange] = React.useState([0, 1000]);
-  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+  const [seo, setSeo] = React.useState({ title: 'Face Wash - A2P Cosmetics', description: 'Shop premium organic Face Washes at A2P Cosmetics.', keywords: 'face wash, organic face wash, skincare, a2p cosmetics' });
+
+  React.useEffect(() => {
+    fetch(`${API_BASE_URL}/categories`)
+      .then(res => res.json())
+      .then(data => {
+        const cat = data.find(c => c.name === 'Face Wash' || c.slug === 'facewash');
+        if (cat) {
+          setSeo({
+            title: cat.meta_title || `${cat.name} - A2P Cosmetics`,
+            description: cat.meta_description || `Shop premium organic ${cat.name} products at A2P Cosmetics.`,
+            keywords: cat.meta_keywords || `${cat.name}, organic, skincare, a2p cosmetics`
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   React.useEffect(() => {
     fetch(`${API_BASE_URL}/products?category=Face Wash`)
@@ -125,8 +143,8 @@ const FaceWash = () => {
       name: product.name,
       price: product.price,
       image: product.image_url || "/facewash_product.png",
-      rating: 4.8,
-      reviews: 120
+      rating: product.rating,
+      reviews: product.review_count
     };
     addToCart(cartProduct);
     showNotification({
@@ -140,6 +158,7 @@ const FaceWash = () => {
 
   return (
     <div className="lips-page facewash-page">
+      <SEO title={seo.title} description={seo.description} keywords={seo.keywords} />
       <div className="lips-banner">
         <video
           src="/video1.mp4"

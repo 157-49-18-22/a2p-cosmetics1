@@ -430,72 +430,77 @@
   }
 }
 
-/* ─── Social Auth ────────────────────────────────────────────────── */
-.al-social {
-  margin-bottom: 2rem;
-}
-
-.al-divider {
-  position: relative;
-  display: flex;
+/* ─── OTP Verification Styles ────────────────────────────────── */
+.al-back-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.al-divider::before,
-.al-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: #c4c7c7;
-}
-
-.al-divider span {
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #64748b;
   font-family: 'Manrope', sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #444748;
-  white-space: nowrap;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1rem;
+  transition: color 0.2s;
 }
 
-.al-social-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+.al-back-btn:hover {
+  color: #e11d48;
 }
 
-.al-social-btn {
+.al-otp-wrap {
+  width: 100%;
+}
+
+.al-otp-input {
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.45em !important;
+  text-align: center !important;
+  color: #0f172a !important;
+  background: #ffffff !important;
+  border: 2px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  transition: all 0.2s ease !important;
+}
+
+.al-otp-input:focus {
+  border-color: #e11d48 !important;
+  box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.12) !important;
+}
+
+.al-resend-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  border: 1px solid #c4c7c7;
-  background: transparent;
-  padding: 0.9rem 1rem;
-  font-family: 'Manrope', sans-serif;
-  font-size: 0.65rem;
+  gap: 8px;
+  margin-top: 1.25rem;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.al-resend-btn {
+  background: none;
+  border: none;
+  color: #e11d48;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #1f1b17;
+  font-size: 0.82rem;
   cursor: pointer;
-  border-radius: 0;
-  transition: background 0.2s, transform 0.15s;
+  padding: 0;
+  transition: opacity 0.2s;
 }
 
-.al-social-btn:hover {
-  background: #f5ece5;
+.al-resend-btn:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
 }
 
-.al-social-btn:active {
-  transform: scale(0.98);
-}
-
-.al-social-btn svg {
-  flex-shrink: 0;
+.al-resend-btn:not(:disabled):hover {
+  text-decoration: underline;
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────── */

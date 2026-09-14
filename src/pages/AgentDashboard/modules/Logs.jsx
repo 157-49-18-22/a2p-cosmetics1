@@ -16,9 +16,17 @@ import {
   Clock
 } from 'lucide-react';
 
+import { useSession } from '../../../hooks/useSession.js';
+
 const API_BASE = `${API_BASE_URL}/agent`;
 
 const Logs = () => {
+  const { user: loggedAgent } = useSession();
+  const agentId = loggedAgent?.id || '';
+  const agentRole = loggedAgent?.role || '';
+  const isAdmin = agentRole === 'Admin Agent' || !agentId;
+  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+
   const [activityLogs, setActivityLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,11 +35,11 @@ const Logs = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, []);
+  }, [agentId, agentRole]);
 
   const fetchLogs = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/logs`);
+      const res = await axios.get(`${API_BASE}/logs${agentParams}`);
       setActivityLogs(res.data.length > 0 ? res.data : [
         { id: 1204, agent_name: 'Karan Mehra', activity_text: 'Payout request for ₹15,000', activity_type: 'Payout', created_at: new Date(), status: 'Pending' },
         { id: 1203, agent_name: 'System', activity_text: 'Monthly commission cycle processed', activity_type: 'Settings', created_at: new Date(Date.now() - 3600000), status: 'Success' },
@@ -40,10 +48,7 @@ const Logs = () => {
       ]);
     } catch (err) {
       console.error('Error fetching logs:', err);
-      // Fallback
-      setActivityLogs([
-        { id: 1, agent_name: 'Karan Mehra', activity_text: 'Sample log entry', activity_type: 'Payout', created_at: new Date(), status: 'Pending' }
-      ]);
+      setActivityLogs([]);
     } finally {
       setLoading(false);
     }

@@ -14,14 +14,19 @@ export const CartProvider = ({ children }) => {
   const [coupon, setCoupon] = useState(null);
   const { user, setShowLoginModal } = useAuth();
 
-  // Fetch cart items on load
+  // Fetch cart items whenever user changes (login / logout / switch account)
   useEffect(() => {
-    fetchCart();
-  }, []);
+    if (user && user.id) {
+      fetchCart(); // User just logged in — load their cart
+    } else if (user === null) {
+      setCartItems([]); // User logged out — clear cart immediately
+      setCoupon(null);
+    }
+  }, [user]);
 
   const fetchCart = async () => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await axios.get(API_URL, { withCredentials: true });
       setCartItems(response.data);
     } catch (error) {
       console.error('Error fetching cart:', error);
@@ -39,10 +44,10 @@ export const CartProvider = ({ children }) => {
         name: product.name,
         price: typeof product.price === 'string' ? parseFloat(product.price.replace('$', '').replace('Rs. ', '')) : product.price,
         image_url: product.image || product.image_url,
-        quantity: 1
+        quantity: product.quantity || 1
       };
 
-      await axios.post(API_URL, productData);
+      await axios.post(API_URL, productData, { withCredentials: true });
       await fetchCart(); // Refresh cart from server
       setIsCartOpen(true);
     } catch (error) {
@@ -52,7 +57,7 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (id) => {
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await axios.delete(`${API_URL}/${id}`, { withCredentials: true });
       await fetchCart();
     } catch (error) {
       console.error('Error removing from cart:', error);
@@ -65,7 +70,7 @@ export const CartProvider = ({ children }) => {
 
     const newQty = Math.max(1, item.quantity + delta);
     try {
-      await axios.put(`${API_URL}/${id}`, { quantity: newQty });
+      await axios.put(`${API_URL}/${id}`, { quantity: newQty }, { withCredentials: true });
       await fetchCart();
     } catch (error) {
       console.error('Error updating quantity:', error);
@@ -77,7 +82,7 @@ export const CartProvider = ({ children }) => {
       // If backend supports clearing all, use that, otherwise loop or just clear state
       // For now, let's clear the state and optionally call backend if there's an endpoint
       // Assuming we might need to delete each item or have a clear endpoint
-      await axios.delete(`${API_URL}/clear/all`).catch(() => {
+      await axios.delete(`${API_URL}/clear/all`, { withCredentials: true }).catch(() => {
         // Fallback if endpoint doesn't exist: clear locally
         console.log('Clear all endpoint not found, clearing locally');
       });
@@ -92,20 +97,19 @@ export const CartProvider = ({ children }) => {
   };
 
 
-  // Mock valid coupons
-  const VALID_COUPONS = {
-    'A2P20': { discount: 20, type: 'percent' },
-    'FREESHIP': { discount: 50, type: 'fixed' }, // Rs. 50 off
-    'GLOW50': { discount: 50, type: 'percent' }
-  };
-
-  const applyCoupon = (code) => {
-    const cleanCode = code.toUpperCase().trim();
-    if (VALID_COUPONS[cleanCode]) {
-      setCoupon({ code: cleanCode, ...VALID_COUPONS[cleanCode] });
-      return { success: true, message: 'Coupon applied successfully!' };
+  const applyCoupon = async (code) => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/promos/validate`, {
+        code,
+        cart_subtotal: subtotal,
+        cart_items: cartItems
+      });
+      setCoupon({ code: res.data.code, discount_amount: parseFloat(res.data.discount_amount) });
+      return { success: true, message: res.data.message };
+    } catch (err) {
+      setCoupon(null);
+      return { success: false, message: err.response?.data?.error || 'Invalid promo code' };
     }
-    return { success: false, message: 'Invalid coupon code.' };
   };
 
   const removeCoupon = () => setCoupon(null);
@@ -114,11 +118,7 @@ export const CartProvider = ({ children }) => {
   
   let discountAmount = 0;
   if (coupon) {
-    if (coupon.type === 'percent') {
-      discountAmount = (subtotal * coupon.discount) / 100;
-    } else {
-      discountAmount = coupon.discount;
-    }
+    discountAmount = coupon.discount_amount || 0;
   }
 
   const total = Math.max(0, subtotal - discountAmount);

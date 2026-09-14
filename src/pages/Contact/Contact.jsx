@@ -47,15 +47,42 @@ const Contact = () => {
     }
   ];
 
+  const [generatedTicketId, setGeneratedTicketId] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/support`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: formData.subject || 'Customer Inquiry',
+          user_name: formData.name,
+          user_email: formData.email,
+          category: 'General',
+          priority: 'Medium',
+          message: formData.message
+        })
+      });
+      const data = await res.json();
+      if (data.ticket_id) {
+        setGeneratedTicketId(data.ticket_id);
+      }
+      setSubmitted(true);
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (err) {
+      console.error('Failed to submit contact query:', err);
+      // Fallback display
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
 

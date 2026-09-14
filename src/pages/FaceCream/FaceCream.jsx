@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Star, ChevronDown, Sparkles, Droplets, Filter, X } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useNotifications } from '../../components/Notifications/NotificationHub';
-import './FaceCream.css'; 
+import './FaceCream.css';
+import SEO from '../../components/SEO/SEO';
+import { calculateRatingFromLikes } from '../../utils/ratingUtils';
 
 const FaceCream = () => {
   const { addToCart } = useCart();
@@ -15,6 +17,23 @@ const FaceCream = () => {
   const [activeConcern, setActiveConcern] = useState('All');
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [seo, setSeo] = useState({ title: 'Face Cream - A2P Cosmetics', description: 'Shop premium organic Face Creams at A2P Cosmetics.', keywords: 'face cream, moisturizer, night cream, day cream, a2p cosmetics' });
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/categories`)
+      .then(res => res.json())
+      .then(data => {
+        const cat = data.find(c => c.name === 'Face Cream' || c.slug === 'facecream');
+        if (cat) {
+          setSeo({
+            title: cat.meta_title || `${cat.name} - A2P Cosmetics`,
+            description: cat.meta_description || `Shop premium organic ${cat.name} products at A2P Cosmetics.`,
+            keywords: cat.meta_keywords || `${cat.name}, organic, skincare, a2p cosmetics`
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/products?category=Face Cream`)
@@ -48,8 +67,8 @@ const FaceCream = () => {
       name: product.name,
       price: product.price,
       image: product.image_url || "/face_cream_product.png",
-      rating: 4.9,
-      reviews: 85
+      rating: calculateRatingFromLikes(product.likes).rating,
+      reviews: calculateRatingFromLikes(product.likes).reviews
     };
     addToCart(cartProduct);
     showNotification({
@@ -62,6 +81,7 @@ const FaceCream = () => {
 
   return (
     <div className="lips-page facewash-page facecream-page-alt">
+      <SEO title={seo.title} description={seo.description} keywords={seo.keywords} />
       <div className="lips-banner">
         <video 
           src="/cream.mp4" 

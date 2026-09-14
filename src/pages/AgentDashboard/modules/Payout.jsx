@@ -1,6 +1,7 @@
 import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useSession } from '../../../hooks/useSession.js';
 import { 
   Wallet, 
   ArrowUpRight, 
@@ -22,6 +23,12 @@ import {
 const API_BASE = `${API_BASE_URL}/agent`;
 
 const Payout = () => {
+  const { user: loggedAgent } = useSession();
+  const agentId = loggedAgent?.id || '';
+  const agentRole = loggedAgent?.role || '';
+  const isAdmin = agentRole === 'Admin Agent' || !agentId;
+  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+
   const [payouts, setPayouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showStatementModal, setShowStatementModal] = useState(false);
@@ -36,19 +43,11 @@ const Payout = () => {
 
   const fetchPayouts = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/payouts`);
-      setPayouts(res.data.length > 0 ? res.data : [
-        { id: 1, agent_name: 'Karan Mehra', amount: 15000, request_time: '2026-04-25T10:00:00Z', status: 'Pending' },
-        { id: 2, agent_name: 'Surbhi Gupta', amount: 5000, request_time: '2026-04-24T12:00:00Z', status: 'Paid' },
-        { id: 3, agent_name: 'Rahul Sharma', amount: 8500, request_time: '2026-04-23T15:00:00Z', status: 'Rejected' }
-      ]);
+      const res = await axios.get(`${API_BASE}/payouts${agentParams}`);
+      setPayouts(res.data || []);
     } catch (err) {
       console.error('Error fetching payouts:', err);
-      // Fallback
-      setPayouts([
-        { id: 1, agent_name: 'Karan Mehra', amount: 15000, request_time: '2026-04-25T10:00:00Z', status: 'Pending' },
-        { id: 2, agent_name: 'Surbhi Gupta', amount: 5000, request_time: '2026-04-24T12:00:00Z', status: 'Paid' }
-      ]);
+      setPayouts([]);
     } finally {
       setLoading(false);
     }

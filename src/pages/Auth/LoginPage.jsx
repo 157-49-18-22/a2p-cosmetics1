@@ -1,6 +1,7 @@
 import API_BASE_URL from '../../apiConfig.js';
 import React, { useState, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Hyperspeed from './Hyperspeed';
 import './LoginPage.css';
 
@@ -91,6 +92,7 @@ const LoginVisual = memo(function LoginVisual() {
 
 const LoginPage = ({ type: initialType }) => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [type, setType] = useState(initialType);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -108,12 +110,18 @@ const LoginPage = ({ type: initialType }) => {
     setLoading(true);
 
     try {
-      const endpoint = type === 'distributor' ? 'distributors/login' : 'agent/login';
+      const endpoint = type === 'distributor' ? 'distributors/login' : type === 'agent' ? 'agent/login' : 'dealers/login';
       const res = await fetch(`${API}/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',   // ← sends/receives HttpOnly cookie
         body: JSON.stringify({ email, password }),
       });
+
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Backend endpoint not found. Please create ${endpoint} API endpoint.`);
+      }
 
       const data = await res.json();
 
@@ -121,12 +129,13 @@ const LoginPage = ({ type: initialType }) => {
         throw new Error(data.error || 'Login failed');
       }
 
-      // Save session
-      const storageKey = type === 'distributor' ? 'active_distributor' : 'active_agent';
-      localStorage.setItem(storageKey, JSON.stringify(data));
-      
-      // Redirect
-      navigate(type === 'distributor' ? '/distributor' : '/agent');
+      // ✅ JWT stored in HttpOnly cookie by backend
+      // Update AuthContext so ProtectedRoute doesn't redirect
+      login(data);
+      if (type === 'dealer') {
+        localStorage.setItem('active_dealer', JSON.stringify(data));
+      }
+      navigate(type === 'distributor' ? '/distributor' : type === 'agent' ? '/agent' : '/dealer');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -167,6 +176,14 @@ const LoginPage = ({ type: initialType }) => {
                   >
                     <span className="material-symbols-outlined">support_agent</span>
                     <span className="role-text">Agent</span>
+                  </button>
+                  <button 
+                    type="button"
+                    className={`auth-role-btn ${type === 'dealer' ? 'active' : ''}`}
+                    onClick={() => setType('dealer')}
+                  >
+                    <span className="material-symbols-outlined">store</span>
+                    <span className="role-text">Dealer</span>
                   </button>
                 </div>
               </div>
@@ -222,17 +239,6 @@ const LoginPage = ({ type: initialType }) => {
                 {!loading && <span className="material-symbols-outlined">arrow_forward</span>}
               </button>
             </form>
-
-            <div className="auth-divider">
-              <div className="divider-line"></div>
-              <span className="divider-text">OR</span>
-              <div className="divider-line"></div>
-            </div>
-
-            <button type="button" className="auth-sso-btn">
-              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmQhO6AweTah95BBtPtafkXzNfn222WwoV1qgZdA8bzLNeiWPm9RBP1skXSUWgT4gqOBT8TVQUPPJZAgYD2BvG4iZv9jqssSTV-mU1b7kS6bBcod69MQqOZKzRYPvDfCwSTH8ouL74L4lSfvFUGvMR9BZwuCdZr9a4_439Uf2isgRdc0o_WGmkndAEYK_2xKN3mmcfCn--vBQTEdZBeEQV3jMmo4Pca7DK3TT85c9phDMO9fhLt5MqVmi6olaU51Vauit1RPVT-IRW" alt="Google" />
-              <span>Sign in with Enterprise SSO</span>
-            </button>
           </div>
 
           <footer className="auth-footer">

@@ -1,6 +1,7 @@
 import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useSession } from '../../../hooks/useSession.js';
 import {
   ShoppingCart, Package, Plus, Search, Trash2,
   CheckCircle, Clock, AlertCircle, RefreshCcw,
@@ -285,7 +286,8 @@ const StockRequest = () => {
   const [showPayment, setShowPayment] = useState(false);
   const [successData, setSuccessData] = useState(null);
 
-  const distributor = JSON.parse(localStorage.getItem('active_distributor') || '{}');
+  const { user: distributor } = useSession();
+
 
   const fetchProducts = async () => {
     try {

@@ -7,6 +7,9 @@ import {
   Calendar, CreditCard, Building2, Sparkles, ShoppingBag, Trash2, Search, Minus, RefreshCcw
 } from 'lucide-react';
 
+import { useAuth } from '../../../context/AuthContext.jsx';
+import { useSession } from '../../../hooks/useSession.js';
+
 const API_BASE = `${API_BASE_URL}/distributors`;
 const PRODUCTS_API = `${API_BASE_URL}/products`;
 
@@ -17,7 +20,10 @@ const DashboardHome = ({ setActiveModule }) => {
   const [products, setProducts] = useState([]);
   const [dealers, setDealers] = useState([]);
   const [topPerformers, setTopPerformers] = useState([]);
-  const distributorId = 1;
+  const { user: authUser } = useAuth();
+  const { user: sessionUser } = useSession();
+  const distributor = authUser || sessionUser;
+  const distributorId = distributor?.id || 1;
 
   // Modal States
   const [showOrderModal, setShowOrderModal] = useState(false);
@@ -33,14 +39,14 @@ const DashboardHome = ({ setActiveModule }) => {
   
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = async (targetId = distributorId) => {
     try {
       const [statsRes, activityRes, productsRes, dealersRes, topRes] = await Promise.all([
-        axios.get(`${API_BASE}/${distributorId}/stats`),
-        axios.get(`${API_BASE}/${distributorId}/activity`),
+        axios.get(`${API_BASE}/${targetId}/stats`),
+        axios.get(`${API_BASE}/${targetId}/activity`),
         axios.get(PRODUCTS_API),
-        axios.get(`${API_BASE}/${distributorId}/dealers`),
-        axios.get(`${API_BASE}/${distributorId}/top-performers`)
+        axios.get(`${API_BASE}/${targetId}/dealers`),
+        axios.get(`${API_BASE}/${targetId}/top-performers`)
       ]);
 
       const rawStats = statsRes.data;
@@ -59,7 +65,11 @@ const DashboardHome = ({ setActiveModule }) => {
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { 
+    if (distributorId) {
+      fetchData(distributorId); 
+    }
+  }, [distributorId]);
 
   const addToOrder = (prod) => {
     const existing = orderItems.find(i => i.id === prod.id);
