@@ -261,14 +261,16 @@ const AllProducts = () => {
     setFilteredProducts(result);
   }, [selectedCategory, priceRange, sortBy, products]);
 
-  const handleAddToCart = (product) => {
-    addToCart({
+  const handleAddToCart = async (product) => {
+    const success = await addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
       image: product.image || '/facewash_product.png',
       rating: product.rating || 4.8
     });
+    if (!success) return;
+
     showNotification({
       type: 'cart',
       title: 'Added to Selection',
@@ -277,13 +279,15 @@ const AllProducts = () => {
     });
   };
 
-  const handleAddToWishlist = (product) => {
-    addToWishlist({
+  const handleAddToWishlist = async (product) => {
+    const success = await addToWishlist({
       id: product.id,
       name: product.name,
       price: product.price,
       image: product.image || '/facewash_product.png'
     });
+    if (!success) return;
+
     showNotification({
       type: 'wishlist',
       title: 'Added to Wishlist',

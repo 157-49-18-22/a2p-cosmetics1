@@ -396,15 +396,17 @@ const ProductDetail = () => {
     }
   };
 
-  const handleAddToCartClick = () => {
+  const handleAddToCartClick = async () => {
     if (!product) return;
-    addToCart({
+    const success = await addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
       image: product.image,
       quantity: quantity
     });
+    if (!success) return;
+
     showNotification({
       type: 'cart',
       title: 'Added to Selection',
@@ -416,14 +418,16 @@ const ProductDetail = () => {
     logGAEvent('add_to_cart', { item_name: product.name, item_id: product.id, price: product.price, quantity });
   };
 
-  const handleAddToWishlistClick = () => {
+  const handleAddToWishlistClick = async () => {
     if (!product) return;
-    addToWishlist({
+    const success = await addToWishlist({
       id: product.id,
       name: product.name,
       price: product.price,
       image: product.image
     });
+    if (!success) return;
+
     showNotification({
       type: 'wishlist',
       title: 'Saved to Wishlist',

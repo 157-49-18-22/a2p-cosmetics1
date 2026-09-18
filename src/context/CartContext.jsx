@@ -36,7 +36,7 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (product) => {
     if (!user) {
       setShowLoginModal(true);
-      return;
+      return false;
     }
     try {
       // Prepare product data for backend
@@ -50,8 +50,10 @@ export const CartProvider = ({ children }) => {
       await axios.post(API_URL, productData, { withCredentials: true });
       await fetchCart(); // Refresh cart from server
       setIsCartOpen(true);
+      return true;
     } catch (error) {
       console.error('Error adding to cart:', error);
+      return false;
     }
   };
 

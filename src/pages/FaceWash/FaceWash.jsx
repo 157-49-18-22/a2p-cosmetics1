@@ -137,7 +137,7 @@ const FaceWash = () => {
     setFilteredProducts(result);
   }, [activeSkinType, priceRange, allProducts]);
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = async (product) => {
     const cartProduct = {
       id: product.id,
       name: product.name,
@@ -146,7 +146,9 @@ const FaceWash = () => {
       rating: product.rating,
       reviews: product.review_count
     };
-    addToCart(cartProduct);
+    const success = await addToCart(cartProduct);
+    if (!success) return;
+
     showNotification({
       type: 'cart',
       title: 'Added to Selection',

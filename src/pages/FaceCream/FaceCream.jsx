@@ -61,7 +61,7 @@ const FaceCream = () => {
     setFilteredProducts(result);
   }, [activeSkinType, activeConcern, priceRange, allProducts]);
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = async (product) => {
     const cartProduct = {
       id: product.id,
       name: product.name,
@@ -70,7 +70,9 @@ const FaceCream = () => {
       rating: calculateRatingFromLikes(product.likes).rating,
       reviews: calculateRatingFromLikes(product.likes).reviews
     };
-    addToCart(cartProduct);
+    const success = await addToCart(cartProduct);
+    if (!success) return;
+
     showNotification({
       type: 'cart',
       title: 'Added to Selection',

@@ -25,7 +25,7 @@ const Lips = () => {
       });
   }, []);
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = async (product) => {
     const cartProduct = {
       id: product.id,
       name: product.name,
@@ -34,7 +34,9 @@ const Lips = () => {
       rating: 4.8,
       reviews: 120
     };
-    addToCart(cartProduct);
+    const success = await addToCart(cartProduct);
+    if (!success) return;
+
     showNotification({
       type: 'cart',
       title: 'Added to Selection',

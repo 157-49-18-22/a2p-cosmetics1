@@ -482,15 +482,17 @@ const NewArrivals = () => {
     }
   };
 
-  const handleAddToCart = (product, e) => {
+  const handleAddToCart = async (product, e) => {
     if (e) e.stopPropagation();
-    addToCart({
+    const success = await addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
       image: product.image || '/luxury_facewash_pump.png',
       rating: product.rating || 4.8
     });
+    if (!success) return;
+
     showNotification({
       type: 'cart',
       title: 'Added to Cart',
@@ -499,14 +501,16 @@ const NewArrivals = () => {
     });
   };
 
-  const handleAddToWishlist = (product, e) => {
+  const handleAddToWishlist = async (product, e) => {
     if (e) e.stopPropagation();
-    addToWishlist({
+    const success = await addToWishlist({
       id: product.id,
       name: product.name,
       price: product.price,
       image: product.image || '/luxury_facewash_pump.png'
     });
+    if (!success) return;
+
     showNotification({
       type: 'wishlist',
       title: 'Saved to Wishlist',

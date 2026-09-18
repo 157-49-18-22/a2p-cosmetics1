@@ -14,7 +14,7 @@ const getWishlistKey = (userId) => userId ? `a2p_wishlist_${userId}` : null;
 export const WishlistProvider = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, setShowLoginModal } = useAuth();
 
   // Whenever user changes (login / logout / switch account), reload the correct wishlist
   useEffect(() => {
@@ -61,7 +61,10 @@ export const WishlistProvider = ({ children }) => {
   };
 
   const addToWishlist = async (product) => {
-    if (!user) return; // Must be logged in
+    if (!user) {
+      setShowLoginModal(true);
+      return false;
+    }
 
     const newItem = {
       id: product.id || `wl-${Date.now()}`,
@@ -106,6 +109,7 @@ export const WishlistProvider = ({ children }) => {
         }
       }
     }
+    return true;
   };
 
   const removeFromWishlist = async (id) => {
