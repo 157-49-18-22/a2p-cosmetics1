@@ -62,23 +62,55 @@ const Header = () => {
   };
 
   return (
-    <header className={`beauty-header ${scrolled ? 'scrolled' : ''}`}>
-      <div className="container header-content">
-        <div className="mobile-menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+    <header className={`beauty-header ${scrolled ? 'scrolled' : ''} ${isMenuOpen ? 'menu-open' : ''}`}>
+      <div className="container header-content" style={isMenuOpen ? { position: 'relative', zIndex: 10000 } : {}}>
+        <div
+          className={`mobile-menu-toggle ${isMenuOpen ? 'menu-open-btn' : ''}`}
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </div>
 
-        <Link to="/" className="beauty-logo">
+        <Link to="/" className="beauty-logo" onClick={() => setIsMenuOpen(false)}>
           <img src="/A2P%20final%20logo.png" alt="A2P Cosmetics" className="header-logo-img" />
         </Link>
 
         <nav className={`beauty-nav ${isMenuOpen ? 'active' : ''}`}>
+          {isMenuOpen && (
+            <div style={{ textAlign: 'center', marginBottom: '2.5rem', position: 'relative', zIndex: 1 }}>
+              <img
+                src="/A2P%20final%20logo.png"
+                alt="A2P"
+                style={{ height: 70, filter: 'brightness(0) invert(1)', opacity: 0.9 }}
+              />
+            </div>
+          )}
           <ul className="nav-links">
             <li><Link to="/new-arrivals" onClick={() => setIsMenuOpen(false)}>New Arrivals</Link></li>
             <li><Link to="/all-products" onClick={() => setIsMenuOpen(false)}>All Products</Link></li>
             <li><Link to="/articles" onClick={() => setIsMenuOpen(false)}>Journal</Link></li>
             <li><Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contact Us</Link></li>
           </ul>
+          {isMenuOpen && (
+            <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center', gap: 6, position: 'relative', zIndex: 1 }}>
+              {[
+                { url: 'https://www.instagram.com/a2prealtech', label: 'IG' },
+                { url: 'https://www.facebook.com/a2prealtechpvtltd', label: 'FB' },
+                { url: 'https://api.whatsapp.com/send?phone=918130525001', label: 'WA' },
+              ].map(s => (
+                <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer"
+                  style={{
+                    color: 'rgba(255,255,255,0.7)', fontSize: '0.68rem', fontWeight: 700,
+                    letterSpacing: '0.08em', padding: '6px 14px',
+                    border: '1px solid rgba(255,255,255,0.25)', borderRadius: 99,
+                    textDecoration: 'none', transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => { e.target.style.color = '#ffc107'; e.target.style.borderColor = '#ffc107'; }}
+                  onMouseLeave={e => { e.target.style.color = 'rgba(255,255,255,0.7)'; e.target.style.borderColor = 'rgba(255,255,255,0.25)'; }}
+                >{s.label}</a>
+              ))}
+            </div>
+          )}
         </nav>
 
         <div className="header-icons">
