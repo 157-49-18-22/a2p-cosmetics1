@@ -1,0 +1,37 @@
+.sidebar-social-container {
+  padding: 12px 10px 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sidebar-social-list {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sidebar-social-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff !important;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.sidebar-social-btn:hover {
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  filter: brightness(1.1);
+}
+
+.sidebar-social-btn svg {
+  display: block;
+}

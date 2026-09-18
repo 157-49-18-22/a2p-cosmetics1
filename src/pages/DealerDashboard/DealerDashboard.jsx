@@ -7,6 +7,7 @@ import DealerHome from './modules/DealerHome';
 import ProductOrderManagement from './modules/ProductOrderManagement';
 import DealerBranding from './modules/DealerBranding';
 import { useAuth } from '../../context/AuthContext';
+import SidebarSocialLinks from '../../components/Sidebar/SidebarSocialLinks';
 import './DealerDashboard.css';
 
 const navItems = [
@@ -100,6 +101,7 @@ const DealerDashboard = () => {
             <span className="dl-nav-icon"><LogOut size={17} /></span>
             {sidebarOpen && <span className="dl-nav-label">Logout</span>}
           </button>
+          <SidebarSocialLinks isCollapsed={!sidebarOpen} />
         </div>
       </aside>
 

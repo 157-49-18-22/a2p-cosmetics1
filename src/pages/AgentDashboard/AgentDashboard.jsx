@@ -16,6 +16,7 @@ import ReferralCode from './modules/ReferralCode';
 import AgentEarnings from './modules/AgentEarnings';
 import Logs from './modules/Logs';
 import { useAuth } from '../../context/AuthContext';
+import SidebarSocialLinks from '../../components/Sidebar/SidebarSocialLinks';
 import './AgentDashboard.css';
 
 // Full nav — Admin Agent sees all
@@ -136,6 +137,7 @@ const AgentDashboard = () => {
             <span className="ag-nav-icon"><LogOut size={17} /></span>
             {sidebarOpen && <span className="ag-nav-label">Logout</span>}
           </button>
+          <SidebarSocialLinks isCollapsed={!sidebarOpen} />
         </div>
       </aside>
 

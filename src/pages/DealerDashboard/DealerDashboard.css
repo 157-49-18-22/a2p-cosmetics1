@@ -13,7 +13,7 @@
 .dl-sidebar {
   width: 260px;
   min-height: 100vh;
-  background: linear-gradient(170deg, #022c22 0%, #064e3b 50%, #065f46 100%);
+  background: linear-gradient(180deg, #c00415 0%, #a00311 50%, #7d020d 100%);
   display: flex;
   flex-direction: column;
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -22,7 +22,7 @@
   height: 100vh;
   overflow: hidden;
   z-index: 100;
-  box-shadow: 4px 0 28px rgba(6, 95, 70, 0.25);
+  box-shadow: 4px 0 24px rgba(192, 4, 21, 0.28);
 }
 .dl-sidebar.collapsed { width: 68px; }
 
@@ -31,19 +31,19 @@
   align-items: center;
   gap: 10px;
   padding: 20px 16px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 .dl-logo-img {
   width: 36px; height: 36px;
   object-fit: contain;
   border-radius: 9px;
-  background: rgba(255,255,255,0.08);
+  background: #ffffff;
   padding: 3px;
   flex-shrink: 0;
 }
 .dl-logo-title {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.04em;
@@ -53,13 +53,13 @@
 .dl-logo-sub {
   display: block;
   font-size: 0.68rem;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.8);
 }
 
 .dl-sidebar-close-btn {
   display: none;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
   width: 32px;
   height: 32px;
@@ -71,7 +71,7 @@
   flex-shrink: 0;
 }
 .dl-sidebar-close-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
 }
 @media (max-width: 1024px) {
@@ -82,10 +82,10 @@
 
 .dl-nav {
   flex: 1;
-  padding: 14px 8px;
+  padding: 16px 10px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   overflow-y: auto;
   scrollbar-width: none;
 }
@@ -95,11 +95,11 @@
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 10px 12px;
-  border-radius: 11px;
-  color: rgba(255,255,255,0.5);
-  font-size: 0.83rem;
-  font-weight: 500;
+  padding: 11px 14px;
+  border-radius: 9px;
+  color: rgba(255,255,255,0.92);
+  font-size: 0.86rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.22s ease;
   white-space: nowrap;
@@ -109,42 +109,54 @@
   border: none;
 }
 .dl-nav-item:hover {
-  background: rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.15);
   color: #fff;
 }
 .dl-nav-item.active {
-  background: linear-gradient(135deg, rgba(16,185,129,0.28), rgba(34,197,94,0.22));
-  color: #fff;
-  box-shadow: 0 2px 12px rgba(16,185,129,0.18);
+  background: #ffc107 !important;
+  color: #111827 !important;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+}
+.dl-nav-item.active .dl-nav-icon,
+.dl-nav-item.active .dl-nav-arrow {
+  color: #111827 !important;
 }
 .dl-nav-icon {
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; width: 20px;
 }
-.dl-nav-arrow { margin-left: auto; opacity: 0.5; }
+.dl-nav-arrow { margin-left: auto; opacity: 0.8; }
 .dl-nav-label { flex: 1; }
 
 .dl-sidebar-footer {
   padding: 10px 8px 14px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255,255,255,0.15);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 .dl-dealer-pill {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 11px;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.18);
+  border-radius: 9px;
   margin-bottom: 2px;
 }
 .dl-dealer-pill img { width: 30px; height: 30px; border-radius: 50%; }
 .dl-dealer-name { font-size: 0.78rem; font-weight: 600; color: #fff; line-height: 1.2; }
-.dl-dealer-tier { font-size: 0.68rem; color: rgba(255,255,255,0.45); }
-.dl-logout { color: rgba(255,120,120,0.65) !important; }
-.dl-logout:hover { background: rgba(255,80,80,0.1) !important; color: #ff8080 !important; }
+.dl-dealer-tier { font-size: 0.68rem; color: rgba(255,255,255,0.8); }
+
+.dl-logout {
+  color: #ffffff !important;
+  background: rgba(0,0,0,0.18) !important;
+}
+.dl-logout:hover {
+  background: rgba(0,0,0,0.35) !important;
+  color: #ffcccc !important;
+}
 
 /* ─── Main ───────────────────────────────────────────────── */
 .dl-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }

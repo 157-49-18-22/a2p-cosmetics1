@@ -16,6 +16,7 @@ import BrandingManagement from './modules/BrandingManagement';
 import DashboardHome from './modules/DashboardHome';
 import StockRequest from './modules/StockRequest';
 import { useAuth } from '../../context/AuthContext';
+import SidebarSocialLinks from '../../components/Sidebar/SidebarSocialLinks';
 import './DistributorDashboard.css';
 
 const navItems = [
@@ -134,6 +135,7 @@ const DistributorDashboard = () => {
             <span className="dd-nav-icon"><LogOut size={18} /></span>
             {sidebarOpen && <span className="dd-nav-label">Logout</span>}
           </button>
+          <SidebarSocialLinks isCollapsed={!sidebarOpen} />
         </div>
       </aside>
 

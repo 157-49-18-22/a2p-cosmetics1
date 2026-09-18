@@ -37,6 +37,7 @@ import OrderManager from './modules/OrderManager';
 import BroadcastManager from './modules/BroadcastManager';
 import WishlistTracker from './modules/WishlistTracker';
 import PromoManager from './modules/PromoManager';
+import SidebarSocialLinks from '../../components/Sidebar/SidebarSocialLinks';
 import './AdminDashboard.css';
 
 const navItems = [
@@ -132,6 +133,7 @@ const AdminDashboard = () => {
             <span className="adm-nav-icon"><LogOut size={18} /></span>
             <span className="adm-nav-label">Exit Panel</span>
           </button>
+          <SidebarSocialLinks isCollapsed={!sidebarOpen} />
         </div>
       </aside>
 
