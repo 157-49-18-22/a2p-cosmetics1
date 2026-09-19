@@ -6,17 +6,20 @@ const createTransporter = () => {
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER || process.env.EMAIL_USER;
   const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-  const port = process.env.SMTP_PORT || 587;
+  const port = Number(process.env.SMTP_PORT) || 587;
 
   if (host && user && pass) {
     return nodemailer.createTransport({
       host: host.trim(),
-      port: Number(port),
-      secure: Number(port) === 465,
+      port: port,
+      secure: port === 465,
       auth: {
         user: user.trim(),
         pass: pass.trim()
       },
+      connectionTimeout: 10000, // 10 sec timeout
+      greetingTimeout: 5000,
+      socketTimeout: 15000,
       tls: {
         rejectUnauthorized: false
       }
@@ -63,6 +66,7 @@ const sendSignupOtp = async (email) => {
   );
 
   const transporter = createTransporter();
+  let emailSentSuccessfully = false;
 
   const htmlContent = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
@@ -98,6 +102,7 @@ const sendSignupOtp = async (email) => {
         html: htmlContent
       });
       console.log(`📧 [OTP SENT] Real email sent to ${email}`);
+      emailSentSuccessfully = true;
     } catch (err) {
       console.error(`❌ [OTP EMAIL FAILED] Error sending email:`, err.message);
     }
@@ -108,7 +113,11 @@ const sendSignupOtp = async (email) => {
     console.log(`=========================================\n`);
   }
 
-  return { success: true, otp: process.env.NODE_ENV === 'development' || !transporter ? otp : undefined };
+  // If email failed or transporter missing, send devOtp so user can still complete signup
+  return { 
+    success: true, 
+    devOtp: (!emailSentSuccessfully) ? otp : undefined 
+  };
 };
 
 // Verify OTP function
