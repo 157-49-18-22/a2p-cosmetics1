@@ -41,10 +41,16 @@ const ReferralCode = () => {
 
   useEffect(() => {
     if (agentId) {
-      setNewCode(prev => ({ ...prev, agent_id: agentId }));
+      setNewCode(prev => ({ ...prev, agent_id: prev.agent_id || agentId }));
     }
     fetchData();
   }, [agentId]);
+
+  useEffect(() => {
+    if (!newCode.agent_id && Array.isArray(agents) && agents.length > 0) {
+      setNewCode(prev => ({ ...prev, agent_id: agents[0].id }));
+    }
+  }, [agents]);
 
   const fetchData = async () => {
     try {
@@ -314,7 +320,7 @@ const ReferralCode = () => {
                   </div>
                 </div>
 
-                {isAdmin && (
+                {(isAdmin || (Array.isArray(agents) && agents.length > 0)) && (
                   <div className="ag-field" style={{ gridColumn: '1 / -1' }}>
                     <label>Assign to Agent *</label>
                     <select value={newCode.agent_id} onChange={e => setNewCode({ ...newCode, agent_id: e.target.value })}>
