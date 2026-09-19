@@ -25,8 +25,9 @@ const ReferralOrders = () => {
   const { user: loggedAgent } = useSession();
   const agentId = loggedAgent?.id || '';
   const agentRole = loggedAgent?.role || '';
-  const isAdmin = agentRole === 'Admin Agent' || !agentId;
-  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+  const isAdmin = agentRole === 'Admin Agent';
+  // Admin sees ALL data; sub-agents see only their own
+  const agentParams = (!isAdmin && agentId) ? `?agent_id=${agentId}` : '';
 
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState({
@@ -44,7 +45,7 @@ const ReferralOrders = () => {
 
   useEffect(() => {
     fetchReferralOrders();
-  }, []);
+  }, [agentId]);
 
   const fetchReferralOrders = async () => {
     try {

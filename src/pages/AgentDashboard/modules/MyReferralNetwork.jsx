@@ -24,8 +24,9 @@ const MyReferralNetwork = () => {
   const { user: loggedAgent } = useSession();
   const agentId = loggedAgent?.id || '';
   const agentRole = loggedAgent?.role || '';
-  const isAdmin = agentRole === 'Admin Agent' || !agentId;
-  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+  const isAdmin = agentRole === 'Admin Agent';
+  // Admin sees full network; sub-agents see their own subtree
+  const agentParams = (!isAdmin && agentId) ? `?agent_id=${agentId}` : '';
 
   const [network, setNetwork] = useState([]);
   const [stats, setStats] = useState({
@@ -41,7 +42,7 @@ const MyReferralNetwork = () => {
 
   useEffect(() => {
     fetchReferralNetwork();
-  }, []);
+  }, [agentId]);
 
   const fetchReferralNetwork = async () => {
     try {

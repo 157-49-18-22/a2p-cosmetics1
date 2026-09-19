@@ -28,9 +28,11 @@ const AgentEarnings = () => {
   const agentId = loggedAgent?.id || '';
   const agentRole = loggedAgent?.role || '';
   const isAdmin = agentRole === 'Admin Agent';
-  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+  // Admin sees ALL data; sub-agents see only their own
+  const agentParams = (!isAdmin && agentId) ? `?agent_id=${agentId}` : '';
 
   const [orders, setOrders] = useState([]);
+  const [codes, setCodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('all'); // 'all', 'this_week', 'this_month', 'last_month', 'custom'
   const [customRange, setCustomRange] = useState({ start: '', end: '' });
@@ -41,23 +43,21 @@ const AgentEarnings = () => {
 
   useEffect(() => {
     fetchEarningsData();
-  }, [agentId, agentRole]);
+  }, [agentId]);
 
   const fetchEarningsData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE}/referral-orders${agentParams}`);
-      const data = Array.isArray(res.data) ? res.data : [];
-      
-      // If sub-agent, strictly ensure only his orders
-      const userOrders = !isAdmin && agentId
-        ? data.filter(o => o.agent_name?.toLowerCase() === loggedAgent?.name?.toLowerCase() || !isAdmin)
-        : data;
-
-      setOrders(userOrders);
+      const [ordersRes, codesRes] = await Promise.all([
+        axios.get(`${API_BASE}/referral-orders${agentParams}`),
+        axios.get(`${API_BASE}/referral-codes${agentParams}`)
+      ]);
+      setOrders(Array.isArray(ordersRes.data) ? ordersRes.data : []);
+      setCodes(Array.isArray(codesRes.data) ? codesRes.data : []);
     } catch (err) {
       console.error('Error fetching referral orders for earnings:', err);
       setOrders([]);
+      setCodes([]);
     } finally {
       setLoading(false);
     }
@@ -128,8 +128,9 @@ const AgentEarnings = () => {
   const totalRevenue = filteredOrders.reduce((sum, o) => sum + parseFloat(o.order_amount || 0), 0);
   const avgCommissionRate = totalRevenue > 0 ? ((totalCommission / totalRevenue) * 100).toFixed(1) : '19.0';
 
-  // Unique codes
-  const uniqueCodes = [...new Set(orders.map(o => o.referral_code).filter(Boolean))];
+  // Active codes count & unique code list
+  const activeCodesCount = codes.filter(c => c.status === 'Active').length || codes.length;
+  const allAgentCodes = [...new Set([...codes.map(c => c.code), ...orders.map(o => o.referral_code)].filter(Boolean))];
 
   // Export CSV handler
   const handleExportCSV = () => {
@@ -278,7 +279,7 @@ const AgentEarnings = () => {
           <div className="ag-stat-icon" style={{ background: 'rgba(245, 158, 11, 0.12)' }}>
             <QrCode size={20} color="#f59e0b" />
           </div>
-          <div className="ag-stat-value" style={{ fontWeight: 800 }}>{uniqueCodes.length}</div>
+          <div className="ag-stat-value" style={{ fontWeight: 800 }}>{activeCodesCount}</div>
           <div className="ag-stat-label">Active Referral Codes</div>
           <div className="ag-stat-change up">
             <ArrowUpRight size={14} /> {avgCommissionRate}% Avg Rate
@@ -310,14 +311,14 @@ const AgentEarnings = () => {
             </div>
 
             {/* Code Filter */}
-            {uniqueCodes.length > 1 && (
+            {allAgentCodes.length > 1 && (
               <select
                 value={codeFilter}
                 onChange={e => setCodeFilter(e.target.value)}
                 style={{ padding: '7px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }}
               >
                 <option value="all">All Codes</option>
-                {uniqueCodes.map(c => <option key={c} value={c}>{c}</option>)}
+                {allAgentCodes.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             )}
 

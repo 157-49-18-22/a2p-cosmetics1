@@ -26,8 +26,9 @@ const Payout = () => {
   const { user: loggedAgent } = useSession();
   const agentId = loggedAgent?.id || '';
   const agentRole = loggedAgent?.role || '';
-  const isAdmin = agentRole === 'Admin Agent' || !agentId;
-  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+  const isAdmin = agentRole === 'Admin Agent';
+  // Admin sees ALL data; sub-agents see only their own
+  const agentParams = (!isAdmin && agentId) ? `?agent_id=${agentId}` : '';
 
   const [payouts, setPayouts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +40,7 @@ const Payout = () => {
 
   useEffect(() => {
     fetchPayouts();
-  }, []);
+  }, [agentId]);
 
   const fetchPayouts = async () => {
     try {

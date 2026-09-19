@@ -443,30 +443,34 @@ const Hyperspeed = memo(function Hyperspeed({ effectOptions = DEFAULT_EFFECT_OPT
       }
 
       initPasses() {
-        this.renderPass = new RenderPass(this.scene, this.camera);
-        this.bloomPass = new EffectPass(
-          this.camera,
-          new BloomEffect({
-            luminanceThreshold: 0.2,
-            luminanceSmoothing: 0,
-            resolutionScale: 1
-          })
-        );
+        try {
+          this.renderPass = new RenderPass(this.scene, this.camera);
+          this.bloomPass = new EffectPass(
+            this.camera,
+            new BloomEffect({
+              luminanceThreshold: 0.2,
+              luminanceSmoothing: 0,
+              resolutionScale: 1
+            })
+          );
 
-        const smaaPass = new EffectPass(
-          this.camera,
-          new SMAAEffect({
-            preset: SMAAPreset.MEDIUM,
-            searchImage: SMAAEffect.searchImageDataURL,
-            areaImage: SMAAEffect.areaImageDataURL
-          })
-        );
-        this.renderPass.renderToScreen = false;
-        this.bloomPass.renderToScreen = false;
-        smaaPass.renderToScreen = true;
-        this.composer.addPass(this.renderPass);
-        this.composer.addPass(this.bloomPass);
-        this.composer.addPass(smaaPass);
+          const smaaPass = new EffectPass(
+            this.camera,
+            new SMAAEffect({
+              preset: SMAAPreset.MEDIUM,
+              searchImage: SMAAEffect.searchImageDataURL,
+              areaImage: SMAAEffect.areaImageDataURL
+            })
+          );
+          this.renderPass.renderToScreen = false;
+          this.bloomPass.renderToScreen = false;
+          smaaPass.renderToScreen = true;
+          this.composer.addPass(this.renderPass);
+          this.composer.addPass(this.bloomPass);
+          this.composer.addPass(smaaPass);
+        } catch (e) {
+          console.warn('Hyperspeed initPasses fallback:', e);
+        }
       }
 
       loadAssets() {
@@ -584,7 +588,11 @@ const Hyperspeed = memo(function Hyperspeed({ effectOptions = DEFAULT_EFFECT_OPT
       }
 
       render(delta) {
-        this.composer.render(delta);
+        if (this.composer && this.composer.passes && this.composer.passes.length > 0) {
+          this.composer.render(delta);
+        } else if (this.renderer && this.scene && this.camera) {
+          this.renderer.render(this.scene, this.camera);
+        }
       }
 
       dispose() {

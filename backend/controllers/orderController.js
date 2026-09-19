@@ -29,6 +29,14 @@ exports.createOrder = async (req, res) => {
 
     const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
+    let finalAgentId = referral_agent_id ? parseInt(referral_agent_id) : null;
+    if (referral_code && !finalAgentId) {
+      const [codeRows] = await db.query('SELECT agent_id FROM agent_referral_codes WHERE code = ?', [referral_code]);
+      if (codeRows.length > 0) {
+        finalAgentId = codeRows[0].agent_id;
+      }
+    }
+
     // Insert order with referral info and customer_id
     const [result] = await db.query(
       `INSERT INTO orders (
@@ -39,7 +47,7 @@ exports.createOrder = async (req, res) => {
       [
         orderNumber, req.user.id, customer_name, customer_email, customer_phone, 
         address, city, state, zip_code, subtotal, discount, total_amount,
-        referral_code || null, referral_agent_id || null
+        referral_code || null, finalAgentId || null
       ]
     );
 
@@ -55,7 +63,7 @@ exports.createOrder = async (req, res) => {
     }
 
     // If referral code used → increment usage_count + auto calculate commission
-    if (referral_code && referral_agent_id) {
+    if (referral_code && finalAgentId) {
       // Increment usage count
       await db.query(
         `UPDATE agent_referral_codes SET usage_count = usage_count + 1 WHERE code = ?`,
@@ -79,7 +87,7 @@ exports.createOrder = async (req, res) => {
            )
            WHERE a.id = ?
            LIMIT 1`,
-          [orderId, total_amount, total_amount, category, referral_agent_id, referral_agent_id]
+          [orderId, total_amount, total_amount, category, finalAgentId, finalAgentId]
         );
       } catch (commErr) {
         console.warn('Commission auto-calc skipped (no matching rule?):', commErr.message);

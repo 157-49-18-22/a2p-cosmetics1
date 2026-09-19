@@ -20,8 +20,7 @@ const HierarchyStructure = () => {
   const { user: loggedAgent } = useSession();
   const agentId = loggedAgent?.id || '';
   const agentRole = loggedAgent?.role || '';
-  const isAdmin = agentRole === 'Admin Agent' || !agentId;
-  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+  const agentParams = agentId ? `?agent_id=${agentId}` : '';
 
   const [tree, setTree] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +53,7 @@ const HierarchyStructure = () => {
       }
     };
     fetchHierarchy();
-  }, []);
+  }, [agentId]);
 
   const Node = ({ agent, depth = 0 }) => {
     const [expanded, setExpanded] = useState(true);

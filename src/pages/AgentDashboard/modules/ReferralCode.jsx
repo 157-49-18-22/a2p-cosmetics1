@@ -25,7 +25,8 @@ const ReferralCode = () => {
   const agentId = loggedAgent?.id || '';
   const agentRole = loggedAgent?.role || '';
   const isAdmin = agentRole === 'Admin Agent';
-  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+  // Admin sees ALL data; sub-agents see only their own
+  const agentParams = (!isAdmin && agentId) ? `?agent_id=${agentId}` : '';
 
   const [codes, setCodes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,22 +34,28 @@ const ReferralCode = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showRecognitionModal, setShowRecognitionModal] = useState(false);
   const [agents, setAgents] = useState([]);
-  const [newCode, setNewCode] = useState({ code: '', agent_id: '', discount_type: 'percentage', discount_value: '10' });
+  const [agentStats, setAgentStats] = useState({ total_commission: 0, paid_commission: 0, pending_payouts: 0 });
+  const [newCode, setNewCode] = useState({ code: '', agent_id: agentId || '', discount_type: 'percentage', discount_value: '10' });
   const [recognitionMsg, setRecognitionMsg] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (agentId) {
+      setNewCode(prev => ({ ...prev, agent_id: agentId }));
+    }
     fetchData();
   }, [agentId]);
 
   const fetchData = async () => {
     try {
-      const [codeRes, agentRes] = await Promise.all([
+      const [codeRes, agentRes, statsRes] = await Promise.all([
         axios.get(`${API_BASE}/referral-codes${agentParams}`),
-        axios.get(`${API_BASE}/top`)
+        axios.get(`${API_BASE}/applicants${agentParams}`),
+        axios.get(`${API_BASE}/stats${agentParams}`)
       ]);
       setCodes(codeRes.data || []);
       setAgents(agentRes.data || []);
+      setAgentStats(statsRes.data || {});
     } catch (err) {
       console.error('Error fetching referral data:', err);
       setCodes([]);
@@ -59,57 +66,32 @@ const ReferralCode = () => {
   };
 
   const handleCreateCode = async () => {
-    if (!newCode.code || !newCode.agent_id) return alert('Fill all required fields');
+    const targetAgentId = newCode.agent_id || agentId;
+    if (!newCode.code || !targetAgentId) return alert('Fill all required fields');
     if (!newCode.discount_value || parseFloat(newCode.discount_value) <= 0) {
       return alert('Please enter a valid discount amount or percentage');
     }
     setSaving(true);
     try {
-      await axios.post(`${API_BASE}/referral-codes`, newCode);
+      await axios.post(`${API_BASE}/referral-codes`, { ...newCode, agent_id: targetAgentId });
       setShowCreateModal(false);
-      setNewCode({ code: '', agent_id: '', discount_type: 'percentage', discount_value: '10' });
-      fetchData();
+      setNewCode({ code: '', agent_id: agentId, discount_type: 'percentage', discount_value: '10' });
+      await fetchData();
     } catch (err) {
-      console.error(err);
-      setCodes([
-        ...codes,
-        {
-          id: Date.now(),
-          code: newCode.code,
-          agent_name: agents.find(a => a.id == newCode.agent_id)?.name || 'Agent',
-          discount_type: newCode.discount_type,
-          discount_value: newCode.discount_value,
-          usage_count: 0,
-          status: 'Active'
-        }
-      ]);
-      setShowCreateModal(false);
-      setNewCode({ code: '', agent_id: '', discount_type: 'percentage', discount_value: '10' });
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to create referral code';
+      console.error('Error creating referral code:', errorMsg);
+      alert(errorMsg);
     } finally {
       setSaving(false);
     }
   };
 
-  // Dynamically compute Top Referral Agent
-  const agentStatsMap = {};
-  codes.forEach(c => {
-    const aId = c.agent_id;
-    const aName = c.agent_name || 'Agent';
-    if (!agentStatsMap[aId]) {
-      agentStatsMap[aId] = { id: aId, name: aName, totalUses: 0, codesCount: 0 };
-    }
-    agentStatsMap[aId].totalUses += (parseInt(c.usage_count) || 0);
-    agentStatsMap[aId].codesCount += 1;
-  });
-
-  const sortedAgents = Object.values(agentStatsMap).sort((a, b) => b.totalUses - a.totalUses);
-  const topAgentSummary = sortedAgents[0] || (agents[0] ? { id: agents[0].id, name: agents[0].name, totalUses: 0, codesCount: 0 } : null);
-  const matchedAgent = agents.find(a => a.id === topAgentSummary?.id);
-  const topAgentName = topAgentSummary?.name || 'Top Agent';
-  const topAgentTier = matchedAgent?.tier ? `${matchedAgent.tier} Tier` : 'Super Agent';
-  const topAgentRole = matchedAgent?.role || 'Direct Agent';
-  const topAgentUses = topAgentSummary?.totalUses || 0;
-  const topAgentCodesCount = topAgentSummary?.codesCount || 0;
+  // Agent's own stats for the side card
+  const topAgentName = loggedAgent?.name || 'My Profile';
+  const topAgentTier = loggedAgent?.tier ? `${loggedAgent.tier} Tier` : 'Silver Tier';
+  const topAgentRole = loggedAgent?.role || 'Agent';
+  const topAgentUses = codes.reduce((sum, c) => sum + (parseInt(c.usage_count) || 0), 0);
+  const topAgentCodesCount = codes.filter(c => c.status === 'Active').length;
 
   const handleSendRecognition = async () => {
     if (!recognitionMsg) return alert('Enter a message');
@@ -164,8 +146,8 @@ const ReferralCode = () => {
         {[
           { label: 'Active Codes', value: activeCodes, icon: QrCode, color: '#0ea5e9' },
           { label: 'Total Uses', value: totalUses, icon: TrendingUp, color: '#16a34a' },
-          { label: 'Network Size', value: codes.length, icon: Users, color: '#6366f1' },
-          { label: 'Rewards Claimed', value: '₹45K', icon: Gift, color: '#f59e0b' },
+          { label: 'Total Commission', value: `₹${parseFloat(agentStats.total_commission || 0).toLocaleString('en-IN')}`, icon: Gift, color: '#f59e0b' },
+          { label: 'Paid Commission', value: `₹${parseFloat(agentStats.paid_commission || 0).toLocaleString('en-IN')}`, icon: CheckCircle, color: '#6366f1' },
         ].map((stat, i) => (
           <div className="ag-stat-card" key={i}>
             <div className="ag-stat-icon" style={{ background: `${stat.color}15` }}>

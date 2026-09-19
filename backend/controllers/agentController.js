@@ -30,11 +30,10 @@ exports.loginAgent = async (req, res) => {
 // ── 2. STATS ──
 exports.getStats = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const aId = parseInt(agent_id);
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
 
-    if (isAdmin) {
+    if (!aId) {
       const [[a]] = await db.query('SELECT COUNT(*) as total_agents FROM agents');
       const [[r]] = await db.query('SELECT COALESCE(SUM(usage_count), 0) as active_referrals FROM agent_referral_codes');
       const [[c]] = await db.query("SELECT COALESCE(SUM(commission_amount), 0) as total_commission FROM agent_commissions WHERE status = 'Earned'");
@@ -61,7 +60,8 @@ exports.getStats = async (req, res) => {
         sub_agent_referrals: s.sub_agent_referrals || 0
       });
     } else {
-      // Sub-Agent specific stats
+      // Scoped strictly to logged-in agent
+      const [[subTeam]] = await db.query('SELECT COUNT(*) as team_count FROM agents WHERE parent_id = ?', [aId]);
       const [[r]] = await db.query('SELECT COALESCE(SUM(usage_count), 0) as active_referrals FROM agent_referral_codes WHERE agent_id = ?', [aId]);
       const [[c]] = await db.query("SELECT COALESCE(SUM(commission_amount), 0) as total_commission FROM agent_commissions WHERE agent_id = ? AND status = 'Earned'", [aId]);
       const [[p]] = await db.query("SELECT COALESCE(SUM(commission_amount), 0) as paid_commission FROM agent_commissions WHERE agent_id = ? AND status = 'Paid'", [aId]);
@@ -77,7 +77,7 @@ exports.getStats = async (req, res) => {
       const [[s]] = await db.query('SELECT COUNT(*) as sub_agent_referrals FROM agent_commissions WHERE agent_id = ? AND level_number > 1', [aId]);
 
       return res.json({ 
-        total_agents: 1, 
+        total_agents: subTeam.team_count || 0, 
         active_referrals: parseInt(r.active_referrals) || 0, 
         total_commission: parseFloat(c.total_commission) || 0, 
         paid_commission: parseFloat(p.paid_commission) || 0,
@@ -96,17 +96,22 @@ exports.getStats = async (req, res) => {
 // ── 3. TOP AGENTS ──
 exports.getTopAgents = async (req, res) => {
   try {
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const whereClause = aId ? 'WHERE a.status = "Active" AND (a.id = ? OR a.parent_id = ?)' : 'WHERE a.status = "Active"';
+    const params = aId ? [aId, aId] : [];
+
     const [rows] = await db.query(`
       SELECT a.id, a.name, a.role, a.tier,
              COALESCE(SUM(c.commission_amount), 0) as total_earned,
              COALESCE((SELECT SUM(rc.usage_count) FROM agent_referral_codes rc WHERE rc.agent_id = a.id), 0) as total_referrals
       FROM agents a
       LEFT JOIN agent_commissions c ON c.agent_id = a.id
-      WHERE a.status = 'Active'
+      ${whereClause}
       GROUP BY a.id, a.name, a.role, a.tier
       ORDER BY total_referrals DESC, total_earned DESC
       LIMIT 5
-    `);
+    `, params);
     const topAgents = rows.map(a => ({
       ...a,
       rev: `₹${parseFloat(a.total_earned || 0).toLocaleString()}`,
@@ -122,10 +127,10 @@ exports.getTopAgents = async (req, res) => {
 // ── 4. APPLICANTS / AGENT LIST ──
 exports.getApplicants = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const whereClause = isAdmin ? '' : 'WHERE parent_id = ?';
-    const params = isAdmin ? [] : [parseInt(agent_id)];
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const whereClause = aId ? 'WHERE parent_id = ?' : '';
+    const params = aId ? [aId] : [];
 
     const [rows] = await db.query(`SELECT * FROM agents ${whereClause} ORDER BY created_at DESC`, params);
     res.json(rows);
@@ -137,9 +142,8 @@ exports.getApplicants = async (req, res) => {
 // ── 5. HIERARCHY STRUCTURE ──
 exports.getHierarchy = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const aId = parseInt(agent_id);
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
 
     const [agents] = await db.query("SELECT id, name, role, tier, parent_id FROM agents WHERE status != 'Rejected'");
     
@@ -160,7 +164,7 @@ exports.getHierarchy = async (req, res) => {
       }
     });
 
-    if (!isAdmin && aId && map[aId]) {
+    if (aId && map[aId]) {
       return res.json([map[aId]]);
     }
 
@@ -173,9 +177,8 @@ exports.getHierarchy = async (req, res) => {
 // ── 6. MY REFERRAL NETWORK ──
 exports.getMyReferralNetwork = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const agentIdInt = parseInt(agent_id) || null;
+    const { agent_id } = req.query;
+    const agentIdInt = agent_id ? parseInt(agent_id) : null;
 
     const [agents] = await db.query("SELECT id, name, role, tier, parent_id, status, created_at as join_date FROM agents WHERE status != 'Rejected'");
     
@@ -204,18 +207,17 @@ exports.getMyReferralNetwork = async (req, res) => {
       }
     });
 
-    // If not admin, show only the logged agent's subtree
     let networkResult = roots;
-    if (!isAdmin && agentIdInt && map[agentIdInt]) {
+    if (agentIdInt && map[agentIdInt]) {
       networkResult = [map[agentIdInt]];
     }
 
-    const statsWhere = isAdmin ? '' : `AND agent_id = ${agentIdInt}`;
-    const ordersWhere = isAdmin ? '' : `AND referral_agent_id = ${agentIdInt}`;
+    const statsWhere = agentIdInt ? `AND agent_id = ${agentIdInt}` : '';
+    const ordersWhere = agentIdInt ? `AND referral_agent_id = ${agentIdInt}` : '';
     const [[stats]] = await db.query(`
       SELECT 
-        (SELECT COUNT(*) FROM agents WHERE parent_id ${isAdmin ? 'IS NOT NULL' : `= ${agentIdInt}`}) as sub_agent_referrals,
-        (SELECT COUNT(*) FROM agents WHERE ${isAdmin ? 'parent_id IS NULL' : `id = ${agentIdInt}`}) as direct_referrals,
+        (SELECT COUNT(*) FROM agents WHERE parent_id ${agentIdInt ? `= ${agentIdInt}` : 'IS NOT NULL'}) as sub_agent_referrals,
+        (SELECT COUNT(*) FROM agents WHERE parent_id ${agentIdInt ? `= ${agentIdInt}` : 'IS NOT NULL'}) as direct_referrals,
         (SELECT COUNT(*) FROM orders WHERE referral_code IS NOT NULL ${ordersWhere}) as total_referral_orders,
         (SELECT IFNULL(SUM(commission_amount), 0) FROM agent_commissions WHERE status = 'Earned' ${statsWhere}) as total_commission_from_referrals
     `);
@@ -340,10 +342,10 @@ exports.deleteAgent = async (req, res) => {
 // ── 11. LOGS ──
 exports.getLogs = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const whereClause = isAdmin ? '' : 'WHERE l.agent_id = ?';
-    const params = isAdmin ? [] : [parseInt(agent_id)];
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const whereClause = aId ? 'WHERE l.agent_id = ?' : '';
+    const params = aId ? [aId] : [];
 
     const [rows] = await db.query(`
       SELECT l.*, a.name as agent_name 
@@ -358,7 +360,13 @@ exports.getLogs = async (req, res) => {
 
 exports.clearLogs = async (req, res) => {
   try {
-    await db.query('DELETE FROM agent_logs');
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    if (aId) {
+      await db.query('DELETE FROM agent_logs WHERE agent_id = ?', [aId]);
+    } else {
+      await db.query('DELETE FROM agent_logs');
+    }
     res.json({ message: 'Logs cleared successfully' });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
@@ -366,10 +374,10 @@ exports.clearLogs = async (req, res) => {
 // ── 12. PAYOUTS ──
 exports.getPayouts = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const whereClause = isAdmin ? '' : 'WHERE c.agent_id = ?';
-    const params = isAdmin ? [] : [parseInt(agent_id)];
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const whereClause = aId ? 'WHERE c.agent_id = ?' : '';
+    const params = aId ? [aId] : [];
 
     const [rows] = await db.query(`
       SELECT 
@@ -406,10 +414,10 @@ exports.processPayoutBatch = async (req, res) => {
 // ── 13. REFERRAL CODES ──
 exports.getReferralCodes = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const whereClause = isAdmin ? '' : 'WHERE c.agent_id = ?';
-    const params = isAdmin ? [] : [parseInt(agent_id)];
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const whereClause = aId ? 'WHERE c.agent_id = ?' : '';
+    const params = aId ? [aId] : [];
 
     const [rows] = await db.query(`
       SELECT c.*, a.name as agent_name 
@@ -425,14 +433,30 @@ exports.getReferralCodes = async (req, res) => {
 exports.createReferralCode = async (req, res) => {
   try {
     const { code, agent_id, discount_type, discount_value } = req.body;
+    if (!code || !agent_id) {
+      return res.status(400).json({ error: 'Code and Agent are required' });
+    }
+    const cleanCode = code.trim().toUpperCase();
     const dType = discount_type === 'fixed' ? 'fixed' : 'percentage';
     const dVal = discount_value !== undefined && discount_value !== '' ? parseFloat(discount_value) : 10.00;
+
+    // Check if code already exists
+    const [existing] = await db.query('SELECT id, agent_id FROM agent_referral_codes WHERE code = ?', [cleanCode]);
+    if (existing.length > 0) {
+      return res.status(400).json({ error: `Referral code "${cleanCode}" already exists. Please choose a different code.` });
+    }
+
     await db.query(
       'INSERT INTO agent_referral_codes (code, agent_id, discount_type, discount_value, status) VALUES (?, ?, ?, ?, "Active")',
-      [code, agent_id, dType, dVal]
+      [cleanCode, agent_id, dType, dVal]
     );
-    res.json({ message: 'Referral code created' });
-  } catch (error) { res.status(500).json({ error: error.message }); }
+    res.json({ message: 'Referral code created successfully' });
+  } catch (error) { 
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'This referral code already exists. Please choose a different code.' });
+    }
+    res.status(500).json({ error: error.message }); 
+  }
 };
 
 exports.validateReferralCode = async (req, res) => {
@@ -469,10 +493,10 @@ exports.sendRecognition = async (req, res) => {
 // ── 14. REFERRAL ORDERS ──
 exports.getReferralOrders = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const extraWhere = isAdmin ? '' : 'AND o.referral_agent_id = ?';
-    const params = isAdmin ? [] : [parseInt(agent_id)];
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const extraWhere = aId ? 'AND o.referral_agent_id = ?' : '';
+    const params = aId ? [aId] : [];
 
     const [rows] = await db.query(`
       SELECT 
@@ -501,16 +525,16 @@ exports.getReferralOrders = async (req, res) => {
 
 exports.getReferralOrderStats = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const agentWhere = isAdmin ? '' : 'AND referral_agent_id = ?';
-    const params = isAdmin ? [] : [parseInt(agent_id)];
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const agentWhere = aId ? 'AND referral_agent_id = ?' : '';
+    const codeWhere = aId ? 'AND agent_id = ?' : '';
+    const params = aId ? [aId] : [];
 
     const [[{ total_orders, total_revenue }]] = await db.query(
       `SELECT COUNT(*) as total_orders, IFNULL(SUM(total_amount), 0) as total_revenue FROM orders WHERE referral_code IS NOT NULL ${agentWhere}`,
       params
     );
-    const codeWhere = isAdmin ? '' : 'AND agent_id = ?';
     const [[{ active_codes }]] = await db.query(
       `SELECT COUNT(*) as active_codes FROM agent_referral_codes WHERE status = 'Active' ${codeWhere}`,
       params
@@ -533,17 +557,33 @@ exports.getReferralOrderStats = async (req, res) => {
 // ── 15. COMMISSION RULES ──
 exports.getCommissionRules = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM agent_commission_rules ORDER BY created_at DESC');
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const whereClause = aId ? 'WHERE agent_id = ?' : '';
+    const params = aId ? [aId] : [];
+
+    const [rows] = await db.query(`SELECT * FROM agent_commission_rules ${whereClause} ORDER BY created_at DESC`, params);
     res.json(rows);
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
 
 exports.createCommissionRule = async (req, res) => {
-  const { category_name, base_rate, bonus_margin, referral_level, status } = req.body;
+  const { category_name, base_rate, bonus_margin, referral_level, status, agent_id, commission_type, campaign_name, start_date, end_date } = req.body;
   try {
     const [result] = await db.query(
-      'INSERT INTO agent_commission_rules (category_name, base_rate, bonus_margin, referral_level, status) VALUES (?, ?, ?, ?, ?)',
-      [category_name, base_rate, bonus_margin, referral_level || 'All Levels', status || 'Active']
+      'INSERT INTO agent_commission_rules (category_name, base_rate, bonus_margin, referral_level, status, agent_id, commission_type, campaign_name, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        category_name, 
+        base_rate, 
+        bonus_margin, 
+        referral_level || 'All Levels', 
+        status || 'Active', 
+        agent_id ? parseInt(agent_id) : null,
+        commission_type || 'percentage',
+        campaign_name || null,
+        start_date || null,
+        end_date || null
+      ]
     );
     res.json({ id: result.insertId, message: 'Rule created successfully' });
   } catch (error) { res.status(500).json({ error: error.message }); }
@@ -557,13 +597,17 @@ exports.deleteCommissionRule = async (req, res) => {
 };
 
 exports.bulkUpdateCommissionRules = async (req, res) => {
-  const { percentage } = req.body;
+  const { percentage, agent_id } = req.body;
   try {
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const whereExtra = aId ? 'AND agent_id = ?' : '';
+    const params = aId ? [percentage, aId] : [percentage];
+
     await db.query(`
       UPDATE agent_commission_rules 
       SET base_rate = CONCAT(CAST(REPLACE(base_rate, '%', '') AS DECIMAL(5,2)) + ?, '%')
-      WHERE status = 'Active'
-    `, [percentage]);
+      WHERE status = 'Active' ${whereExtra}
+    `, params);
     res.json({ message: 'Bulk update successful' });
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
@@ -597,7 +641,7 @@ exports.calculateCommission = async (req, res) => {
   }
 
   try {
-    // 1. Fetch all active commission rules
+    // 1. Fetch active commission rules
     const [rules] = await db.query(
       `SELECT * FROM agent_commission_rules 
        WHERE status = 'Active'
@@ -697,10 +741,10 @@ exports.calculateCommission = async (req, res) => {
 // ── 18. COMMISSIONS LIST & SUMMARIES ──
 exports.getCommissions = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const whereClause = isAdmin ? '' : 'WHERE ac.agent_id = ?';
-    const params = isAdmin ? [] : [parseInt(agent_id)];
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const whereClause = aId ? 'WHERE ac.agent_id = ?' : '';
+    const params = aId ? [aId] : [];
 
     const [rows] = await db.query(`
       SELECT ac.*, a.name as agent_name, a.role as agent_role
@@ -715,10 +759,10 @@ exports.getCommissions = async (req, res) => {
 
 exports.getAgentCommissionSummary = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const whereClause = isAdmin ? "WHERE a.status = 'Active'" : "WHERE a.status = 'Active' AND a.id = ?";
-    const params = isAdmin ? [] : [parseInt(agent_id)];
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const whereClause = aId ? "WHERE a.status = 'Active' AND a.id = ?" : "WHERE a.status = 'Active'";
+    const params = aId ? [aId] : [];
 
     const [rows] = await db.query(`
       SELECT 
@@ -739,10 +783,10 @@ exports.getAgentCommissionSummary = async (req, res) => {
 
 exports.getReferralWiseCommission = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const extraWhere = isAdmin ? '' : 'AND o.referral_agent_id = ?';
-    const params = isAdmin ? [] : [parseInt(agent_id)];
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const extraWhere = aId ? 'AND o.referral_agent_id = ?' : '';
+    const params = aId ? [aId] : [];
 
     const [rows] = await db.query(`
       SELECT 
@@ -763,10 +807,10 @@ exports.getReferralWiseCommission = async (req, res) => {
 
 exports.getLevelWiseCommission = async (req, res) => {
   try {
-    const { agent_id, role } = req.query;
-    const isAdmin = !agent_id || role === 'Admin Agent';
-    const whereClause = isAdmin ? '' : 'WHERE c.agent_id = ?';
-    const params = isAdmin ? [] : [parseInt(agent_id)];
+    const { agent_id } = req.query;
+    const aId = agent_id ? parseInt(agent_id) : null;
+    const whereClause = aId ? 'WHERE c.agent_id = ?' : '';
+    const params = aId ? [aId] : [];
 
     const [rows] = await db.query(`
       SELECT 

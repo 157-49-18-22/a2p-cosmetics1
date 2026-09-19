@@ -1,6 +1,7 @@
 import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useSession } from '../../../hooks/useSession.js';
 import { 
   UserPlus, 
   Upload, 
@@ -16,6 +17,11 @@ import {
 const API_BASE = `${API_BASE_URL}/agent`;
 
 const AgentOnboarding = () => {
+  const { user: loggedAgent } = useSession();
+  const agentId = loggedAgent?.id || '';
+  const agentRole = loggedAgent?.role || '';
+  const isAdmin = agentRole === 'Admin Agent';
+
   const [showForm, setShowForm] = useState(false);
   const [step, setStep] = useState(1);
   const [search, setSearch] = useState('');
@@ -39,9 +45,15 @@ const AgentOnboarding = () => {
     phone: '',
     city: '',
     address: '',
-    role: 'Master Agent',
-    parent_id: ''
+    role: 'Sub Agent',
+    parent_id: agentId || ''
   });
+
+  useEffect(() => {
+    if (agentId) {
+      setFormData(prev => ({ ...prev, parent_id: agentId }));
+    }
+  }, [agentId]);
 
   const [aadharFile, setAadharFile] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
@@ -51,7 +63,11 @@ const AgentOnboarding = () => {
 
   const fetchApplicants = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/applicants`);
+      // Admin sees ALL agents; sub-agents see only their own recruits
+      const url = (!isAdmin && agentId)
+        ? `${API_BASE}/applicants?agent_id=${agentId}`
+        : `${API_BASE}/applicants`;
+      const res = await axios.get(url);
       setApplicants(res.data);
     } catch (err) {
       console.error('Error fetching applicants:', err);
@@ -74,7 +90,7 @@ const AgentOnboarding = () => {
 
   useEffect(() => {
     fetchApplicants();
-  }, []);
+  }, [agentId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

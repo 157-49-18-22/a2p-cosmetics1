@@ -1,6 +1,7 @@
 import API_BASE_URL from '../../../apiConfig.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useSession } from '../../../hooks/useSession.js';
 import { 
   BadgeDollarSign, 
   Plus, 
@@ -18,6 +19,11 @@ import {
 const API_BASE = `${API_BASE_URL}/agent`;
 
 const CommissionSetup = () => {
+  const { user: loggedAgent } = useSession();
+  const agentId = loggedAgent?.id || '';
+  const agentRole = loggedAgent?.role || '';
+  const isAdmin = agentRole === 'Admin Agent';
+
   const [categories, setCategories] = useState([]);
   const [settings, setSettings] = useState({
     referral_bonus_percent: 0,
@@ -55,12 +61,16 @@ const CommissionSetup = () => {
 
   useEffect(() => {
     fetchConfig();
-  }, []);
+  }, [agentId]);
 
   const fetchConfig = async () => {
     try {
+      // Admin sees ALL rules; sub-agents see only their own
+      const rulesUrl = (!isAdmin && agentId)
+        ? `${API_BASE}/commission-rules?agent_id=${agentId}`
+        : `${API_BASE}/commission-rules`;
       const [rulesRes, settingsRes] = await Promise.all([
-        axios.get(`${API_BASE}/commission-rules`),
+        axios.get(rulesUrl),
         axios.get(`${API_BASE}/settings`)
       ]);
       setCategories(rulesRes.data || []);
@@ -77,7 +87,7 @@ const CommissionSetup = () => {
     if (!newRule.category_name || !newRule.base_rate) return alert('Please fill required fields');
     setSaving(true);
     try {
-      await axios.post(`${API_BASE}/commission-rules`, newRule);
+      await axios.post(`${API_BASE}/commission-rules`, { ...newRule, agent_id: agentId });
       setShowNewRuleModal(false);
       setNewRule({ 
         category_name: '', 
@@ -96,6 +106,7 @@ const CommissionSetup = () => {
       setCategories([...categories, { 
         id: Date.now(), 
         ...newRule,
+        agent_id: agentId,
         commission_type: newRule.commission_type || 'percentage',
         campaign_name: newRule.campaign_name || '',
         start_date: newRule.start_date || '',
@@ -111,7 +122,7 @@ const CommissionSetup = () => {
     if (!bulkPercent) return alert('Enter a percentage');
     setSaving(true);
     try {
-      await axios.post(`${API_BASE}/commission-rules/bulk-update`, { percentage: bulkPercent });
+      await axios.post(`${API_BASE}/commission-rules/bulk-update`, { percentage: bulkPercent, agent_id: agentId });
       setShowBulkModal(false);
       setBulkPercent('');
       fetchConfig();

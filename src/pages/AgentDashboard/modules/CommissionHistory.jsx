@@ -21,8 +21,9 @@ const CommissionHistory = () => {
   const { user: loggedAgent } = useSession();
   const agentId = loggedAgent?.id || '';
   const agentRole = loggedAgent?.role || '';
-  const isAdmin = agentRole === 'Admin Agent' || !agentId;
-  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+  const isAdmin = agentRole === 'Admin Agent';
+  // Admin sees ALL data; sub-agents see only their own
+  const agentParams = (!isAdmin && agentId) ? `?agent_id=${agentId}` : '';
 
   const [commissions, setCommissions]   = useState([]);
   const [summary, setSummary]           = useState([]);
@@ -45,7 +46,7 @@ const CommissionHistory = () => {
       const [cRes, sRes, aRes, rwRes, lwRes] = await Promise.all([
         axios.get(`${API_BASE}/commissions${agentParams}`),
         axios.get(`${API_BASE}/commissions/summary${agentParams}`),
-        axios.get(`${API_BASE}/applicants`),
+        axios.get(`${API_BASE}/applicants${agentParams}`),
         axios.get(`${API_BASE}/commissions/referral-wise${agentParams}`),
         axios.get(`${API_BASE}/commissions/level-wise${agentParams}`)
       ]);
@@ -63,7 +64,7 @@ const CommissionHistory = () => {
     }
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); }, [agentId]);
 
   const handleCalculate = async () => {
     if (!calcForm.agent_id || !calcForm.order_amount) {

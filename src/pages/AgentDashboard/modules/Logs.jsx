@@ -24,8 +24,9 @@ const Logs = () => {
   const { user: loggedAgent } = useSession();
   const agentId = loggedAgent?.id || '';
   const agentRole = loggedAgent?.role || '';
-  const isAdmin = agentRole === 'Admin Agent' || !agentId;
-  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+  const isAdmin = agentRole === 'Admin Agent';
+  // Admin sees ALL logs; sub-agents see only their own
+  const agentParams = (!isAdmin && agentId) ? `?agent_id=${agentId}` : '';
 
   const [activityLogs, setActivityLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,17 +36,12 @@ const Logs = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, [agentId, agentRole]);
+  }, [agentId]);
 
   const fetchLogs = async () => {
     try {
       const res = await axios.get(`${API_BASE}/logs${agentParams}`);
-      setActivityLogs(res.data.length > 0 ? res.data : [
-        { id: 1204, agent_name: 'Karan Mehra', activity_text: 'Payout request for ₹15,000', activity_type: 'Payout', created_at: new Date(), status: 'Pending' },
-        { id: 1203, agent_name: 'System', activity_text: 'Monthly commission cycle processed', activity_type: 'Settings', created_at: new Date(Date.now() - 3600000), status: 'Success' },
-        { id: 1202, agent_name: 'Surbhi Gupta', activity_text: 'Updated profile information', activity_type: 'Onboarding', created_at: new Date(Date.now() - 7200000), status: 'Success' },
-        { id: 1201, agent_name: 'Rahul Sharma', activity_text: 'Failed login attempt from IP 192.168.1.1', activity_type: 'Security', created_at: new Date(Date.now() - 86400000), status: 'Warning' }
-      ]);
+      setActivityLogs(res.data || []);
     } catch (err) {
       console.error('Error fetching logs:', err);
       setActivityLogs([]);

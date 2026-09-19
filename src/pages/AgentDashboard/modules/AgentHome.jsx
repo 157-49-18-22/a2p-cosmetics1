@@ -22,7 +22,8 @@ const AgentHome = ({ onNavigate }) => {
   const agentId = loggedAgent?.id || '';
   const agentRole = loggedAgent?.role || '';
   const isAdmin = agentRole === 'Admin Agent';
-  const agentParams = isAdmin ? '' : `?agent_id=${agentId}&role=${encodeURIComponent(agentRole)}`;
+  // Admin sees ALL data (no filter); sub-agents see only their own
+  const agentParams = (!isAdmin && agentId) ? `?agent_id=${agentId}` : '';
 
   const [stats, setStats] = useState([
     { label: 'Total Agents', value: '0', change: '+0%', up: true, icon: Users, color: '#0ea5e9' },
@@ -42,8 +43,8 @@ const AgentHome = ({ onNavigate }) => {
     try {
       const [statsRes, reqRes, topRes] = await Promise.all([
         axios.get(`${API_BASE}/stats${agentParams}`),
-        axios.get(`${API_BASE}/requests`),
-        axios.get(`${API_BASE}/top`)
+        axios.get(`${API_BASE}/requests${agentParams}`),
+        axios.get(`${API_BASE}/top${agentParams}`)
       ]);
 
       const s = statsRes.data || {};
