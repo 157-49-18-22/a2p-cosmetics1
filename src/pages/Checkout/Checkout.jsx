@@ -389,7 +389,7 @@ const Checkout = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>ZIP Code</label>
+                  <label>PIN Code</label>
                   <input 
                     type="text" 
                     name="zipCode" 

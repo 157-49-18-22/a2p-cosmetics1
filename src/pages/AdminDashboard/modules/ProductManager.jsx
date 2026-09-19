@@ -480,49 +480,6 @@ const ProductManager = ({ initialCategory = null }) => {
                     </div>
                   </div>
 
-                  {/* 360° Gallery Images */}
-                  <div className="adm-field" style={{ gridColumn: '1 / -1', marginTop: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569' }}>
-                        360° View Sequence <span style={{ color: '#94a3b8', fontWeight: 500 }}>(Upload 8 to 24 images for smooth rotation)</span>
-                      </label>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <label className="adm-btn adm-btn-primary" style={{ padding: '6px 14px', cursor: 'pointer', borderRadius: '8px', fontSize: '0.75rem', gap: '6px', background: '#3b82f6' }}>
-                          <Upload size={14} />
-                          Upload Files
-                          <input type="file" multiple hidden accept="image/*" onChange={e => handleMultipleFileUpload(e.target.files, 'images_360')} />
-                        </label>
-                        <label className="adm-btn adm-btn-outline" style={{ padding: '6px 14px', cursor: 'pointer', borderRadius: '8px', fontSize: '0.75rem', gap: '6px' }}>
-                          <Upload size={14} />
-                          Upload Folder
-                          <input type="file" webkitdirectory="true" directory="true" hidden accept="image/*" onChange={e => handleMultipleFileUpload(e.target.files, 'images_360')} />
-                        </label>
-                      </div>
-                    </div>
-                    <div style={{ padding: '16px', border: '1.5px dashed #cbd5e1', borderRadius: '12px', background: '#f8fafc', display: 'flex', gap: '16px', flexWrap: 'wrap', minHeight: '90px' }}>
-                      {(!form.images_360 || form.images_360.length === 0) ? (
-                        <div style={{ width: '100%', textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                          <RefreshCw size={24} style={{ opacity: 0.3, marginBottom: '8px' }} />
-                          No frames uploaded yet. Select multiple images at once to create a 360° turntable sequence.
-                        </div>
-                      ) : (
-                        form.images_360.map((img, idx) => (
-                          <div key={idx} style={{ position: 'relative', width: '64px', height: '64px', marginBottom: '16px' }}>
-                            <img src={img} alt={`frame-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fff' }} />
-                            <button 
-                              onClick={() => removeImage('images_360', idx)}
-                              style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#f43f5e', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}
-                            >
-                              <X size={12} />
-                            </button>
-                            <div style={{ position: 'absolute', bottom: '-22px', left: 0, width: '100%', textAlign: 'center', fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>
-                              #{idx + 1}
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
 
                   {/* Sirv 360 URL */}
                   <div className="adm-field" style={{ gridColumn: '1 / -1', marginTop: '12px' }}>
@@ -641,6 +598,14 @@ const ProductManager = ({ initialCategory = null }) => {
                       Upload Excel / CSV File
                       <input type="file" hidden accept=".xlsx,.xls,.csv" onChange={e => handleExcelUpload(e.target.files[0])} />
                     </label>
+                    <a
+                      href="/pincode_template.csv"
+                      download="pincode_template.csv"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 700, border: '1.5px solid #16a34a', color: '#16a34a', textDecoration: 'none', marginBottom: '16px', marginLeft: '10px', background: '#f0fdf4' }}
+                    >
+                      <FileSpreadsheet size={16} />
+                      ⬇ Download Template
+                    </a>
                     <p style={{ fontSize: '0.72rem', color: '#94a3b8', marginBottom: '16px', marginTop: '-10px' }}>
                       Excel/CSV me pincodes ki list honi chahiye (kisi bhi column me). Sab 6-digit pincodes auto-detect ho jayenge.
                     </p>

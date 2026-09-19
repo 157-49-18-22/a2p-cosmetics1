@@ -199,7 +199,7 @@ const MyAddresses = () => {
                 <input type="text" name="state" placeholder="State" value={formData.state} onChange={handleInputChange} required style={inputStyle} />
               </div>
               
-              <input type="text" name="zip_code" placeholder="ZIP Code" value={formData.zip_code} onChange={handleInputChange} required style={inputStyle} />
+              <input type="text" name="zip_code" placeholder="PIN Code" value={formData.zip_code} onChange={handleInputChange} required style={inputStyle} />
               
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
                 <input type="checkbox" name="is_default" checked={formData.is_default} onChange={handleInputChange} />

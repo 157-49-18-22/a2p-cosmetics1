@@ -148,6 +148,7 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState('100ml');
   const [pincode, setPincode] = useState('');
   const [pincodeStatus, setPincodeStatus] = useState('');
+  const [isDeliveryAvailable, setIsDeliveryAvailable] = useState(null);
   const [activeTab, setActiveTab] = useState('description');
   const [recommendations, setRecommendations] = useState([]);
   const [currentRating, setCurrentRating] = useState(0);
@@ -377,12 +378,14 @@ const ProductDetail = () => {
     e.preventDefault();
     if (!pincode || pincode.length !== 6 || !/^\d+$/.test(pincode)) {
       setPincodeStatus('Please enter a valid 6-digit pincode.');
+      setIsDeliveryAvailable(null);
       return;
     }
 
     // If product is from MASTER_PRODUCTS (not DB), show generic available
     if (!product || typeof product.id === 'string') {
       setPincodeStatus('✅ Available! Estimated Delivery in 2-3 Days.');
+      setIsDeliveryAvailable(true);
       return;
     }
 
@@ -390,14 +393,25 @@ const ProductDetail = () => {
       setPincodeStatus('Checking...');
       const res = await fetch(`${API_BASE_URL}/products/${product.id}/check-pincode?pincode=${pincode}`);
       const data = await res.json();
-      setPincodeStatus(data.message || (data.available ? '✅ Available!' : '❌ Not available at this pincode.'));
+      if (data.available) {
+        setPincodeStatus(data.message || '✅ Available!');
+        setIsDeliveryAvailable(true);
+      } else {
+        setPincodeStatus(data.message || '❌ Not available at this pincode.');
+        setIsDeliveryAvailable(false);
+      }
     } catch (err) {
       setPincodeStatus('❌ Could not check availability. Please try again.');
+      setIsDeliveryAvailable(null);
     }
   };
 
   const handleAddToCartClick = async () => {
     if (!product) return;
+    if (isDeliveryAvailable === false) {
+      showNotification('Delivery is not available at this pincode', 'error');
+      return;
+    }
     const success = await addToCart({
       id: product.id,
       name: product.name,
@@ -652,7 +666,11 @@ const ProductDetail = () => {
                   type="text" 
                   placeholder="Enter 6-digit pincode" 
                   value={pincode}
-                  onChange={(e) => setPincode(e.target.value.slice(0, 6))}
+                  onChange={(e) => {
+                    setPincode(e.target.value.slice(0, 6));
+                    if (isDeliveryAvailable !== null) setIsDeliveryAvailable(null);
+                    if (pincodeStatus) setPincodeStatus('');
+                  }}
                   className="pd-delivery-input"
                 />
                 <button type="submit" className="pd-delivery-btn">Check</button>
@@ -695,9 +713,13 @@ const ProductDetail = () => {
                 </button>
               </div>
 
-              <button className="pd-add-to-cart-cta" onClick={handleAddToCartClick}>
+              <button 
+                className="pd-add-to-cart-cta" 
+                onClick={handleAddToCartClick}
+                disabled={isDeliveryAvailable === false}
+              >
                 <ShoppingBag size={18} />
-                <span>ADD TO CART - ₹{product.price * quantity}.00</span>
+                <span>{isDeliveryAvailable === false ? 'DELIVERY NOT AVAILABLE' : `ADD TO CART - ₹${product.price * quantity}.00`}</span>
               </button>
 
               <button className="pd-wishlist-action" onClick={handleAddToWishlistClick} title="Save to Favorites">

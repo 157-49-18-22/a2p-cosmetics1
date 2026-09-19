@@ -442,6 +442,13 @@
   background-color: #333333;
 }
 
+.pd-add-to-cart-cta:disabled {
+  background-color: #a3a3a3;
+  color: #ffffff;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .pd-wishlist-action {
   width: 48px;
   height: 48px;
