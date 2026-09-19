@@ -5,45 +5,47 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]               = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('a2p_user') || localStorage.getItem('active_dealer');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
   const [loading, setLoading]         = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // On mount: restore session from HttpOnly JWT cookie and localStorage for dealers
+  // On mount: restore session from HttpOnly JWT cookie or localStorage
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        // First try to restore from auth endpoint
         const authResponse = await fetch(`${API_BASE_URL}/auth/me`, { credentials: 'include' });
         if (authResponse.ok) {
           const userData = await authResponse.json();
-          if (userData) {
+          if (userData && typeof userData === 'object' && !userData.error) {
             setUser(userData);
+            try {
+              localStorage.setItem('a2p_user', JSON.stringify(userData));
+            } catch (e) {}
             setLoading(false);
             return;
           }
         }
-
-        // Fallback: Check for dealer data in localStorage
-        const dealerData = localStorage.getItem('active_dealer');
-        if (dealerData) {
-          const parsedDealer = JSON.parse(dealerData);
-          setUser(parsedDealer);
-        }
       } catch (error) {
-        console.error('Error restoring session:', error);
-        
-        // Fallback to localStorage if API fails
-        const dealerData = localStorage.getItem('active_dealer');
-        if (dealerData) {
-          try {
-            const parsedDealer = JSON.parse(dealerData);
-            setUser(parsedDealer);
-          } catch (e) {
-            console.error('Error parsing dealer data:', e);
-            localStorage.removeItem('active_dealer');
-          }
+        console.error('Error restoring session from API:', error);
+      }
+
+      // Fallback: Check for stored user in localStorage
+      try {
+        const savedUser = localStorage.getItem('a2p_user') || localStorage.getItem('active_dealer');
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          setUser(parsed);
         }
+      } catch (e) {
+        console.error('Error parsing stored user data:', e);
       } finally {
         setLoading(false);
       }
@@ -53,9 +55,15 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
-    // userData comes from login API response (safe payload, no password)
+    if (!userData) return;
     setUser(userData);
     setShowLoginModal(false);
+    try {
+      localStorage.setItem('a2p_user', JSON.stringify(userData));
+      if (userData.role === 'Dealer' || userData.type === 'dealer') {
+        localStorage.setItem('active_dealer', JSON.stringify(userData));
+      }
+    } catch (e) {}
   };
 
   const logout = async (redirectTo) => {
@@ -64,7 +72,10 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {
       console.error('Logout error:', e);
     }
-    localStorage.removeItem('active_dealer');
+    try {
+      localStorage.removeItem('a2p_user');
+      localStorage.removeItem('active_dealer');
+    } catch (e) {}
     setUser(null);
 
     if (redirectTo) {
@@ -90,3 +101,4 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
