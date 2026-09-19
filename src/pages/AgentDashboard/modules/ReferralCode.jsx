@@ -24,7 +24,7 @@ const ReferralCode = () => {
   const { user: loggedAgent } = useSession();
   const agentId = loggedAgent?.id || '';
   const agentRole = loggedAgent?.role || '';
-  const isAdmin = agentRole === 'Admin Agent';
+  const isAdmin = Boolean(agentRole && agentRole.toLowerCase().includes('admin'));
   // Admin sees ALL data; sub-agents see only their own
   const agentParams = (!isAdmin && agentId) ? `?agent_id=${agentId}` : '';
 
@@ -53,9 +53,9 @@ const ReferralCode = () => {
         axios.get(`${API_BASE}/applicants${agentParams}`),
         axios.get(`${API_BASE}/stats${agentParams}`)
       ]);
-      setCodes(codeRes.data || []);
-      setAgents(agentRes.data || []);
-      setAgentStats(statsRes.data || {});
+      setCodes(Array.isArray(codeRes.data) ? codeRes.data : []);
+      setAgents(Array.isArray(agentRes.data) ? agentRes.data : []);
+      setAgentStats(statsRes.data && typeof statsRes.data === 'object' && !Array.isArray(statsRes.data) ? statsRes.data : { total_commission: 0, paid_commission: 0, pending_payouts: 0 });
     } catch (err) {
       console.error('Error fetching referral data:', err);
       setCodes([]);
@@ -90,8 +90,8 @@ const ReferralCode = () => {
   const topAgentName = loggedAgent?.name || 'My Profile';
   const topAgentTier = loggedAgent?.tier ? `${loggedAgent.tier} Tier` : 'Silver Tier';
   const topAgentRole = loggedAgent?.role || 'Agent';
-  const topAgentUses = codes.reduce((sum, c) => sum + (parseInt(c.usage_count) || 0), 0);
-  const topAgentCodesCount = codes.filter(c => c.status === 'Active').length;
+  const topAgentUses = (Array.isArray(codes) ? codes : []).reduce((sum, c) => sum + (parseInt(c.usage_count) || 0), 0);
+  const topAgentCodesCount = (Array.isArray(codes) ? codes : []).filter(c => c.status === 'Active').length;
 
   const handleSendRecognition = async () => {
     if (!recognitionMsg) return alert('Enter a message');
@@ -115,8 +115,8 @@ const ReferralCode = () => {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const totalUses = codes.reduce((acc, c) => acc + (c.usage_count || 0), 0);
-  const activeCodes = codes.filter(c => c.status === 'Active').length;
+  const totalUses = (Array.isArray(codes) ? codes : []).reduce((acc, c) => acc + (c.usage_count || 0), 0);
+  const activeCodes = (Array.isArray(codes) ? codes : []).filter(c => c.status === 'Active').length;
 
   if (loading) return <div className="ag-loading">Loading Codes...</div>;
 
@@ -132,13 +132,11 @@ const ReferralCode = () => {
               : 'Your active referral codes. Share them to earn commissions.'}
           </p>
         </div>
-        {isAdmin && (
-          <div className="ag-header-btns">
-            <button className="ag-btn ag-btn-primary" onClick={() => setShowCreateModal(true)}>
-              <Plus size={16} /> Create Code
-            </button>
-          </div>
-        )}
+        <div className="ag-header-btns">
+          <button className="ag-btn ag-btn-primary" onClick={() => setShowCreateModal(true)}>
+            <Plus size={16} /> Create Code
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -293,8 +291,8 @@ const ReferralCode = () => {
         )}
       </div>
 
-      {/* Create Code Modal - Admin only */}
-      {isAdmin && showCreateModal && (
+      {/* Create Code Modal */}
+      {showCreateModal && (
         <div className="ag-modal-overlay" onClick={() => setShowCreateModal(false)}>
           <div className="ag-modal-content" style={{ maxWidth: 'min(450px, 95%)' }} onClick={e => e.stopPropagation()}>
             <div className="ag-modal-header">
@@ -316,13 +314,15 @@ const ReferralCode = () => {
                   </div>
                 </div>
 
-                <div className="ag-field" style={{ gridColumn: '1 / -1' }}>
-                  <label>Assign to Agent *</label>
-                  <select value={newCode.agent_id} onChange={e => setNewCode({ ...newCode, agent_id: e.target.value })}>
-                    <option value="">Select Agent</option>
-                    {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                  </select>
-                </div>
+                {isAdmin && (
+                  <div className="ag-field" style={{ gridColumn: '1 / -1' }}>
+                    <label>Assign to Agent *</label>
+                    <select value={newCode.agent_id} onChange={e => setNewCode({ ...newCode, agent_id: e.target.value })}>
+                      <option value="">Select Agent</option>
+                      {(Array.isArray(agents) ? agents : []).map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                    </select>
+                  </div>
+                )}
 
                 <div className="ag-field" style={{ gridColumn: '1 / -1', marginTop: '6px' }}>
                   <label style={{ fontWeight: 700, color: '#0ea5e9', display: 'flex', alignItems: 'center', gap: '6px' }}>
