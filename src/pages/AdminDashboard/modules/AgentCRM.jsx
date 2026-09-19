@@ -42,12 +42,15 @@ const AgentCRM = () => {
         logsRes.json()
       ]);
 
-      setAgents(agentsData);
-      setStats(statsData);
-      setTopAgents(topData);
-      setLogs(logsData);
+      setAgents(Array.isArray(agentsData) ? agentsData : []);
+      setStats(statsData && typeof statsData === 'object' && !Array.isArray(statsData) ? statsData : { total_agents: 0, active_referrals: 0, total_commission: 0, pending_payouts: 0 });
+      setTopAgents(Array.isArray(topData) ? topData : []);
+      setLogs(Array.isArray(logsData) ? logsData : []);
     } catch (e) {
       showToast('Failed to load data', 'danger');
+      setAgents([]);
+      setTopAgents([]);
+      setLogs([]);
     } finally {
       setLoading(false);
     }
@@ -163,11 +166,12 @@ const AgentCRM = () => {
     setShowProfileModal(true);
   };
 
-  const pendingAgents = agents.filter(a => a.status === 'Pending');
-  const filteredAgents = agents.filter(ag => {
-    const matchesSearch = ag.name.toLowerCase().includes(search.toLowerCase()) || 
+  const pendingAgents = (Array.isArray(agents) ? agents : []).filter(a => a?.status === 'Pending');
+  const filteredAgents = (Array.isArray(agents) ? agents : []).filter(ag => {
+    if (!ag) return false;
+    const matchesSearch = (ag.name || '').toLowerCase().includes(search.toLowerCase()) || 
                           ag.id?.toString().includes(search) ||
-                          ag.city?.toLowerCase().includes(search.toLowerCase());
+                          (ag.city || '').toLowerCase().includes(search.toLowerCase());
     const matchesTier = filterTier === 'All' || ag.tier === filterTier;
     const matchesStatus = filterStatus === 'All' || ag.status === filterStatus;
     return matchesSearch && matchesTier && matchesStatus;
@@ -342,7 +346,7 @@ const AgentCRM = () => {
               <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Top Performers</h3>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {topAgents.map((a, i) => (
+              {(Array.isArray(topAgents) ? topAgents : []).map((a, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', borderRadius: '12px', background: i === 0 ? '#fefce8' : '#f8fafc', border: i === 0 ? '1px solid #fef08a' : '1px solid #f1f5f9' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <img src={a.img} alt="" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
@@ -364,7 +368,7 @@ const AgentCRM = () => {
               <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Recent Activity</h3>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {logs.map((l, i) => (
+              {(Array.isArray(logs) ? logs : []).map((l, i) => (
                 <div key={i} style={{ display: 'flex', gap: '10px' }}>
                   <div style={{ width: '4px', height: 'auto', background: l.activity_type === 'Payout' ? '#ef4444' : '#10b981', borderRadius: '10px' }} />
                   <div>

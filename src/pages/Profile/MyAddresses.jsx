@@ -25,9 +25,10 @@ const MyAddresses = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/customers/addresses`, { credentials: 'include' });
       const data = await response.json();
-      setAddresses(data);
+      setAddresses(Array.isArray(data) ? data : (data && Array.isArray(data.addresses) ? data.addresses : []));
     } catch (err) {
       console.error("Error fetching addresses:", err);
+      setAddresses([]);
     } finally {
       setLoading(false);
     }
@@ -134,7 +135,7 @@ const MyAddresses = () => {
       </div>
 
       <div className="addresses-grid">
-        {addresses.length === 0 ? (
+        {!Array.isArray(addresses) || addresses.length === 0 ? (
           <div className="empty-state" style={{ textAlign: 'center', padding: '60px', background: '#fff', borderRadius: '24px', gridColumn: '1 / -1' }}>
             <MapPin size={48} color="#ccc" style={{ marginBottom: '16px' }} />
             <h3>No addresses saved</h3>
