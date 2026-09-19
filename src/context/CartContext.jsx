@@ -9,95 +9,138 @@ const API_URL = `${API_BASE_URL}/cart`;
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem('a2p_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [coupon, setCoupon] = useState(null);
-  const { user, setShowLoginModal } = useAuth();
+  const { user } = useAuth();
 
-  // Fetch cart items whenever user changes (login / logout / switch account)
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('a2p_cart', JSON.stringify(cartItems));
+    } catch (e) {}
+  }, [cartItems]);
+
+  // Fetch cart from backend whenever user logs in
   useEffect(() => {
     if (user && user.id) {
-      fetchCart(); // User just logged in — load their cart
-    } else if (user === null) {
-      setCartItems([]); // User logged out — clear cart immediately
-      setCoupon(null);
+      fetchCart();
     }
   }, [user]);
 
   const fetchCart = async () => {
     try {
       const response = await axios.get(API_URL, { withCredentials: true });
-      setCartItems(response.data);
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        setCartItems(response.data);
+      }
     } catch (error) {
-      console.error('Error fetching cart:', error);
+      console.error('Error fetching backend cart:', error);
     }
   };
 
   const addToCart = async (product) => {
-    if (!user) {
-      setShowLoginModal(true);
-      return false;
-    }
-    try {
-      // Prepare product data for backend
-      const productData = {
-        name: product.name,
-        price: typeof product.price === 'string' ? parseFloat(product.price.replace('$', '').replace('Rs. ', '')) : product.price,
-        image_url: product.image || product.image_url,
-        quantity: product.quantity || 1
-      };
+    if (!product) return false;
 
-      await axios.post(API_URL, productData, { withCredentials: true });
-      await fetchCart(); // Refresh cart from server
-      setIsCartOpen(true);
-      return true;
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      return false;
+    let rawPrice = product.price;
+    if (typeof rawPrice === 'string') {
+      rawPrice = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
+    } else {
+      rawPrice = parseFloat(rawPrice) || 0;
     }
+
+    const itemToAdd = {
+      id: product.id || Date.now(),
+      product_id: product.id,
+      name: product.name || 'Product',
+      price: rawPrice,
+      image: product.image || product.image_url || '/facewash_product.png',
+      image_url: product.image || product.image_url || '/facewash_product.png',
+      quantity: product.quantity || 1
+    };
+
+    setCartItems(prev => {
+      const existingIdx = prev.findIndex(item => (item.id === itemToAdd.id || (item.product_id && item.product_id === itemToAdd.product_id)));
+      if (existingIdx > -1) {
+        const updated = [...prev];
+        updated[existingIdx] = {
+          ...updated[existingIdx],
+          quantity: updated[existingIdx].quantity + itemToAdd.quantity
+        };
+        return updated;
+      }
+      return [...prev, itemToAdd];
+    });
+
+    setIsCartOpen(true);
+
+    // If user is logged in, sync in background
+    if (user && user.id) {
+      try {
+        await axios.post(API_URL, {
+          name: itemToAdd.name,
+          price: itemToAdd.price,
+          image_url: itemToAdd.image_url,
+          quantity: itemToAdd.quantity
+        }, { withCredentials: true });
+      } catch (error) {
+        console.warn('Backend cart sync omitted/failed, local cart retained:', error.message);
+      }
+    }
+
+    return true;
   };
 
   const removeFromCart = async (id) => {
-    try {
-      await axios.delete(`${API_URL}/${id}`, { withCredentials: true });
-      await fetchCart();
-    } catch (error) {
-      console.error('Error removing from cart:', error);
+    setCartItems(prev => prev.filter(item => item.id !== id && item.product_id !== id));
+    if (user && user.id) {
+      try {
+        await axios.delete(`${API_URL}/${id}`, { withCredentials: true });
+      } catch (error) {
+        console.error('Error removing from cart on server:', error);
+      }
     }
   };
 
   const updateQuantity = async (id, delta) => {
-    const item = cartItems.find(i => i.id === id);
-    if (!item) return;
+    let targetQty = 1;
+    setCartItems(prev => prev.map(item => {
+      if (item.id === id || item.product_id === id) {
+        targetQty = Math.max(1, item.quantity + delta);
+        return { ...item, quantity: targetQty };
+      }
+      return item;
+    }));
 
-    const newQty = Math.max(1, item.quantity + delta);
-    try {
-      await axios.put(`${API_URL}/${id}`, { quantity: newQty }, { withCredentials: true });
-      await fetchCart();
-    } catch (error) {
-      console.error('Error updating quantity:', error);
+    if (user && user.id) {
+      try {
+        await axios.put(`${API_URL}/${id}`, { quantity: targetQty }, { withCredentials: true });
+      } catch (error) {
+        console.error('Error updating quantity on server:', error);
+      }
     }
   };
 
   const clearCart = async () => {
+    setCartItems([]);
+    setCoupon(null);
     try {
-      // If backend supports clearing all, use that, otherwise loop or just clear state
-      // For now, let's clear the state and optionally call backend if there's an endpoint
-      // Assuming we might need to delete each item or have a clear endpoint
-      await axios.delete(`${API_URL}/clear/all`, { withCredentials: true }).catch(() => {
-        // Fallback if endpoint doesn't exist: clear locally
-        console.log('Clear all endpoint not found, clearing locally');
-      });
-      setCartItems([]);
-      setCoupon(null);
-    } catch (error) {
-      console.error('Error clearing cart:', error);
-      // Even if API fails, clear locally for better UX
-      setCartItems([]);
-      setCoupon(null);
+      localStorage.removeItem('a2p_cart');
+    } catch (e) {}
+    if (user && user.id) {
+      try {
+        await axios.delete(`${API_URL}/clear/all`, { withCredentials: true });
+      } catch (error) {}
     }
   };
-
 
   const applyCoupon = async (code) => {
     try {
@@ -116,7 +159,7 @@ export const CartProvider = ({ children }) => {
 
   const removeCoupon = () => setCoupon(null);
 
-  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const subtotal = cartItems.reduce((acc, item) => acc + (parseFloat(item.price || 0) * item.quantity), 0);
   
   let discountAmount = 0;
   if (coupon) {
@@ -141,8 +184,8 @@ export const CartProvider = ({ children }) => {
       total,
       clearCart
     }}>
-
       {children}
     </CartContext.Provider>
   );
 };
+

@@ -238,7 +238,8 @@ const ProductDetail = () => {
       fetch(`${API_BASE_URL}/products`)
         .then(res => res.json())
         .then(data => {
-          const item = data.find(p => String(p.id) === String(id));
+          const list = Array.isArray(data) ? data : [];
+          const item = list.find(p => String(p.id) === String(id));
           if (item) {
             const mapped = {
               id: item.id,
