@@ -20,6 +20,7 @@ import { trackUserActivity, getOrCreateSession, incrementSessionPage } from './u
 
 import CartSidebar from './components/Cart/CartSidebar';
 import WishlistSidebar from './components/Cart/WishlistSidebar';
+import WhatsAppWidget from './components/WhatsAppWidget/WhatsAppWidget';
 import DistributorDashboard from './pages/DistributorDashboard/DistributorDashboard';
 import AgentDashboard from './pages/AgentDashboard/AgentDashboard';
 import DealerDashboard from './pages/DealerDashboard/DealerDashboard';
@@ -105,6 +106,7 @@ function App() {
       <ScrollToTop />
       <CartSidebar />
       <WishlistSidebar />
+      <WhatsAppWidget />
       <LoginModal />
 
       {!isDashboard && <Header />}
